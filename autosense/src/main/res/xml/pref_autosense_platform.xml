@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:title="Location"
+        android:key="location"
+        android:icon="@drawable/location"
+        android:entries="@array/chest_entries"
+        android:entryValues="@array/chest_entries" />
+    <EditTextPreference
+        android:key="platformId"
+        android:title="DeviceID"
+        android:icon="@drawable/id" />
+    <PreferenceCategory android:title="Available Devices">
+    </PreferenceCategory>
+
+</PreferenceScreen>

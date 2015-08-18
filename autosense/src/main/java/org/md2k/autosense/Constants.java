@@ -1,0 +1,76 @@
+package org.md2k.autosense;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+
+import org.md2k.utilities.Report.Log;
+
+import java.io.File;
+
+/**
+ * Copyright (c) 2015, The University of Memphis, MD2K Center
+ * - Syed Monowar Hossain <monowar.hossain@gmail.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+public class Constants {
+    public static final String DIRECTORY = Environment.getExternalStorageDirectory() + File.separator + "mCerebrum" + File.separator + "config";
+    public static final String FILENAME = "config_autosense.json";
+    public static final String DIR_FILENAME = DIRECTORY + File.separator + FILENAME;
+    public static SharedPreferences sharedPreferences=null;
+    public static void createSharedPreference(Context context){
+        Log.d("Constants", "SharedPreference:" + context.getPackageName());
+        sharedPreferences= PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.commit();
+    }
+    public static boolean getSharedPreferenceBoolean(String key){
+        return sharedPreferences.getBoolean(key,false);
+    }
+    public static String getSharedPreferenceString(String key){
+        return sharedPreferences.getString(key, "");
+    }
+    public static int getSharedPreferenceInt(String key){
+        return sharedPreferences.getInt(key, -1);
+    }
+    public static void setSharedPreferencesString(String key, String text) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(key, text);
+        editor.commit();
+    }
+
+    public static void setSharedPreferencesBoolean(String key, boolean result) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(key, result);
+        editor.commit();
+    }
+
+    public static void setSharedPreferencesInt(String key, int value) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(key, value);
+        editor.commit();
+    }
+}

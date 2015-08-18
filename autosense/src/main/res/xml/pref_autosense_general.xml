@@ -1,0 +1,24 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="ANT Radio">
+        <Preference
+            android:key="antradio_support"
+            android:title="Support"
+            />
+        <Preference
+            android:key="version"
+            android:title="Firmware Version" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Configured Devices"
+        android:key="autosense_configured" />
+    <PreferenceCategory
+        android:title="Add Devices"
+        android:key="autosense_available" />
+    <Preference
+        android:key="add_autosense_chest"
+        android:title="Add Chest Device" />
+    <Preference
+        android:key="add_autosense_wrist"
+        android:title="Add Wrist Device" />
+</PreferenceScreen>
