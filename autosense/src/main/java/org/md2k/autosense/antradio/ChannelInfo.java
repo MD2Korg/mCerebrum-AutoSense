@@ -63,14 +63,15 @@ public class ChannelInfo
     public final int CHANNEL_PROOF_FREQUENCY;
     public int status = 0;
 
-    public byte[] broadcastData = new byte[DataMessage.LENGTH_STANDARD_PAYLOAD];
+    public byte[] broadcastData;
+    public long timestamp;
     
     public boolean error;
     private String mErrorMessage;
     
     public ChannelInfo(AutoSensePlatform autoSensePlatform)
     {
-        Log.d(TAG, "platformType=" + autoSensePlatform.getPlatformType() + " platformId=" + autoSensePlatform.getPlatformId() + " dataSourceType=" + autoSensePlatform.getAutoSenseDataSource().getDataSourceType());
+        Log.d(TAG, "platformType=" + autoSensePlatform.getPlatformType() + " platformId=" + autoSensePlatform.getPlatformId());
         this.autoSensePlatform=autoSensePlatform;
         if(PlatformType.AUTOSENSE_CHEST.equals(autoSensePlatform.getPlatformType())){
             CHANNEL_PROOF_DEVICE_TYPE = (byte)0x01;

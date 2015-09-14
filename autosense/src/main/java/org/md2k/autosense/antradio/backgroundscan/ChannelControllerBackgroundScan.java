@@ -15,6 +15,7 @@
  */
 package org.md2k.autosense.antradio.backgroundscan;
 
+import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -70,6 +71,7 @@ import org.md2k.datakitapi.source.platform.PlatformType;
 
 public class ChannelControllerBackgroundScan
 {
+    Context context;
     private int CHANNEL_PROOF_DEVICE_TYPE;
     private int CHANNEL_PROOF_TRANSMISSION_TYPE;
 
@@ -95,8 +97,9 @@ public class ChannelControllerBackgroundScan
         public abstract void onBackgroundScanStateChange(boolean backgroundScanInProgress, boolean backgroundScanIsConfigured);
         public abstract void onChannelDeath();
     }
-    public ChannelControllerBackgroundScan(AntChannel antChannel, ChannelBroadcastListener broadcastListener, int deviceType, int transmissionType, int wildcard, int period, int frequency)
+    public ChannelControllerBackgroundScan(Context context, AntChannel antChannel, ChannelBroadcastListener broadcastListener, int deviceType, int transmissionType, int wildcard, int period, int frequency)
     {
+        this.context=context;
         CHANNEL_PROOF_DEVICE_TYPE=deviceType;
         CHANNEL_PROOF_TRANSMISSION_TYPE = transmissionType;
         WILDCARD_SEARCH_DEVICE_NUMBER = 0;
@@ -234,7 +237,7 @@ public class ChannelControllerBackgroundScan
             int deviceNumber = dataMessage.getExtendedData().getChannelId().getDeviceNumber();
             String platformType= Constants.getSharedPreferenceString(PlatformType.class.getSimpleName());
             String platformId=String.format("%X", deviceNumber);
-            AutoSensePlatform autoSensePlatform=new AutoSensePlatform(platformType,platformId,"");
+            AutoSensePlatform autoSensePlatform=new AutoSensePlatform(context, platformType,platformId,"");
             ChannelInfo receivedChannelInfo = new ChannelInfo(autoSensePlatform);
             receivedChannelInfo.broadcastData = dataMessage.getPayload();
             // Passes found channel info onto ChannelService and then onto ChannelList

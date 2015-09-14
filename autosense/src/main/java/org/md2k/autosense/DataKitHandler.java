@@ -1,17 +1,13 @@
-package org.md2k.autosense.devices;
+package org.md2k.autosense;
 
 import android.content.Context;
 
-import org.md2k.autosense.DataKitHandler;
+import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.DataKitApi;
 import org.md2k.datakitapi.datatype.DataType;
+import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.datakitapi.source.datasource.DataSource;
-import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
-import org.md2k.datakitapi.source.platform.Platform;
-
-import java.io.Serializable;
-
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -38,44 +34,36 @@ import java.io.Serializable;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class AutoSenseDataSource implements Serializable{
-    private String dataSourceType;
-    private double frequency;
-    private DataSourceClient dataSourceClient;
-    private Context context;
-
-    public AutoSenseDataSource(Context context, String dataSourceType, double frequency) {
-        this.context = context;
-        this.dataSourceType = dataSourceType;
-        this.frequency=frequency;
+public class DataKitHandler {
+    private static final String TAG = DataKitHandler.class.getSimpleName();
+    DataKitApi dataKitApi;
+    Context context;
+    private static DataKitHandler instance=null;
+    AutoSensePlatforms autoSensePlatforms;
+    public static DataKitHandler getInstance(Context context){
+        if(instance==null){
+            instance=new DataKitHandler(context);
+        }
+        return instance;
     }
-
-    public double getFrequency() {
-        return frequency;
+    private DataKitHandler(Context context){
+        this.context=context;
+        dataKitApi = new DataKitApi(context);
+        autoSensePlatforms=new AutoSensePlatforms(context);
     }
-
-    public boolean equals(String dataSourceType){
-        if(this.dataSourceType.equals(dataSourceType)) return true;
-        return false;
-    }
-
-    public String getDataSourceType() {
-        return dataSourceType;
-    }
-
-    public DataSourceClient getDataSourceClient() {
-        return dataSourceClient;
-    }
-
-    public DataSourceBuilder createDatSourceBuilder(DataSourceBuilder dataSourceBuilder){
-        return dataSourceBuilder.setId(null).setType(dataSourceType).setMetadata("frequency",String.valueOf(frequency));
-    }
-
-    public boolean register(DataSourceBuilder dataSourceBuilder) {
-        dataSourceBuilder=createDatSourceBuilder(dataSourceBuilder);
-        DataSource dataSource = dataSourceBuilder.build();
-        dataSourceClient = DataKitHandler.getInstance(context).register(dataSource);
-        if(dataSourceClient==null) return false;
+    public boolean connect(OnConnectionListener onConnectionListener) {
+        if (!dataKitApi.connect(onConnectionListener)) {
+            return false;
+        }
         return true;
+    }
+    public void insert(DataSourceClient dataSourceClient, DataType data){
+        dataKitApi.insert(dataSourceClient, data);
+    }
+    public DataSourceClient register(DataSource dataSource){
+        return dataKitApi.register(dataSource).await();
+    }
+    public void disconnect(){
+        dataKitApi.disconnect();
     }
 }

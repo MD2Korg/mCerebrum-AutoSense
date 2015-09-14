@@ -246,7 +246,7 @@ public class ServiceBackgroundScan extends Service
                         }
                     };
 
-                    mBackgroundScanController = new ChannelControllerBackgroundScan(antChannel, broadcastListener,CHANNEL_PROOF_DEVICE_TYPE,CHANNEL_PROOF_TRANSMISSION_TYPE,WILDCARD_SEARCH_DEVICE_NUMBER,CHANNEL_PROOF_PERIOD,CHANNEL_PROOF_FREQUENCY);
+                    mBackgroundScanController = new ChannelControllerBackgroundScan(ServiceBackgroundScan.this,antChannel, broadcastListener,CHANNEL_PROOF_DEVICE_TYPE,CHANNEL_PROOF_TRANSMISSION_TYPE,WILDCARD_SEARCH_DEVICE_NUMBER,CHANNEL_PROOF_PERIOD,CHANNEL_PROOF_FREQUENCY);
                     mBackgroundScanController.openBackgroundScanningChannel();
                 }
             }

@@ -1,18 +1,3 @@
-/*
- * Copyright 2012 Dynastream Innovations Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package org.md2k.autosense.antradio.connection;
 
 import android.app.Service;
@@ -35,14 +20,19 @@ import com.dsi.ant.channel.ChannelNotAvailableException;
 import com.dsi.ant.channel.PredefinedNetwork;
 
 import org.md2k.autosense.BuildConfig;
+import org.md2k.autosense.DataKitHandler;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
+import org.md2k.datakitapi.datatype.DataTypeInt;
+import org.md2k.datakitapi.datatype.DataTypeIntArray;
 import org.md2k.datakitapi.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -76,10 +66,9 @@ public class ServiceAutoSense extends Service
 
     private Object mCreateChannel_LOCK = new Object();
 
-    HashMap<String,ChannelController> mChannelControllerList = new HashMap<String,ChannelController>();
+    HashMap<String,ChannelController> mChannelControllerList = new HashMap<>();
 
     ChannelChangedListener mListener;
-
 
     private boolean mAntRadioServiceBound;
     private AntService mAntRadioService = null;
@@ -183,10 +172,9 @@ public class ServiceAutoSense extends Service
          */
         ArrayList<ChannelInfo> getCurrentChannelInfoForAllChannels()
         {
-            ArrayList<ChannelInfo> retList = new ArrayList<ChannelInfo>();
-            Iterator it = mChannelControllerList.entrySet().iterator();
-            while (it.hasNext()) {
-                HashMap.Entry pair = (HashMap.Entry)it.next();
+            ArrayList<ChannelInfo> retList = new ArrayList<>();
+            for (Object o : mChannelControllerList.entrySet()) {
+                HashMap.Entry pair = (HashMap.Entry) o;
                 ChannelController channel = (ChannelController) pair.getValue();
                 retList.add(channel.getCurrentInfo());
             }
@@ -226,16 +214,13 @@ public class ServiceAutoSense extends Service
     {
         synchronized (mChannelControllerList)
         {
-            Iterator it = mChannelControllerList.entrySet().iterator();
-            while (it.hasNext()) {
-                HashMap.Entry pair = (HashMap.Entry)it.next();
+            for (Object o : mChannelControllerList.entrySet()) {
+                HashMap.Entry pair = (HashMap.Entry) o;
                 ChannelController channel = (ChannelController) pair.getValue();
                 channel.close();
             }
             mChannelControllerList.clear();
         }
-
-        // Reset the device id counter
     }
 
     AntChannel acquireChannel() throws ChannelNotAvailableException
@@ -294,17 +279,13 @@ public class ServiceAutoSense extends Service
                                     mListener.onChannelChanged(newInfo);
                                     return;
                                 }
-
-                                DataTypeByteArray dataTypeByteArray=new DataTypeByteArray(DateTime.getDateTime(),newInfo.broadcastData);
-                                newInfo.autoSensePlatform.getAutoSenseDataSource().sendMessage(dataTypeByteArray);
-//                                Log.d(TAG, "type=" + autoSensePlatform.getPlatformType() + " id=" + autoSensePlatform.getPlatformId());
+                                DataExtractorOld.prepareAndSendToDataKit(ServiceAutoSense.this,newInfo);
                                 Intent intent = new Intent("autosense");
                                 // You can also include some extra data.
                                 intent.putExtra("operation","data");
                                 intent.putExtra("platformId", autoSensePlatform.getPlatformId());
-                                intent.putExtra("platformType",autoSensePlatform.getPlatformType());
-                                intent.putExtra("dataSourceType", autoSensePlatform.getPlatformType());
-
+                                intent.putExtra("platformType", autoSensePlatform.getPlatformType());
+                                intent.putExtra("dataSourceType", "autosense");
                                 if (!hm.containsKey(autoSensePlatform.getPlatformId())) {
                                     hm.put(autoSensePlatform.getPlatformId(), 0);
                                 }
@@ -312,9 +293,8 @@ public class ServiceAutoSense extends Service
                                 intent.putExtra("count", hm.get(autoSensePlatform.getPlatformId()));
                                 intent.putExtra("timestamp", DateTime.getDateTime());
                                 intent.putExtra("starttimestamp",starttimestamp);
-                                intent.putExtra("data",dataTypeByteArray);
-//                                intent.putExtra("datasource",dataSource);
-                                LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(intent);
+                                intent.putExtra("data", new DataTypeByteArray(newInfo.timestamp,newInfo.broadcastData));
+                                LocalBroadcastManager.getInstance(ServiceAutoSense.this).sendBroadcast(intent);
 
                                 mListener.onChannelChanged(newInfo);
                             }

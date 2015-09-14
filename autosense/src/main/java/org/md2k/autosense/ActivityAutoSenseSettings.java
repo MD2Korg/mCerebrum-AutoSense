@@ -66,7 +66,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
         }
 
         createMySharedPreference();
-        autoSensePlatforms = AutoSensePlatforms.getInstance(ActivityAutoSenseSettings.this);
+        autoSensePlatforms = new AutoSensePlatforms(ActivityAutoSenseSettings.this);
         setContentView(R.layout.activity_autosense_settings);
         addPreferencesFromResource(R.xml.pref_autosense_general);
         updatePreferenceScreen();
@@ -231,7 +231,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
                 String platformType = Constants.getSharedPreferenceString("platformType");
                 String location = Constants.getSharedPreferenceString("location");
                 if(autoSensePlatforms.getAutoSensePlatform(platformType,platformId)==null)
-                    autoSensePlatforms.addAutoSensePlatform(platformType,platformId,location);
+                    autoSensePlatforms.add(platformType, platformId, location);
                 else autoSensePlatforms.getAutoSensePlatform(platformType,platformId).setLocation(location);
 
                 Log.d(TAG, platformId + " " + platformType + " " + location);

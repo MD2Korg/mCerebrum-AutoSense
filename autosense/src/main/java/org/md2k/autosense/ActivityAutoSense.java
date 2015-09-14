@@ -19,6 +19,7 @@ import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
 import org.md2k.datakitapi.time.DateTime;
+import org.md2k.utilities.Report.Log;
 
 import java.util.HashMap;
 
@@ -53,10 +54,12 @@ public class ActivityAutoSense extends Activity {
 
     private static final String TAG = ActivityAutoSense.class.getSimpleName();
     Context context;
+    AutoSensePlatforms autoSensePlatforms = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        autoSensePlatforms=new AutoSensePlatforms(ActivityAutoSense.this);
         context = this;
 
         setContentView(R.layout.activity_auto_sense);
@@ -90,7 +93,6 @@ public class ActivityAutoSense extends Activity {
     }
 
     void prepareTable() {
-        AutoSensePlatforms autoSensePlatforms = AutoSensePlatforms.getInstance(ActivityAutoSense.this);
         TableLayout ll = (TableLayout) findViewById(R.id.tableLayout);
         ll.removeAllViews();
         ll.addView(createDefaultRow());
@@ -123,7 +125,6 @@ public class ActivityAutoSense extends Activity {
     void showDevices() {
         TextView textView = (TextView) findViewById(R.id.configuration_info);
         String str = "";
-        AutoSensePlatforms autoSensePlatforms = AutoSensePlatforms.getInstance(ActivityAutoSense.this);
         for (int i = 0; i < autoSensePlatforms.size(); i++) {
                 if (i != 0) str = str + "\n";
                 str = str + autoSensePlatforms.get(i).getPlatformType().toLowerCase()+":"+autoSensePlatforms.get(i).getPlatformId()+" (loc: "+autoSensePlatforms.get(i).getLocation()+")";

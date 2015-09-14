@@ -1,5 +1,6 @@
 package org.md2k.autosense.antradio.connection;
 
+import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -11,26 +12,34 @@ import com.dsi.ant.message.ChannelType;
 import com.dsi.ant.message.fromant.AcknowledgedDataMessage;
 import com.dsi.ant.message.fromant.BroadcastDataMessage;
 import com.dsi.ant.message.fromant.ChannelEventMessage;
+import com.dsi.ant.message.fromant.DataMessage;
 import com.dsi.ant.message.fromant.MessageFromAntType;
 import com.dsi.ant.message.ipc.AntMessageParcel;
 
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
+import org.md2k.datakitapi.DataKitApi;
+import org.md2k.datakitapi.datatype.DataType;
+import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.datakitapi.source.datasource.DataSource;
+import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.datakitapi.time.DateTime;
+
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p/>
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- *
+ * <p/>
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- *
+ * <p/>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -43,8 +52,7 @@ import org.md2k.autosense.devices.AutoSensePlatform;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ChannelController
-{
+public class ChannelController {
 
     private static final String TAG = ChannelController.class.getSimpleName();
 
@@ -56,30 +64,23 @@ public class ChannelController
 
     private boolean mIsOpen;
 
-    static public abstract class ChannelBroadcastListener
-    {
+    static public abstract class ChannelBroadcastListener {
         public abstract void onBroadcastChanged(ChannelInfo newInfo);
     }
 
     public ChannelController(AntChannel antChannel, AutoSensePlatform autoSensePlatform,
-                             ChannelBroadcastListener broadcastListener)
-    {
+                             ChannelBroadcastListener broadcastListener) {
         mAntChannel = antChannel;
         mChannelInfo = new ChannelInfo(autoSensePlatform);
         mChannelBroadcastListener = broadcastListener;
         openChannel();
     }
 
-    public boolean openChannel()
-    {
-        if(null != mAntChannel)
-        {
-            if(mIsOpen)
-            {
+    public boolean openChannel() {
+        if (null != mAntChannel) {
+            if (mIsOpen) {
                 Log.w(TAG, "Channel was already open");
-            }
-            else
-            {
+            } else {
                 /*
                  * Although this reference code sets ChannelType to either a transmitting master or a receiving slave,
                  * the standard for ANT is that channels communication is bidirectional. The use of single-direction
@@ -95,8 +96,7 @@ public class ChannelController
                 ChannelId channelId = new ChannelId(mChannelInfo.DEVICE_NUMBER,
                         mChannelInfo.CHANNEL_PROOF_DEVICE_TYPE, mChannelInfo.CHANNEL_PROOF_TRANSMISSION_TYPE);
 
-                try
-                {
+                try {
                     // Setting the channel event handler so that we can receive messages from ANT
                     mAntChannel.setChannelEventHandler(mChannelEventCallback);
 
@@ -127,9 +127,7 @@ public class ChannelController
                     channelError("Open failed", e);
                 }
             }
-        }
-        else
-        {
+        } else {
             Log.w(TAG, "No channel available");
         }
 
@@ -140,12 +138,11 @@ public class ChannelController
      * Implements the Channel Event Handler Interface so that messages can be
      * received and channel death events can be handled.
      */
-    public class ChannelEventCallback implements IAntChannelEventHandler
-    {
-        private void updateData(byte[] data) {
-//            mChannelInfo.autoSensePlatform.
+    public class ChannelEventCallback implements IAntChannelEventHandler {
+        private void updateData(DataMessage data) {
             mChannelInfo.status = 0;
-            mChannelInfo.broadcastData = data;
+            mChannelInfo.broadcastData = data.getMessageContent();
+            mChannelInfo.timestamp= DateTime.getDateTime();
             mChannelBroadcastListener.onBroadcastChanged(mChannelInfo);
         }
 
@@ -156,37 +153,29 @@ public class ChannelController
         }
 
         @Override
-        public void onChannelDeath()
-        {
+        public void onChannelDeath() {
             // Display channel death message when channel dies
             displayChannelError("Channel Death");
         }
 
         @Override
         public void onReceiveMessage(MessageFromAntType messageType, AntMessageParcel antParcel) {
-
-//            Log.d(TAG,"platformType="+mChannelInfo.platfromType+" platformId="+mChannelInfo.platformId);
-//            Log.d(TAG, "Rx: " + antParcel);
-
             // Switching on message type to handle different types of messages
-            switch(messageType)
-            {
+            switch (messageType) {
                 // If data message, construct from parcel and update channel data
                 case BROADCAST_DATA:
                     // Rx Data
-                    updateData(new BroadcastDataMessage(antParcel).getPayload());
+                    updateData(new BroadcastDataMessage(antParcel));
                     break;
                 case ACKNOWLEDGED_DATA:
                     // Rx Data
-                    updateData(new AcknowledgedDataMessage(antParcel).getPayload());
+                    updateData(new AcknowledgedDataMessage(antParcel));
                     break;
                 case CHANNEL_EVENT:
                     // Constructing channel event message from parcel
                     ChannelEventMessage eventMessage = new ChannelEventMessage(antParcel);
-
                     // Switching on event code to handle the different types of channel events
-                    switch(eventMessage.getEventCode())
-                    {
+                    switch (eventMessage.getEventCode()) {
                         case TX:
                             // Use old info as this is what remote device has just received
                             Log.d(TAG, "TX = " + mChannelInfo.broadcastData);
@@ -194,8 +183,7 @@ public class ChannelController
 
                             mChannelInfo.broadcastData[0]++;
 
-                            if(mIsOpen)
-                            {
+                            if (mIsOpen) {
                                 try {
                                     // Setting the data to be broadcast on the next channel period
                                     mAntChannel.setBroadcastData(mChannelInfo.broadcastData);
@@ -236,15 +224,12 @@ public class ChannelController
         }
     }
 
-    public ChannelInfo getCurrentInfo()
-    {
+    public ChannelInfo getCurrentInfo() {
         return mChannelInfo;
     }
 
-    void displayChannelError(String displayText)
-    {
+    void displayChannelError(String displayText) {
         mChannelInfo.die(displayText);
-//        mChannelBroadcastListener.onBroadcastChanged(mChannelInfo);
     }
 
     void channelError(RemoteException e) {
@@ -258,10 +243,10 @@ public class ChannelController
     void channelError(String error, AntCommandFailedException e) {
         StringBuilder logString;
 
-        if(e.getResponseMessage() != null) {
-            String initiatingMessageId = "0x"+ Integer.toHexString(
+        if (e.getResponseMessage() != null) {
+            String initiatingMessageId = "0x" + Integer.toHexString(
                     e.getResponseMessage().getInitiatingMessageId());
-            String rawResponseCode = "0x"+ Integer.toHexString(
+            String rawResponseCode = "0x" + Integer.toHexString(
                     e.getResponseMessage().getRawResponseCode());
 
             logString = new StringBuilder(error)
@@ -270,7 +255,7 @@ public class ChannelController
                     .append(" failed with code ")
                     .append(rawResponseCode);
         } else {
-            String attemptedMessageId = "0x"+ Integer.toHexString(
+            String attemptedMessageId = "0x" + Integer.toHexString(
                     e.getAttemptedMessageType().getMessageId());
             String failureReason = e.getFailureReason().toString();
 
@@ -288,11 +273,9 @@ public class ChannelController
         displayChannelError("ANT Command Failed");
     }
 
-    public void close()
-    {
+    public void close() {
         // TODO kill all our resources
-        if (null != mAntChannel)
-        {
+        if (null != mAntChannel) {
             mIsOpen = false;
 
             // Releasing the channel to make it available for others.
@@ -300,7 +283,6 @@ public class ChannelController
             mAntChannel.release();
             mAntChannel = null;
         }
-
         displayChannelError("Channel Closed");
     }
 }
