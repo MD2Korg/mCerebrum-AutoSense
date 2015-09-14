@@ -77,7 +77,7 @@ public class ServiceAutoSenses extends Service {
         if(!readSettings())
             UIShow.ErrorDialog(ServiceAutoSenses.this, "Configuration File", "Configuration file for AutoSense doesn't exist. Please click Settings");
         else if(!connectDataKit())
-            UIShow.ErrorDialog(ServiceAutoSenses.this, "Configuration File", "Configuration file for AutoSense doesn't exist. Please click Settings");
+            UIShow.ErrorDialog(ServiceAutoSenses.this, "DataKit", "DataKit is not available. Please Install DataKit");
         else
             Toast.makeText(ServiceAutoSenses.this, "AutoSense Service stared Successfully", Toast.LENGTH_LONG).show();
     }
