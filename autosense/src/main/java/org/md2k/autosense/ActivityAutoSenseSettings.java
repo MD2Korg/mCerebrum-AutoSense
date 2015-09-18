@@ -8,6 +8,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -17,6 +18,7 @@ import com.dsi.ant.StoreDownloader;
 import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.source.platform.PlatformType;
+import org.md2k.utilities.Apps;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -52,19 +54,9 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
     private static final String TAG = ActivityAutoSenseSettings.class.getSimpleName();
     static final int ADD_DEVICE = 1;  // The request code
     AutoSensePlatforms autoSensePlatforms = null;
-    boolean wasServiceRunning =false;
-    void stopService(){
-        Intent intent = new Intent(ActivityAutoSenseSettings.this, ServiceAutoSenses.class);
-        stopService(intent);
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(ServiceAutoSenses.isRunning){
-            wasServiceRunning =true;
-            stopService();
-        }
-
         createMySharedPreference();
         autoSensePlatforms = new AutoSensePlatforms(ActivityAutoSenseSettings.this);
         setContentView(R.layout.activity_autosense_settings);
@@ -72,6 +64,17 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
         updatePreferenceScreen();
         setCancelButton();
         setSaveButton();
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void createMySharedPreference() {
@@ -176,21 +179,51 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
         };
         return ab;
     }
+    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    Intent intent = new Intent(ActivityAutoSenseSettings.this, ServiceAutoSenses.class);
+                    stopService(intent);
+                    saveConfigurationFile();
+                    intent = new Intent(ActivityAutoSenseSettings.this, ServiceAutoSenses.class);
+                    startService(intent);
+                    finish();
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    Toast.makeText(getBaseContext(), "Configuration file is not saved.", Toast.LENGTH_LONG).show();
+                    finish();
+                    break;
+            }
+        }
+    };
 
     private void setSaveButton() {
         final Button button = (Button) findViewById(R.id.button_settings_save);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    autoSensePlatforms.writeDataSourceToFile();
-                    Toast.makeText(getBaseContext(), "Configuration file is saved.", Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    Toast.makeText(getBaseContext(), "!!!Error:" + e.getMessage(), Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
+                if (Apps.isServiceRunning(ActivityAutoSenseSettings.this, Constants.SERVICE_NAME)) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityAutoSenseSettings.this);
+                    builder.setMessage("Save configuration file and restart the AutoSense Service?").setPositiveButton("Yes", dialogClickListener)
+                            .setNegativeButton("No", dialogClickListener).show();
                 }
-                finish();
+                else{
+                    saveConfigurationFile();
+                    finish();
+                }
             }
         });
+    }
+    void saveConfigurationFile() {
+        try {
+            autoSensePlatforms.writeDataSourceToFile();
+            Toast.makeText(getBaseContext(), "Configuration file is saved.", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Toast.makeText(getBaseContext(), "!!!Error:" + e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
     }
 
     private void setCancelButton() {
@@ -243,9 +276,6 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
     }
     @Override
     protected void onDestroy() {
-        if(wasServiceRunning){
-            startService();
-        }
         super.onDestroy();
     }
     void startService(){

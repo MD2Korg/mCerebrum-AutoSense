@@ -40,6 +40,8 @@ public class Constants {
     public static final String FILENAME = "config_autosense.json";
     public static final String DIR_FILENAME = DIRECTORY + File.separator + FILENAME;
     public static SharedPreferences sharedPreferences=null;
+    public static final String SERVICE_NAME = "org.md2k.autosense.antradio.connection.ServiceAutoSenses";
+
     public static void createSharedPreference(Context context){
         Log.d("Constants", "SharedPreference:" + context.getPackageName());
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(context);

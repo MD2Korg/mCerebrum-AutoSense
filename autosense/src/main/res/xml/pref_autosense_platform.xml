@@ -11,5 +11,4 @@
         android:icon="@drawable/id" />
     <PreferenceCategory android:title="Available Devices">
     </PreferenceCategory>
-
 </PreferenceScreen>
