@@ -58,7 +58,7 @@ public class DataKitHandler {
         return true;
     }
     public void insert(DataSourceClient dataSourceClient, DataType data){
-        dataKitApi.insert(dataSourceClient, data);
+        dataKitApi.insert(dataSourceClient, data).await();
     }
     public DataSourceClient register(DataSource dataSource){
         return dataKitApi.register(dataSource).await();
