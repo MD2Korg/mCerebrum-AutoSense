@@ -3,10 +3,12 @@
         android:title="ANT Radio">
         <Preference
             android:key="antradio_support"
+            android:icon="@drawable/ic_antradio"
             android:title="Support"
             />
         <Preference
             android:key="version"
+            android:icon="@drawable/ic_antradio"
             android:title="Firmware Version" />
     </PreferenceCategory>
     <PreferenceCategory
