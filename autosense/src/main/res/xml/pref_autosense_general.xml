@@ -17,8 +17,10 @@
         android:key="autosense_available" />
     <Preference
         android:key="add_autosense_chest"
+        android:icon="@drawable/ic_chest_24_white"
         android:title="Add Chest Device" />
     <Preference
         android:key="add_autosense_wrist"
+        android:icon="@drawable/ic_watch_white_24dp"
         android:title="Add Wrist Device" />
 </PreferenceScreen>

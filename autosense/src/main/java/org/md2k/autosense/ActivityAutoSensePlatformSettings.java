@@ -57,9 +57,9 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
     String platformType, platformId,location;
     private ServiceBackgroundScan.ChannelServiceComm mChannelService;
 
-    private ArrayList<String> mChannelDisplayList = new ArrayList<String>();
+    private ArrayList<String> mChannelDisplayList = new ArrayList<>();
     private ArrayAdapter<String> mChannelListAdapter;
-    private SparseArray<Integer> mIdChannelListIndexMap = new SparseArray<Integer>();
+    private SparseArray<Integer> mIdChannelListIndexMap = new SparseArray<>();
 
     private boolean mChannelServiceBound = false;
 
@@ -76,7 +76,7 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
         addPreferencesFromResource(R.xml.pref_autosense_platform);
 
         mChannelServiceBound = false;
-        mChannelListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice,
+        mChannelListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice,
                 android.R.id.text1, mChannelDisplayList);
         ListView listView_channelList = (ListView) findViewById(R.id.listView_channelList);
         listView_channelList.setAdapter(mChannelListAdapter);
@@ -86,7 +86,7 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String item = ((TextView) view).getText().toString().trim();
                 Preference preference = findPreference("platformId");
-                platformId=item;
+                platformId = item;
                 Constants.setSharedPreferencesString("platformId", item);
                 preference.setSummary(item);
             }
@@ -104,7 +104,8 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
         setupPreferenecePlatformId();
         setAddButton();
         setCancelButton();
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -135,7 +136,7 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
     }
 
     private void setupPreferenecePlatformId(){
-        Preference preference = (Preference) findPreference("platformId");
+        Preference preference = findPreference("platformId");
         preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -160,12 +161,12 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
         });
 
         if(platformType.equals(PlatformType.AUTOSENSE_CHEST)) {
-            this.setTitle("Settings:AutoSense:Chest");
+            this.setTitle("Settings -> AutoSense-> Chest");
             locationPreference.setEntries(R.array.chest_entries);
             locationPreference.setEntryValues(R.array.chest_entries);
         }
         else{
-            this.setTitle("Settings:AutoSense:Wrist");
+            this.setTitle("Settings -> AutoSense -> Wrist");
             locationPreference.setEntries(R.array.wrist_entries);
             locationPreference.setEntryValues(R.array.wrist_entries);
         }
@@ -288,7 +289,7 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
 
     private static String getDisplayText(ChannelInfo channelInfo){
         android.util.Log.v(TAG, "getDisplayText...");
-        String displayText = null;
+        String displayText;
 
         if (channelInfo.error) {
             displayText = String.format("#%X !:%s", channelInfo.DEVICE_NUMBER,

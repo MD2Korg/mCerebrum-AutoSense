@@ -74,10 +74,13 @@ public class ServiceAutoSenses extends Service {
     public void onCreate() {
         super.onCreate();
         isRunning=false;
-        if(!readSettings())
-            UIShow.ErrorDialog(ServiceAutoSenses.this, "Configuration File", "Configuration file for AutoSense doesn't exist. Please click Settings");
-        else if(!connectDataKit())
-            UIShow.ErrorDialog(ServiceAutoSenses.this, "DataKit", "DataKit is not available. Please Install DataKit");
+        if (!readSettings()) {
+            UIShow.ErrorDialog(ServiceAutoSenses.this, "Configuration Error", "Configuration file for AutoSense doesn't exist.\n\nPlease go to Menu -> Settings");
+            stopSelf();
+        } else if (!connectDataKit()) {
+            UIShow.ErrorDialog(ServiceAutoSenses.this, "DataKit Error", "DataKit is not available.\n\nPlease Install DataKit");
+            stopSelf();
+        }
         else
             Toast.makeText(ServiceAutoSenses.this, "AutoSense Service stared Successfully", Toast.LENGTH_LONG).show();
     }

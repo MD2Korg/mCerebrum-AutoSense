@@ -64,7 +64,8 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
         updatePreferenceScreen();
         setCancelButton();
         setSaveButton();
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -89,7 +90,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
     }
 
     private void setupPreferenceScreenAutoSenseAvailable() {
-        Preference preference = (Preference) findPreference("add_autosense_chest");
+        Preference preference = findPreference("add_autosense_chest");
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -102,7 +103,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
             }
         });
 
-        preference = (Preference) findPreference("add_autosense_wrist");
+        preference = findPreference("add_autosense_wrist");
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -124,11 +125,15 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
         for (int i = 0; i < autoSensePlatforms.size(); i++) {
             Preference preference = new Preference(this);
             String platformType;
-            if (autoSensePlatforms.get(i).getPlatformType().equals(PlatformType.AUTOSENSE_CHEST))
+            if (autoSensePlatforms.get(i).getPlatformType().equals(PlatformType.AUTOSENSE_CHEST)) {
                 platformType = "Chest";
-            else platformType = "Wrist";
+                preference.setIcon(R.drawable.ic_chest_24_white);
+            } else {
+                platformType = "Wrist";
+                preference.setIcon(R.drawable.ic_watch_white_24dp);
+            }
             preference.setTitle(platformType + ":" + autoSensePlatforms.get(i).getPlatformId());
-            preference.setSummary("Location: "+autoSensePlatforms.get(i).getLocation());
+            preference.setSummary("Location: " + autoSensePlatforms.get(i).getLocation());
             preference.setKey(autoSensePlatforms.get(i).getPlatformType() + ":" + autoSensePlatforms.get(i).getPlatformId());
             preference.setOnPreferenceClickListener(autoSenseListener());
             category.addPreference(preference);
@@ -148,7 +153,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
     }
 
     private Preference.OnPreferenceClickListener autoSenseListener() {
-        Preference.OnPreferenceClickListener ab = new Preference.OnPreferenceClickListener() {
+        return new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 final String platformType = getPlatformType(preference.getKey());
@@ -177,7 +182,6 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
                 return true;
             }
         };
-        return ab;
     }
     DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
         @Override
@@ -236,7 +240,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
     }
 
     public void setupPreferenceScreenAntRadio() {
-        Preference preference = (Preference) findPreference("version");
+        Preference preference = findPreference("version");
         preference.setSummary(autoSensePlatforms.getVersionAntDriver());
 
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -246,7 +250,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
                 return true;
             }
         });
-        preference = (Preference) findPreference("antradio_support");
+        preference = findPreference("antradio_support");
         preference.setEnabled(false);
         if (autoSensePlatforms.hasAntSupport(getBaseContext())) {
             preference.setSummary("Yes");

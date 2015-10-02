@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.md2k.autosense" >
+    package="org.md2k.autosense">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
-        android:theme="@style/AppThemeDark" >
+        android:theme="@style/AppThemeDark">
         <activity
             android:name=".ActivityAutoSense"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -18,45 +18,35 @@
         </activity>
         <activity
             android:name=".ActivityAutoSenseSettings"
-            android:label="Settings: AutoSense"
             android:enabled="true"
-            android:exported="true">
-        <intent-filter><action android:name="org.md2k.autosense.ActivityAutoSenseSettings" /></intent-filter>
+            android:exported="true"
+            android:icon="@drawable/ic_settings_white_24dp"
+            android:label="Settings -> AutoSense">
+            <intent-filter>
+                <action android:name="org.md2k.autosense.ActivityAutoSenseSettings" />
+            </intent-filter>
 
         </activity>
         <activity
             android:name=".ActivityAutoSensePlatformSettings"
-            android:label="Settings: AutoSense Chest"
             android:enabled="true"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".ActivityAbout"
-            android:label="About"
-            android:icon="@drawable/about"
-            android:theme="@style/AppThemeDark">
-        </activity>
-        <activity
-            android:name=".ActivityCopyright"
-            android:label="Copyright"
-            android:icon="@drawable/copyright"
-            android:theme="@style/AppThemeDark">
-        </activity>
+            android:exported="true"
+            android:icon="@drawable/ic_settings_white_24dp"
+            android:label="Settings: AutoSense Chest"></activity>
 
         <service android:name=".antradio.backgroundscan.ServiceBackgroundScan" />
         <service
             android:name=".antradio.connection.ServiceAutoSenses"
             android:enabled="true"
-            android:exported="true" >
-            <intent-filter><action android:name="org.md2k.autosense.antradio.connection.ServiceConnectDevices"></action></intent-filter>
-
+            android:exported="true">
+            <intent-filter>
+                <action android:name="org.md2k.autosense.antradio.connection.ServiceConnectDevices"></action>
+            </intent-filter>
         </service>
         <service
             android:name=".antradio.connection.ServiceAutoSense"
             android:enabled="true"
-            android:exported="true" >
-        </service>
-
+            android:exported="true"></service>
     </application>
 
 </manifest>

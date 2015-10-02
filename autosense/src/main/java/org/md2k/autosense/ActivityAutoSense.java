@@ -23,6 +23,8 @@ import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.utilities.Apps;
+import org.md2k.utilities.UI.ActivityAbout;
+import org.md2k.utilities.UI.ActivityCopyright;
 
 import java.util.HashMap;
 
@@ -30,17 +32,17 @@ import java.util.HashMap;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p/>
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- *
+ * <p/>
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- *
+ * <p/>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -80,7 +82,7 @@ public class ActivityAutoSense extends Activity {
                 }
             }
         });
-        ((TextView)findViewById(R.id.textViewTime)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.textViewTime).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ActivityAutoSense.this, ServiceAutoSenses.class);
@@ -92,8 +94,10 @@ public class ActivityAutoSense extends Activity {
             }
         });
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -158,7 +162,7 @@ public class ActivityAutoSense extends Activity {
         ll.removeAllViews();
         ll.addView(createDefaultRow());
         for (int i = 0; i < autoSensePlatforms.size(); i++) {
-            String platform = autoSensePlatforms.get(i).getPlatformType()+":"+autoSensePlatforms.get(i).getPlatformId();
+            String platform = autoSensePlatforms.get(i).getPlatformType() + ":" + autoSensePlatforms.get(i).getPlatformId();
             TableRow row = new TableRow(this);
             TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
             row.setLayoutParams(lp);
@@ -181,9 +185,10 @@ public class ActivityAutoSense extends Activity {
             ll.addView(row);
         }
     }
+
     void updateTable(Intent intent) {
         String sampleStr = "";
-        String platform = intent.getStringExtra("platformType")+":"+intent.getStringExtra("platformId");
+        String platform = intent.getStringExtra("platformType") + ":" + intent.getStringExtra("platformId");
         int count = intent.getIntExtra("count", 0);
         hashMapData.get(platform + "_count").setText(String.valueOf(count));
 
@@ -193,12 +198,12 @@ public class ActivityAutoSense extends Activity {
 
 
         DataType data = (DataType) intent.getSerializableExtra("data");
-            byte[] sample = ((DataTypeByteArray) data).getSample();
-            for (int i = 0; i < sample.length; i++) {
-                if (i != 0) sampleStr += ",";
-                if (i % 3 == 0 && i != 0) sampleStr += "\n";
-                sampleStr = sampleStr + String.valueOf(sample[i]);
-            }
+        byte[] sample = ((DataTypeByteArray) data).getSample();
+        for (int i = 0; i < sample.length; i++) {
+            if (i != 0) sampleStr += ",";
+            if (i % 3 == 0 && i != 0) sampleStr += "\n";
+            sampleStr = sampleStr + String.valueOf(sample[i]);
+        }
         hashMapData.get(platform + "_sample").setText(sampleStr);
     }
 
@@ -213,21 +218,24 @@ public class ActivityAutoSense extends Activity {
     public void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("autosense"));
-        autoSensePlatforms=new AutoSensePlatforms(ActivityAutoSense.this);
+        autoSensePlatforms = new AutoSensePlatforms(ActivityAutoSense.this);
         prepareTable();
         mHandler.post(runnable);
         super.onResume();
     }
+
     @Override
     public void onPause() {
         mHandler.removeCallbacks(runnable);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
         super.onPause();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
+
     Handler mHandler = new Handler();
     Runnable runnable = new Runnable() {
         @Override
