@@ -7,8 +7,8 @@ android {
         applicationId "org.md2k.autosense"
         minSdkVersion 19
         targetSdkVersion 21
-        versionCode 1
-        versionName '0.0.1'
+        versionCode 3
+        versionName '0.3.0'
     }
     buildTypes {
         release {

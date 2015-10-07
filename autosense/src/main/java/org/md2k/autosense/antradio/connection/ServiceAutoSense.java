@@ -20,18 +20,12 @@ import com.dsi.ant.channel.ChannelNotAvailableException;
 import com.dsi.ant.channel.PredefinedNetwork;
 
 import org.md2k.autosense.BuildConfig;
-import org.md2k.autosense.DataKitHandler;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
-import org.md2k.datakitapi.datatype.DataTypeInt;
-import org.md2k.datakitapi.datatype.DataTypeIntArray;
 import org.md2k.datakitapi.time.DateTime;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -96,18 +90,13 @@ public class ServiceAutoSense extends Service
                 boolean legacyInterfaceInUse = mAntChannelProvider.isLegacyInterfaceInUse();
 
                 // If there are channels OR legacy interface in use, allow adding channels
-                if(mChannelAvailable || legacyInterfaceInUse) {
-                    mAllowAddChannel = true;
-                }
-                else {
-                    // If no channels available AND legacy interface is not in use, disallow adding channels
-                    mAllowAddChannel = false;
-                }
+                // If no channels available AND legacy interface is not in use, disallow adding channels
+                mAllowAddChannel = mChannelAvailable || legacyInterfaceInUse;
 
                 if(mAllowAddChannel) {
                     if(null != mListener) {
                         // Send an event that indicates if adding channels is allowed
-                        mListener.onAllowAddChannel(mAllowAddChannel);
+                        mListener.onAllowAddChannel(true);
                     }
                 }
 
@@ -165,22 +154,6 @@ public class ServiceAutoSense extends Service
             mListener = listener;
         }
 
-        /**
-         * Retrieves the current info for all channels currently added.
-         *
-         * @return A list that contains info for all the channels
-         */
-        ArrayList<ChannelInfo> getCurrentChannelInfoForAllChannels()
-        {
-            ArrayList<ChannelInfo> retList = new ArrayList<>();
-            for (Object o : mChannelControllerList.entrySet()) {
-                HashMap.Entry pair = (HashMap.Entry) o;
-                ChannelController channel = (ChannelController) pair.getValue();
-                retList.add(channel.getCurrentInfo());
-            }
-
-            return retList;
-        }
 
         public ChannelInfo addNewChannel(AutoSensePlatform autoSensePlatform) throws ChannelNotAvailableException
         {
@@ -196,11 +169,6 @@ public class ServiceAutoSense extends Service
             closeChannel(autoSensePlatform);
         }
 
-        /**
-         * Queries if adding a channel is allowed.
-         * @return True if adding a channel is allowed. False, otherwise.
-         */
-        boolean isAddChannelAllowed() { return mAllowAddChannel; }
     }
 
     private void closeChannel(AutoSensePlatform autoSensePlatform) {

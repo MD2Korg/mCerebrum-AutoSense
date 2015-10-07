@@ -58,7 +58,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         createMySharedPreference();
-        autoSensePlatforms = new AutoSensePlatforms(ActivityAutoSenseSettings.this);
+        autoSensePlatforms = new AutoSensePlatforms(getApplicationContext());
         setContentView(R.layout.activity_autosense_settings);
         addPreferencesFromResource(R.xml.pref_autosense_general);
         updatePreferenceScreen();
@@ -79,7 +79,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
     }
 
     private void createMySharedPreference() {
-        Constants.createSharedPreference(getBaseContext());
+        Constants.createSharedPreference(getApplicationContext());
     }
 
 
@@ -94,7 +94,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                final Intent intent = new Intent(getBaseContext(), ActivityAutoSensePlatformSettings.class);
+                final Intent intent = new Intent(ActivityAutoSenseSettings.this, ActivityAutoSensePlatformSettings.class);
                 Constants.setSharedPreferencesString("platformId", "");
                 Constants.setSharedPreferencesString("platformType", PlatformType.AUTOSENSE_CHEST);
                 Constants.setSharedPreferencesString("location", "");
@@ -107,7 +107,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                final Intent intent = new Intent(getBaseContext(), ActivityAutoSensePlatformSettings.class);
+                final Intent intent = new Intent(ActivityAutoSenseSettings.this, ActivityAutoSensePlatformSettings.class);
                 Constants.setSharedPreferencesString("platformId", "");
                 Constants.setSharedPreferencesString("platformType", PlatformType.AUTOSENSE_WRIST);
                 Constants.setSharedPreferencesString("location", "");
@@ -158,7 +158,6 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
             public boolean onPreferenceClick(Preference preference) {
                 final String platformType = getPlatformType(preference.getKey());
                 final String platformId = getPlatformId(preference.getKey());
-                final Intent intent = new Intent(getBaseContext(), ActivityAutoSensePlatformSettings.class);
                 Constants.setSharedPreferencesString("platformId", platformId);
                 Constants.setSharedPreferencesString("platformType", platformType);
                 Constants.setSharedPreferencesString("location", autoSensePlatforms.getAutoSensePlatform(platformType, platformId).getLocation());
@@ -197,7 +196,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
                     break;
 
                 case DialogInterface.BUTTON_NEGATIVE:
-                    Toast.makeText(getBaseContext(), "Configuration file is not saved.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ActivityAutoSenseSettings.this, "Configuration file is not saved.", Toast.LENGTH_LONG).show();
                     finish();
                     break;
             }
@@ -223,9 +222,9 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
     void saveConfigurationFile() {
         try {
             autoSensePlatforms.writeDataSourceToFile();
-            Toast.makeText(getBaseContext(), "Configuration file is saved.", Toast.LENGTH_LONG).show();
+            Toast.makeText(ActivityAutoSenseSettings.this, "Configuration file is saved.", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
-            Toast.makeText(getBaseContext(), "!!!Error:" + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(ActivityAutoSenseSettings.this, "!!!Error:" + e.getMessage(), Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }
@@ -252,7 +251,7 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
         });
         preference = findPreference("antradio_support");
         preference.setEnabled(false);
-        if (autoSensePlatforms.hasAntSupport(getBaseContext())) {
+        if (autoSensePlatforms.hasAntSupport(this)) {
             preference.setSummary("Yes");
         } else {
             preference.setSummary("No");

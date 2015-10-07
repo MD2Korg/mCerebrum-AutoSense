@@ -57,7 +57,7 @@ public class ServiceBackgroundScan extends Service
 {
     private static final String TAG = "ChannelService";
     private Object mCreateChannel_LOCK = new Object();
-    ArrayList<ChannelInfo> mChannelInfoList = new ArrayList<ChannelInfo>();
+    ArrayList<ChannelInfo> mChannelInfoList = new ArrayList<>();
     SharedPreferences sharedPreferences;
 
     ChannelChangedListener mListener;
@@ -92,14 +92,9 @@ public class ServiceBackgroundScan extends Service
                 boolean legacyInterfaceInUse = mAntChannelProvider.isLegacyInterfaceInUse();
                 // If there are channels OR legacy interface in use, allow
                 // acquire background scan
-                if (mChannelAvailable || legacyInterfaceInUse) {
-                    mAllowAcquireBackgroundScanChannel = true;
-                }
-                else {
-                    // If no channels available AND legacy interface is not in
-                    // use, disallow acquire background scan
-                    mAllowAcquireBackgroundScanChannel = false;
-                }
+                // If no channels available AND legacy interface is not in
+// use, disallow acquire background scan
+                mAllowAcquireBackgroundScanChannel = mChannelAvailable || legacyInterfaceInUse;
                 // Attempting to acquire a background scan channel when connected
                 // to ANT Radio Service
                 if (mAllowAcquireBackgroundScanChannel) {
@@ -144,11 +139,6 @@ public class ServiceBackgroundScan extends Service
         {
             return mChannelInfoList;
         }
-        void openBackgroundScanChannel() throws ChannelNotAvailableException
-        {
-            mBackgroundScanController.openBackgroundScanningChannel();
-        }
-        void stopBackgroundScan() { closeBackgroundScanChannel(); }
         public void setActivityIsRunning(boolean isRunning) {
             mActivityIsRunning = isRunning;
             if(isRunning && mAllowAcquireBackgroundScanChannel) {

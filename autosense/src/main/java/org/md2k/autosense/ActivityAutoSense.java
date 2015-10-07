@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -59,13 +60,11 @@ public class ActivityAutoSense extends Activity {
 
     private static final String TAG = ActivityAutoSense.class.getSimpleName();
     HashMap<String, TextView> hashMapData = new HashMap<>();
-    Context context;
     AutoSensePlatforms autoSensePlatforms = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = this;
 
         setContentView(R.layout.activity_auto_sense);
         final Button buttonService = (Button) findViewById(R.id.buttonServiceStartStop);
@@ -122,6 +121,12 @@ public class ActivityAutoSense extends Activity {
                 break;
             case R.id.action_about:
                 intent = new Intent(this, ActivityAbout.class);
+                try {
+                    intent.putExtra(org.md2k.utilities.Constants.VERSION_CODE, String.valueOf(this.getPackageManager().getPackageInfo(getPackageName(), 0).versionCode));
+                    intent.putExtra(org.md2k.utilities.Constants.VERSION_NAME, this.getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
                 startActivity(intent);
                 break;
             case R.id.action_copyright:
@@ -218,7 +223,7 @@ public class ActivityAutoSense extends Activity {
     public void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("autosense"));
-        autoSensePlatforms = new AutoSensePlatforms(ActivityAutoSense.this);
+        autoSensePlatforms = new AutoSensePlatforms(getApplicationContext());
         prepareTable();
         mHandler.post(runnable);
         super.onResume();

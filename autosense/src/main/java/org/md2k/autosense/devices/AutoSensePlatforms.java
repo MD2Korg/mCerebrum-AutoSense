@@ -1,7 +1,6 @@
 package org.md2k.autosense.devices;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import com.dsi.ant.AntLibVersionInfo;
 import com.dsi.ant.AntSupportChecker;
@@ -62,7 +61,7 @@ public class AutoSensePlatforms implements Serializable{
         autoSensePlatforms = new ArrayList<>();
         try {
             readDataSourceFromFile();
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException ignored) {
         }
     }
 
@@ -124,7 +123,7 @@ public class AutoSensePlatforms implements Serializable{
     }
 
     public void writeDataSourceToFile() throws IOException {
-        ArrayList<DataSource> dataSources = new ArrayList<DataSource>();
+        ArrayList<DataSource> dataSources = new ArrayList<>();
         if (autoSensePlatforms == null) throw new NullPointerException();
         if (autoSensePlatforms.size() == 0) throw new EmptyStackException();
 

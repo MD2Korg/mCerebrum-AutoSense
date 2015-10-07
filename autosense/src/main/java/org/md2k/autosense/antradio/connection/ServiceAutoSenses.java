@@ -11,12 +11,12 @@ import android.widget.Toast;
 
 import com.dsi.ant.channel.ChannelNotAvailableException;
 
-import org.md2k.autosense.DataKitHandler;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.utilities.UI.UIShow;
+import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -55,11 +55,11 @@ public class ServiceAutoSenses extends Service {
     private boolean mChannelServiceBound = false;
 
     private boolean readSettings(){
-        autoSensePlatforms = new AutoSensePlatforms(ServiceAutoSenses.this);
+        autoSensePlatforms = new AutoSensePlatforms(getApplicationContext());
         return autoSensePlatforms.size() != 0;
     }
     private boolean connectDataKit(){
-        DataKitHandler dataKitHandler = DataKitHandler.getInstance(ServiceAutoSenses.this);
+        DataKitHandler dataKitHandler = DataKitHandler.getInstance(getApplicationContext());
         return dataKitHandler.connect(new OnConnectionListener() {
             @Override
             public void onConnected() {
@@ -75,14 +75,14 @@ public class ServiceAutoSenses extends Service {
         super.onCreate();
         isRunning=false;
         if (!readSettings()) {
-            UIShow.ErrorDialog(ServiceAutoSenses.this, "Configuration Error", "Configuration file for AutoSense doesn't exist.\n\nPlease go to Menu -> Settings");
+            UIShow.ErrorDialog(this, "Configuration Error", "Configuration file for AutoSense doesn't exist.\n\nPlease go to Menu -> Settings");
             stopSelf();
         } else if (!connectDataKit()) {
-            UIShow.ErrorDialog(ServiceAutoSenses.this, "DataKit Error", "DataKit is not available.\n\nPlease Install DataKit");
+            UIShow.ErrorDialog(this, "DataKit Error", "DataKit is not available.\n\nPlease Install DataKit");
             stopSelf();
         }
         else
-            Toast.makeText(ServiceAutoSenses.this, "AutoSense Service stared Successfully", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "AutoSense Service stared Successfully", Toast.LENGTH_LONG).show();
     }
 
     private void doBindChannelService() {
@@ -113,7 +113,7 @@ public class ServiceAutoSenses extends Service {
         mChannelServiceConnection = null;
 
         Log.v(TAG, "...onDestroy");
-        if (isRunning) DataKitHandler.getInstance(ServiceAutoSenses.this).disconnect();
+        if (isRunning) DataKitHandler.getInstance(getApplicationContext()).disconnect();
         isRunning = false;
         super.onDestroy();
     }

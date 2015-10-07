@@ -47,32 +47,14 @@ public class Constants {
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
-        editor.commit();
-    }
-    public static boolean getSharedPreferenceBoolean(String key){
-        return sharedPreferences.getBoolean(key,false);
+        editor.apply();
     }
     public static String getSharedPreferenceString(String key){
         return sharedPreferences.getString(key, "");
     }
-    public static int getSharedPreferenceInt(String key){
-        return sharedPreferences.getInt(key, -1);
-    }
     public static void setSharedPreferencesString(String key, String text) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(key, text);
-        editor.commit();
-    }
-
-    public static void setSharedPreferencesBoolean(String key, boolean result) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(key, result);
-        editor.commit();
-    }
-
-    public static void setSharedPreferencesInt(String key, int value) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(key, value);
-        editor.commit();
+        editor.apply();
     }
 }

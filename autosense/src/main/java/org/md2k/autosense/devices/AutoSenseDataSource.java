@@ -2,13 +2,9 @@ package org.md2k.autosense.devices;
 
 import android.content.Context;
 
-import org.md2k.autosense.DataKitHandler;
-import org.md2k.datakitapi.DataKitApi;
-import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
-import org.md2k.datakitapi.source.platform.Platform;
+import org.md2k.utilities.datakit.DataKitHandler;
 
 import java.io.Serializable;
 
@@ -55,8 +51,7 @@ public class AutoSenseDataSource implements Serializable{
     }
 
     public boolean equals(String dataSourceType){
-        if(this.dataSourceType.equals(dataSourceType)) return true;
-        return false;
+        return this.dataSourceType.equals(dataSourceType);
     }
 
     public String getDataSourceType() {
@@ -73,9 +68,7 @@ public class AutoSenseDataSource implements Serializable{
 
     public boolean register(DataSourceBuilder dataSourceBuilder) {
         dataSourceBuilder=createDatSourceBuilder(dataSourceBuilder);
-        DataSource dataSource = dataSourceBuilder.build();
-        dataSourceClient = DataKitHandler.getInstance(context).register(dataSource);
-        if(dataSourceClient==null) return false;
-        return true;
+        dataSourceClient = DataKitHandler.getInstance(context).register(dataSourceBuilder);
+        return dataSourceClient != null;
     }
 }

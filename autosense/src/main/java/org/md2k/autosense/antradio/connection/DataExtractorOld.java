@@ -2,12 +2,11 @@ package org.md2k.autosense.antradio.connection;
 
 import android.content.Context;
 
-import org.md2k.autosense.DataKitHandler;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.datatype.DataTypeInt;
-import org.md2k.datakitapi.datatype.DataTypeIntArray;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
+import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center

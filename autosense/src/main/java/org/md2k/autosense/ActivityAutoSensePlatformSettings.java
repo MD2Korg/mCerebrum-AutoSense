@@ -68,7 +68,7 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
         super.onPostCreate(savedInstanceState);
 
         setContentView(R.layout.activity_autosense_platform_settings);
-        if(Constants.sharedPreferences==null) Constants.createSharedPreference(getBaseContext());
+        if(Constants.sharedPreferences==null) Constants.createSharedPreference(getApplicationContext());
 
         platformType=Constants.getSharedPreferenceString("platformType");
         platformId=Constants.getSharedPreferenceString("platformId");
@@ -310,9 +310,9 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (platformId.equals("")) {
-                    Toast.makeText(getBaseContext(), "!!! Device ID is missing !!!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ActivityAutoSensePlatformSettings.this, "!!! Device ID is missing !!!", Toast.LENGTH_LONG).show();
                 } else if (location.equals(""))
-                    Toast.makeText(getBaseContext(), "!!! Location is missing !!!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ActivityAutoSensePlatformSettings.this, "!!! Location is missing !!!", Toast.LENGTH_LONG).show();
                 else {
                     Intent returnIntent = new Intent();
                     setResult(RESULT_OK, returnIntent);
