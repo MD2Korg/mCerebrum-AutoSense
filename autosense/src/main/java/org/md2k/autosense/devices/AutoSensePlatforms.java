@@ -125,7 +125,6 @@ public class AutoSensePlatforms implements Serializable{
     public void writeDataSourceToFile() throws IOException {
         ArrayList<DataSource> dataSources = new ArrayList<>();
         if (autoSensePlatforms == null) throw new NullPointerException();
-        if (autoSensePlatforms.size() == 0) throw new EmptyStackException();
 
         for (int i = 0; i < autoSensePlatforms.size(); i++) {
             String platformId = autoSensePlatforms.get(i).getPlatformId();

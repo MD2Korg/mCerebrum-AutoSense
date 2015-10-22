@@ -20,6 +20,7 @@ import com.dsi.ant.channel.ChannelNotAvailableException;
 import com.dsi.ant.channel.PredefinedNetwork;
 
 import org.md2k.autosense.BuildConfig;
+import org.md2k.autosense.Constants;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
@@ -247,7 +248,8 @@ public class ServiceAutoSense extends Service
                                     mListener.onChannelChanged(newInfo);
                                     return;
                                 }
-                                DataExtractorOld.prepareAndSendToDataKit(ServiceAutoSense.this,newInfo);
+                                if(Constants.LOG_DATAKIT)
+                                    DataExtractorOld.prepareAndSendToDataKit(ServiceAutoSense.this,newInfo);
                                 Intent intent = new Intent("autosense");
                                 // You can also include some extra data.
                                 intent.putExtra("operation","data");

@@ -16,6 +16,8 @@ import com.dsi.ant.message.fromant.DataMessage;
 import com.dsi.ant.message.fromant.MessageFromAntType;
 import com.dsi.ant.message.ipc.AntMessageParcel;
 
+import org.md2k.autosense.Constants;
+import org.md2k.autosense.LoggerText;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.DataKitApi;
@@ -161,6 +163,10 @@ public class ChannelController {
         @Override
         public void onReceiveMessage(MessageFromAntType messageType, AntMessageParcel antParcel) {
             // Switching on message type to handle different types of messages
+            if(Constants.LOG_TEXT){
+                String str=String.valueOf(DateTime.getDateTime())+","+antParcel+"\n";
+                LoggerText.getInstance().saveDataToTextFile(str);
+            }
             switch (messageType) {
                 // If data message, construct from parcel and update channel data
                 case BROADCAST_DATA:

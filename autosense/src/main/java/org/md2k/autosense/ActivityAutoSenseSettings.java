@@ -225,7 +225,6 @@ public class ActivityAutoSenseSettings extends PreferenceActivity {
             Toast.makeText(ActivityAutoSenseSettings.this, "Configuration file is saved.", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             Toast.makeText(ActivityAutoSenseSettings.this, "!!!Error:" + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
         }
     }
 

@@ -140,6 +140,8 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
         preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Log.d(TAG,preference.getKey()+" "+newValue.toString());
+                platformId=newValue.toString().trim();
                 Constants.setSharedPreferencesString(preference.getKey(), newValue.toString().trim());
                 preference.setSummary(newValue.toString().trim());
                 return false;
@@ -309,9 +311,9 @@ public class ActivityAutoSensePlatformSettings extends PreferenceActivity {
 
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (platformId.equals("")) {
+                if (platformId==null || platformId.equals("")) {
                     Toast.makeText(ActivityAutoSensePlatformSettings.this, "!!! Device ID is missing !!!", Toast.LENGTH_LONG).show();
-                } else if (location.equals(""))
+                } else if (location==null || location.equals(""))
                     Toast.makeText(ActivityAutoSensePlatformSettings.this, "!!! Location is missing !!!", Toast.LENGTH_LONG).show();
                 else {
                     Intent returnIntent = new Intent();

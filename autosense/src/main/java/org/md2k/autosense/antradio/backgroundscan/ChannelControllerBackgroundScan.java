@@ -235,6 +235,7 @@ public class ChannelControllerBackgroundScan
             
             // Constructing channel info from extended data received from each received message
             int deviceNumber = dataMessage.getExtendedData().getChannelId().getDeviceNumber();
+            Log.d(TAG,"deviceNumber="+deviceNumber);
             String platformType= Constants.getSharedPreferenceString(PlatformType.class.getSimpleName());
             String platformId=String.format("%X", deviceNumber);
             AutoSensePlatform autoSensePlatform=new AutoSensePlatform(context, platformType,platformId,"");
@@ -252,7 +253,7 @@ public class ChannelControllerBackgroundScan
         
         @Override
         public void onReceiveMessage(MessageFromAntType messageType, AntMessageParcel antParcel) {
-            Log.d(TAG, "Rx: " + antParcel);
+            Log.d(TAG, "Rx: messageType="+messageType+" messageId="+messageType.getMessageId()+" messageId="+antParcel.getMessageId()+" message=" + String.valueOf(antParcel.getMessageContent())+" antpearcel="+antParcel);
 
             switch(messageType)
             {

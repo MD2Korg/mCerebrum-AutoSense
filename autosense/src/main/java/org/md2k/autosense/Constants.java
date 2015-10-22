@@ -42,6 +42,9 @@ public class Constants {
     public static SharedPreferences sharedPreferences=null;
     public static final String SERVICE_NAME = "org.md2k.autosense.antradio.connection.ServiceAutoSenses";
 
+    public static final boolean LOG_TEXT =false;
+    public static final boolean LOG_DATAKIT =true;
+
     public static void createSharedPreference(Context context){
         Log.d("Constants", "SharedPreference:" + context.getPackageName());
         sharedPreferences= PreferenceManager.getDefaultSharedPreferences(context);
