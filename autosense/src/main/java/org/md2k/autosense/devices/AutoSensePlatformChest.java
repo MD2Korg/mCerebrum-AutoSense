@@ -42,7 +42,7 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
             new DATASOURCE(DataSourceType.ACCELEROMETER_X,64.0/6),
             new DATASOURCE(DataSourceType.ACCELEROMETER_Y,64.0/6),
             new DATASOURCE(DataSourceType.ACCELEROMETER_Z,64.0/6),
-            new DATASOURCE(DataSourceType.GSR,64.0/6),
+            new DATASOURCE(DataSourceType.GALVANIC_SKIN_RESPONSE,64.0/6),
             new DATASOURCE(DataSourceType.BATTERY,6.4/5),
             new DATASOURCE(DataSourceType.SKIN_TEMPERATURE,6.4/5),
             new DATASOURCE(DataSourceType.AMBIENT_TEMPERATURE,6.4/5)

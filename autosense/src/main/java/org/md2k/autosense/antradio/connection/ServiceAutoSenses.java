@@ -17,7 +17,6 @@ import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
-import org.md2k.utilities.UI.UIShow;
 import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
@@ -80,7 +79,7 @@ public class ServiceAutoSenses extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        if(Constants.LOG_TEXT)
+/*        if(Constants.LOG_TEXT)
             LoggerText.getInstance();
 
         isRunning = false;
@@ -96,7 +95,7 @@ public class ServiceAutoSenses extends Service {
         }else{
             startAutoSense();
         }
-    }
+*/    }
 
     private void doBindChannelService() {
         Intent bindIntent = new Intent(this, ServiceAutoSense.class);

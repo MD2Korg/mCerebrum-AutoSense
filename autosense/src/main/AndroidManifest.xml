@@ -8,9 +8,9 @@
         android:allowBackup="true"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
-        android:theme="@style/AppThemeDark">
+        android:theme="@style/app_theme_teal_light">
         <activity
-            android:name=".ActivityAutoSense"
+            android:name=".ActivityMain"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,7 +21,6 @@
             android:name=".ActivityAutoSenseSettings"
             android:enabled="true"
             android:exported="true"
-            android:icon="@drawable/ic_settings_white_24dp"
             android:label="Settings -> AutoSense">
             <intent-filter>
                 <action android:name="org.md2k.autosense.ActivityAutoSenseSettings" />
@@ -32,7 +31,6 @@
             android:name=".ActivityAutoSensePlatformSettings"
             android:enabled="true"
             android:exported="true"
-            android:icon="@drawable/ic_settings_white_24dp"
             android:label="Settings: AutoSense Chest"></activity>
 
         <service android:name=".antradio.backgroundscan.ServiceBackgroundScan" />

@@ -1,6 +1,5 @@
 package org.md2k.autosense;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +8,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -56,9 +57,9 @@ import java.util.HashMap;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ActivityAutoSense extends Activity {
+public class ActivityMain extends AppCompatActivity {
 
-    private static final String TAG = ActivityAutoSense.class.getSimpleName();
+    private static final String TAG = ActivityMain.class.getSimpleName();
     HashMap<String, TextView> hashMapData = new HashMap<>();
     AutoSensePlatforms autoSensePlatforms = null;
 
@@ -66,26 +67,29 @@ public class ActivityAutoSense extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_auto_sense);
-        final Button buttonService = (Button) findViewById(R.id.buttonServiceStartStop);
+        setContentView(R.layout.activity_main);
+        final Button buttonService = (Button) findViewById(R.id.button_app_status);
 
         buttonService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ActivityAutoSense.this, ServiceAutoSenses.class);
-
-                if (buttonService.getText().equals("Start Service")) {
-                    startService(intent);
-                } else {
+                Intent intent = new Intent(getApplicationContext(), ServiceAutoSenses.class);
+                if (Apps.isServiceRunning(getBaseContext(), Constants.SERVICE_NAME)) {
                     stopService(intent);
+                } else {
+                    startService(intent);
                 }
             }
         });
-        findViewById(R.id.textViewTime).setOnClickListener(new View.OnClickListener() {
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+    void configureAppStatus() {
+        findViewById(R.id.button_app_status).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ActivityAutoSense.this, ServiceAutoSenses.class);
-                if (((TextView) findViewById(R.id.textViewTime)).getText().equals("OFF")) {
+                Intent intent = new Intent(ActivityMain.this, ServiceAutoSenses.class);
+                if (((Button) findViewById(R.id.button_app_status)).getText().equals("OFF")) {
                     startService(intent);
                 } else {
                     stopService(intent);
@@ -93,8 +97,6 @@ public class ActivityAutoSense extends Activity {
             }
         });
 
-        if (getActionBar() != null)
-            getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -142,19 +144,19 @@ public class ActivityAutoSense extends Activity {
         TextView tvSensor = new TextView(this);
         tvSensor.setText("sensor");
         tvSensor.setTypeface(null, Typeface.BOLD);
-        tvSensor.setTextColor(getResources().getColor(R.color.teal_a700));
+        tvSensor.setTextColor(getResources().getColor(R.color.teal_A700));
         TextView tvCount = new TextView(this);
         tvCount.setText("count");
         tvCount.setTypeface(null, Typeface.BOLD);
-        tvCount.setTextColor(getResources().getColor(R.color.teal_a700));
+        tvCount.setTextColor(getResources().getColor(R.color.teal_A700));
         TextView tvFreq = new TextView(this);
         tvFreq.setText("freq.");
         tvFreq.setTypeface(null, Typeface.BOLD);
-        tvFreq.setTextColor(getResources().getColor(R.color.teal_a700));
+        tvFreq.setTextColor(getResources().getColor(R.color.teal_A700));
         TextView tvSample = new TextView(this);
         tvSample.setText("samples");
         tvSample.setTypeface(null, Typeface.BOLD);
-        tvSample.setTextColor(getResources().getColor(R.color.teal_a700));
+        tvSample.setTextColor(getResources().getColor(R.color.teal_A700));
         row.addView(tvSensor);
         row.addView(tvCount);
         row.addView(tvFreq);
@@ -236,38 +238,23 @@ public class ActivityAutoSense extends Activity {
         super.onPause();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
     Handler mHandler = new Handler();
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
             {
-                long time = Apps.serviceRunningTime(ActivityAutoSense.this, Constants.SERVICE_NAME);
+                long time = Apps.serviceRunningTime(ActivityMain.this, Constants.SERVICE_NAME);
                 if (time < 0) {
-                    ((TextView) findViewById(R.id.textViewTime)).setText("OFF");
-
-                    ((Button) findViewById(R.id.buttonServiceStartStop)).setText("Start Service");
-                    findViewById(R.id.buttonServiceStartStop).setBackground(getResources().getDrawable(R.drawable.button_green));
+                    ((TextView) findViewById(R.id.button_app_status)).setText("START");
+                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_off));
 
                 } else {
-                    long runtime = time / 1000;
-                    int second = (int) (runtime % 60);
-                    runtime /= 60;
-                    int minute = (int) (runtime % 60);
-                    runtime /= 60;
-                    int hour = (int) runtime;
-                    ((TextView) findViewById(R.id.textViewTime)).setText(String.format("%02d:%02d:%02d", hour, minute, second));
-                    ((Button) findViewById(R.id.buttonServiceStartStop)).setText("Stop Service");
-                    findViewById(R.id.buttonServiceStartStop).setBackground(getResources().getDrawable(R.drawable.button_red));
 
+                    ((TextView) findViewById(R.id.button_app_status)).setText(DateTime.convertTimestampToTimeStr(time));
+                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_on));
                 }
                 mHandler.postDelayed(this, 1000);
             }
         }
     };
-
 }

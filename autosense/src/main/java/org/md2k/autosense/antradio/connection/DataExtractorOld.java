@@ -106,7 +106,7 @@ public class DataExtractorOld {
             case ACCELZ_CHANNEL:
                 return DataSourceType.ACCELEROMETER_Z;
             case GSR_CHANNEL:
-                return DataSourceType.GSR;
+                return DataSourceType.GALVANIC_SKIN_RESPONSE;
             case RIP_CHANNEL:
                 return DataSourceType.RESPIRATION;
             case MISC_CHANNEL:

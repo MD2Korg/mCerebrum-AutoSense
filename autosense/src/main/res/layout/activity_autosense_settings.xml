@@ -1,35 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"></ListView>
+    <include
+        android:id="@+id/layout_two_button"
+        layout="@layout/layout_two_button" />
+
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/button_settings_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cancel"
-            android:layout_weight="0.5"
-            android:layout_gravity="center_vertical" />
-
-        <Button
-            android:id="@+id/button_settings_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Save"
-            android:layout_weight="0.5"
-            android:layout_gravity="center_vertical" />
-
-    </LinearLayout>
-
-</LinearLayout>
+        android:id="@+id/layout_preference_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/layout_two_button"
+        android:orientation="vertical" />
+</RelativeLayout>

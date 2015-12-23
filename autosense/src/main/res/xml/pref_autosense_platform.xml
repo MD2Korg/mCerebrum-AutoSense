@@ -2,13 +2,13 @@
     <ListPreference
         android:title="Location"
         android:key="location"
-        android:icon="@drawable/ic_location_searching_white_24dp"
+        android:icon="@drawable/ic_location_teal_48dp"
         android:entries="@array/chest_entries"
         android:entryValues="@array/chest_entries" />
     <EditTextPreference
         android:key="platformId"
         android:title="DeviceID"
-        android:icon="@drawable/ic_vpn_key_white_24dp" />
+        android:icon="@drawable/ic_id_teal_48dp" />
     <PreferenceCategory android:title="Available Devices">
     </PreferenceCategory>
 </PreferenceScreen>
