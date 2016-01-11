@@ -169,7 +169,7 @@ public class ActivityMain extends AppCompatActivity {
         ll.removeAllViews();
         ll.addView(createDefaultRow());
         for (int i = 0; i < autoSensePlatforms.size(); i++) {
-            String platform = autoSensePlatforms.get(i).getPlatformType() + ":" + autoSensePlatforms.get(i).getPlatformId();
+            String platform = autoSensePlatforms.get(i).getPlatformType() + ":" + autoSensePlatforms.get(i).getDeviceId();
             TableRow row = new TableRow(this);
             TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
             row.setLayoutParams(lp);
@@ -195,7 +195,7 @@ public class ActivityMain extends AppCompatActivity {
 
     void updateTable(Intent intent) {
         String sampleStr = "";
-        String platform = intent.getStringExtra("platformType") + ":" + intent.getStringExtra("platformId");
+        String platform = intent.getStringExtra("platformType") + ":" + intent.getStringExtra("deviceId");
         int count = intent.getIntExtra("count", 0);
         hashMapData.get(platform + "_count").setText(String.valueOf(count));
 

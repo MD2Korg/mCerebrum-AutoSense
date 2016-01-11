@@ -2,7 +2,9 @@ package org.md2k.autosense.devices;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
+import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 
 import java.io.Serializable;
@@ -37,18 +39,17 @@ import java.util.ArrayList;
 public class AutoSensePlatform implements Serializable{
     protected String platformId;
     protected String platformType;
-    protected String location;
+    protected String deviceId;
     protected Context context;
     protected ArrayList<AutoSenseDataSource> autoSenseDataSources;
-    public void setLocation(String location){
-        this.location=location;
+    public void setDeviceId(String deviceId){
+        this.deviceId=deviceId;
     }
-    public AutoSensePlatform(Context context, String platformType, String platformId, String location) {
+    public AutoSensePlatform(Context context, String platformType, String platformId, String deviceId) {
         this.context=context;
         this.platformType = platformType;
         this.platformId = platformId;
-        this.location = location;
-
+        this.deviceId=deviceId;
     }
 
     public String getPlatformId() {
@@ -64,16 +65,17 @@ public class AutoSensePlatform implements Serializable{
         return platformType;
     }
 
-    public boolean equals(String platformType, String platformId) {
-        return this.platformType.equals(platformType) && this.platformId.equals(platformId);
+    public String getDeviceId() {
+        return deviceId;
     }
-    public String getLocation() {
-        return location;
+
+    public boolean equals(String platformType, String deviceId) {
+        return this.platformType.equals(platformType) && this.deviceId.equals(deviceId);
     }
     public void register() {
         for(int i=0;i<autoSenseDataSources.size();i++) {
-            DataSourceBuilder dataSourceBuilder=new DataSourceBuilder().setPlatform(new PlatformBuilder().setId(platformId).setType(platformType).setMetadata("location", location).build());
-            autoSenseDataSources.get(i).register(dataSourceBuilder);
+            Platform platform=new PlatformBuilder().setId(platformId).setType(platformType).setMetadata(METADATA.DEVICE_ID, deviceId).build();
+            autoSenseDataSources.get(i).register(platform);
         }
     }
 }

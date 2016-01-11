@@ -1,31 +1,9 @@
 package org.md2k.autosense;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.util.SparseArray;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import org.md2k.autosense.antradio.ChannelInfo;
-import org.md2k.autosense.antradio.backgroundscan.ServiceBackgroundScan;
-import org.md2k.datakitapi.source.platform.PlatformType;
-
-import java.util.ArrayList;
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -57,7 +35,7 @@ public class ActivityAutoSensePlatformSettings extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_autosense_settings);
+        setContentView(R.layout.activity_autosense_platform_settings);
         getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
                 new PrefsFragmentAutoSensePlatformSettings()).commit();
 

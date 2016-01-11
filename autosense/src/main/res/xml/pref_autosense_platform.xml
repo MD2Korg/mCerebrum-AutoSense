@@ -1,12 +1,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <ListPreference
         android:title="Location"
-        android:key="location"
+        android:key="platformId"
         android:icon="@drawable/ic_location_teal_48dp"
         android:entries="@array/chest_entries"
         android:entryValues="@array/chest_entries" />
     <EditTextPreference
-        android:key="platformId"
+        android:key="deviceId"
         android:title="DeviceID"
         android:icon="@drawable/ic_id_teal_48dp" />
     <PreferenceCategory android:title="Available Devices">

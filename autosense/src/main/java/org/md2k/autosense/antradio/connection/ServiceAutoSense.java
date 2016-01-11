@@ -174,9 +174,9 @@ public class ServiceAutoSense extends Service
 
     private void closeChannel(AutoSensePlatform autoSensePlatform) {
         synchronized (mChannelControllerList) {
-            ChannelController channelController = mChannelControllerList.get(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getPlatformId());
+            ChannelController channelController = mChannelControllerList.get(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
             channelController.close();
-            mChannelControllerList.remove(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getPlatformId());
+            mChannelControllerList.remove(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
         }
     }
     private void closeAllChannels()
@@ -233,7 +233,9 @@ public class ServiceAutoSense extends Service
         synchronized(mCreateChannel_LOCK)
         {
             // Acquiring a channel from ANT Radio Service
+            Log.d(TAG,"create_new_channel....");
             AntChannel antChannel = acquireChannel();
+            Log.d(TAG,"create_new_channel....antChannel="+antChannel);
 
             if(null != antChannel)
             {
@@ -253,14 +255,14 @@ public class ServiceAutoSense extends Service
                                 Intent intent = new Intent("autosense");
                                 // You can also include some extra data.
                                 intent.putExtra("operation","data");
-                                intent.putExtra("platformId", autoSensePlatform.getPlatformId());
+                                intent.putExtra("deviceId", autoSensePlatform.getDeviceId());
                                 intent.putExtra("platformType", autoSensePlatform.getPlatformType());
                                 intent.putExtra("dataSourceType", "autosense");
-                                if (!hm.containsKey(autoSensePlatform.getPlatformId())) {
-                                    hm.put(autoSensePlatform.getPlatformId(), 0);
+                                if (!hm.containsKey(autoSensePlatform.getDeviceId())) {
+                                    hm.put(autoSensePlatform.getDeviceId(), 0);
                                 }
-                                hm.put(autoSensePlatform.getPlatformId(), hm.get(autoSensePlatform.getPlatformId()) + 1);
-                                intent.putExtra("count", hm.get(autoSensePlatform.getPlatformId()));
+                                hm.put(autoSensePlatform.getDeviceId(), hm.get(autoSensePlatform.getDeviceId()) + 1);
+                                intent.putExtra("count", hm.get(autoSensePlatform.getDeviceId()));
                                 intent.putExtra("timestamp", DateTime.getDateTime());
                                 intent.putExtra("starttimestamp",starttimestamp);
                                 intent.putExtra("data", new DataTypeByteArray(newInfo.timestamp,newInfo.broadcastData));
@@ -269,8 +271,8 @@ public class ServiceAutoSense extends Service
                                 mListener.onChannelChanged(newInfo);
                             }
                         });
-                mChannelControllerList.put(autoSensePlatform.getPlatformType()+":"+autoSensePlatform.getPlatformId(), channelController);
-                Log.d(TAG, autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getPlatformId() + " ->channelController=" + channelController);
+                mChannelControllerList.put(autoSensePlatform.getPlatformType()+":"+autoSensePlatform.getDeviceId(), channelController);
+                Log.d(TAG, autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId() + " ->channelController=" + channelController);
             }
         }
 

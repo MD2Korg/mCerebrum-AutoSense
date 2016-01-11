@@ -6,6 +6,7 @@ import com.dsi.ant.AntLibVersionInfo;
 import com.dsi.ant.AntSupportChecker;
 
 import org.md2k.autosense.Constants;
+import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.platform.Platform;
@@ -72,19 +73,19 @@ public class AutoSensePlatforms implements Serializable{
     public boolean hasAntSupport(Context context) {
         return AntSupportChecker.hasAntFeature(context);
     }
-    public boolean isExists(String platformType, String platformId) {
+    public boolean isExists(String platformType, String deviceId) {
         for (int i = 0; i < autoSensePlatforms.size(); i++)
-            if (autoSensePlatforms.get(i).equals(platformType, platformId))
+            if (autoSensePlatforms.get(i).equals(platformType, deviceId))
                 return true;
         return false;
     }
 
-    public void add(String platformType, String platformId, String location) {
-        if (!isExists(platformType, platformId)) {
+    public void add(String platformType, String platformId, String deviceId) {
+        if (!isExists(platformType, deviceId)) {
             if(platformType.equals(PlatformType.AUTOSENSE_CHEST))
-                autoSensePlatforms.add(new AutoSensePlatformChest(context, platformType, platformId, location));
+                autoSensePlatforms.add(new AutoSensePlatformChest(context, platformType, platformId, deviceId));
             else if(platformType.equals(PlatformType.AUTOSENSE_WRIST))
-                autoSensePlatforms.add(new AutoSensePlatformWrist(context, platformType, platformId, location));
+                autoSensePlatforms.add(new AutoSensePlatformWrist(context, platformType, platformId, deviceId));
         }
     }
 
@@ -93,14 +94,14 @@ public class AutoSensePlatforms implements Serializable{
         for (int i = 0; i < dataSources.size(); i++) {
             String platformId = dataSources.get(i).getPlatform().getId();
             String platformType = dataSources.get(i).getPlatform().getType();
-            String location = dataSources.get(i).getPlatform().getMetadata().get("location");
-            add(platformType, platformId, location);
+            String deviceId=dataSources.get(i).getPlatform().getMetadata().get(METADATA.DEVICE_ID);
+            add(platformType, platformId, deviceId);
         }
     }
 
-    public void deleteAutoSensePlatform(String platformType, String platformId) {
+    public void deleteAutoSensePlatform(String platformType, String deviceId) {
         for (int i = 0; i < autoSensePlatforms.size(); i++)
-            if (autoSensePlatforms.get(i).equals(platformType, platformId)) {
+            if (autoSensePlatforms.get(i).equals(platformType, deviceId)) {
                 autoSensePlatforms.remove(i);
                 return;
             }
@@ -114,9 +115,9 @@ public class AutoSensePlatforms implements Serializable{
         return t_autoSensePlatforms;
     }
 
-    public AutoSensePlatform getAutoSensePlatform(String platformType, String platformId) {
+    public AutoSensePlatform getAutoSensePlatform(String platformType, String deviceId) {
         for (int i = 0; i < autoSensePlatforms.size(); i++)
-            if (autoSensePlatforms.get(i).equals(platformType, platformId))
+            if (autoSensePlatforms.get(i).equals(platformType, deviceId))
                 return autoSensePlatforms.get(i);
 
         return null;
@@ -129,14 +130,16 @@ public class AutoSensePlatforms implements Serializable{
         for (int i = 0; i < autoSensePlatforms.size(); i++) {
             String platformId = autoSensePlatforms.get(i).getPlatformId();
             String platformType = autoSensePlatforms.get(i).getPlatformType();
-            String location = autoSensePlatforms.get(i).getLocation();
-            Platform platform = new PlatformBuilder().setId(platformId).setType(platformType).setMetadata("location", location).build();
+            String deviceId = autoSensePlatforms.get(i).getDeviceId();
+            Platform platform = new PlatformBuilder().setId(platformId).setType(platformType).setMetadata(METADATA.DEVICE_ID, deviceId).build();
             ArrayList<AutoSenseDataSource> autoSenseDataSources=autoSensePlatforms.get(i).autoSenseDataSources;
             for (int j = 0; j < autoSenseDataSources.size(); j++) {
-                String dataSourceType = autoSenseDataSources.get(i).getDataSourceType();
-                DataSource dataSource = new DataSourceBuilder().
-                        setPlatform(platform).
-                        setType(dataSourceType).build();
+                DataSource dataSource=autoSenseDataSources.get(j).createDatSourceBuilder(platform).build();
+//                String dataSourceType = autoSenseDataSources.get(i).getDataSourceType();
+//                autoSenseDataSources.get(i).createDatSourceBuilder()
+//                DataSource dataSource = new DataSourceBuilder().
+  //                      setPlatform(platform).
+  //                      setType(dataSourceType).build();
                 dataSources.add(dataSource);
             }
         }

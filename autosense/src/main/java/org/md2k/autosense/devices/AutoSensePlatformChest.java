@@ -5,6 +5,7 @@ import android.content.Context;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
+import org.md2k.datakitapi.source.platform.PlatformId;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,11 +48,14 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
             new DATASOURCE(DataSourceType.SKIN_TEMPERATURE,6.4/5),
             new DATASOURCE(DataSourceType.AMBIENT_TEMPERATURE,6.4/5)
     ));
-    public AutoSensePlatformChest(Context context, String platformType, String platformId, String location) {
-        super(context,platformType,platformId,location);
+    public AutoSensePlatformChest(Context context, String platformType, String platformId, String deviceId) {
+        super(context,platformType,platformId,deviceId);
+        this.platformId= PlatformId.CHEST;
         autoSenseDataSources=new ArrayList<>();
-        for (DATASOURCE datasource : DATASOURCES)
-            autoSenseDataSources.add(new AutoSenseDataSource(context, datasource.dataSourceType,datasource.frequency));
+        for (int i=0;i<DATASOURCES.size();i++) {
+            DATASOURCE datasource=DATASOURCES.get(i);
+            autoSenseDataSources.add(new AutoSenseDataSource(context, datasource.dataSourceType, datasource.frequency, 0, 4096));
+        }
     }
     class DATASOURCE{
         String dataSourceType;

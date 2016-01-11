@@ -17,6 +17,7 @@ import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.utilities.UI.AlertDialogs;
 import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
@@ -79,23 +80,23 @@ public class ServiceAutoSenses extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-/*        if(Constants.LOG_TEXT)
+        if(Constants.LOG_TEXT)
             LoggerText.getInstance();
 
         isRunning = false;
         if (!readSettings()) {
-            UIShow.ErrorDialog(this, "Configuration Error", "Configuration file for AutoSense doesn't exist.\n\nPlease go to Menu -> Settings");
+            AlertDialogs.showAlertDialog(this, "Configuration Error", "Configuration file for AutoSense doesn't exist.\n\nPlease go to Menu -> Settings");
             stopSelf();
         } else if (Constants.LOG_DATAKIT == true) {
             if (!connectDataKit()) {
-                UIShow.ErrorDialog(this, "DataKit Error", "DataKit is not available.\n\nPlease Install DataKit");
+                AlertDialogs.showAlertDialog(this, "DataKit Error", "DataKit is not available.\n\nPlease Install DataKit");
                 stopSelf();
             } else
                 Toast.makeText(this, "AutoSense Service stared Successfully", Toast.LENGTH_LONG).show();
         }else{
             startAutoSense();
         }
-*/    }
+    }
 
     private void doBindChannelService() {
         Intent bindIntent = new Intent(this, ServiceAutoSense.class);

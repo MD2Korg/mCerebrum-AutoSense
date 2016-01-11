@@ -46,7 +46,7 @@ public class AutoSensePlatformWrist extends AutoSensePlatform{
         super(context,platformType,platformId,location);
         autoSenseDataSources=new ArrayList<>();
         for (DATASOURCE datasource : DATASOURCES)
-            autoSenseDataSources.add(new AutoSenseDataSource(context, datasource.dataSourceType,datasource.frequency));
+            autoSenseDataSources.add(new AutoSenseDataSource(context, datasource.dataSourceType,datasource.frequency,0,4096));
     }
     class DATASOURCE{
         String dataSourceType;

@@ -54,7 +54,6 @@ public class ChannelInfo
     
     public ChannelInfo(AutoSensePlatform autoSensePlatform)
     {
-        Log.d(TAG, "platformType=" + autoSensePlatform.getPlatformType() + " platformId=" + autoSensePlatform.getPlatformId());
         this.autoSensePlatform=autoSensePlatform;
         if(PlatformType.AUTOSENSE_CHEST.equals(autoSensePlatform.getPlatformType())){
             CHANNEL_PROOF_DEVICE_TYPE = (byte)0x01;
@@ -62,22 +61,23 @@ public class ChannelInfo
             WILDCARD_SEARCH_DEVICE_NUMBER = 0;
             CHANNEL_PROOF_PERIOD = 0x04EC;//8070;
             CHANNEL_PROOF_FREQUENCY = 0x50;
-            if(autoSensePlatform.getPlatformId()==null || autoSensePlatform.getPlatformId().equals(""))
+            if(autoSensePlatform.getDeviceId()==null || autoSensePlatform.getDeviceId().equals(""))
                 DEVICE_NUMBER=0;
             else {
-                DEVICE_NUMBER=Integer.parseInt(autoSensePlatform.getPlatformId(),16);
+                DEVICE_NUMBER=Integer.parseInt(autoSensePlatform.getDeviceId(),16);
+
             }
+            Log.d(TAG,"deviceNumber="+DEVICE_NUMBER);
         }else{
             CHANNEL_PROOF_DEVICE_TYPE = (byte)0x03;
             CHANNEL_PROOF_TRANSMISSION_TYPE = 0;
             WILDCARD_SEARCH_DEVICE_NUMBER = 0;
             CHANNEL_PROOF_PERIOD = 1638;
             CHANNEL_PROOF_FREQUENCY = 0x50;
-            if(autoSensePlatform.getPlatformId()==null || autoSensePlatform.getPlatformId().equals(""))
+            if(autoSensePlatform.getDeviceId()==null || autoSensePlatform.getDeviceId().equals(""))
                 DEVICE_NUMBER=0;
             else {
-                DEVICE_NUMBER = Integer.parseInt(autoSensePlatform.getPlatformId(), 16);
-                Log.d(TAG, "DEVICENUMBER: " + DEVICE_NUMBER);
+                DEVICE_NUMBER = Integer.parseInt(autoSensePlatform.getDeviceId(), 16);
             }
         }
         error = false;
@@ -87,13 +87,11 @@ public class ChannelInfo
     public void die(String errorMessage)
     {
         error = true;
-        Log.e(TAG, "platformType=" + autoSensePlatform.getPlatformType() + " platformId=" + autoSensePlatform.getPlatformId() + " error=" + errorMessage);
         mErrorMessage = errorMessage;
     }
     
     public String getErrorString()
     {
-        Log.e(TAG, "error=" + mErrorMessage);
         return mErrorMessage;
     }
 }

@@ -8,12 +8,13 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,6 +24,8 @@ import android.widget.Toast;
 
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.antradio.backgroundscan.ServiceBackgroundScan;
+import org.md2k.datakitapi.source.METADATA;
+import org.md2k.datakitapi.source.platform.PlatformId;
 import org.md2k.datakitapi.source.platform.PlatformType;
 
 import java.util.ArrayList;
@@ -56,7 +59,7 @@ import java.util.ArrayList;
 
 public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
     public static final String TAG=PrefsFragmentAutoSensePlatformSettings.class.getSimpleName();
-    String platformType, platformId,location;
+    String platformType, platformId= PlatformId.CHEST, deviceId;
     private ServiceBackgroundScan.ChannelServiceComm mChannelService;
 
     private ArrayList<String> mChannelDisplayList = new ArrayList<>();
@@ -69,12 +72,11 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getActivity().setContentView(R.layout.activity_autosense_platform_settings);
         if(Constants.sharedPreferences==null) Constants.createSharedPreference(getActivity());
 
         platformType=Constants.getSharedPreferenceString("platformType");
         platformId=Constants.getSharedPreferenceString("platformId");
-        location=Constants.getSharedPreferenceString("location");
+        deviceId=Constants.getSharedPreferenceString("deviceId");
         addPreferencesFromResource(R.xml.pref_autosense_platform);
 
         mChannelServiceBound = false;
@@ -87,9 +89,9 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String item = ((TextView) view).getText().toString().trim();
-                Preference preference = findPreference("platformId");
-                platformId = item;
-                Constants.setSharedPreferencesString("platformId", item);
+                Preference preference = findPreference("deviceId");
+                deviceId = item;
+                Constants.setSharedPreferencesString("deviceId", item);
                 preference.setSummary(item);
             }
         });
@@ -100,11 +102,21 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         if (!mChannelServiceBound)
             doBindChannelService();
 
-        setupPreferenceLocation();
-        setupPreferenecePlatformId();
+        setupPreferencePlatformId();
+        setupPreferenceDeviceId();
         setAddButton();
         setCancelButton();
     }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View v=super.onCreateView(inflater, container,savedInstanceState);
+        assert v != null;
+        ListView lv = (ListView) v.findViewById(android.R.id.list);
+        lv.setPadding(0, 0, 0, 0);
+        return v;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -133,13 +145,13 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         super.onPause();
     }
 
-    private void setupPreferenecePlatformId(){
-        Preference preference = findPreference("platformId");
+    private void setupPreferenceDeviceId(){
+        Preference preference = findPreference("deviceId");
         preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Log.d(TAG,preference.getKey()+" "+newValue.toString());
-                platformId=newValue.toString().trim();
+                deviceId=newValue.toString().trim();
                 Constants.setSharedPreferencesString(preference.getKey(), newValue.toString().trim());
                 preference.setSummary(newValue.toString().trim());
                 return false;
@@ -147,13 +159,13 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         });
 
     }
-    private void setupPreferenceLocation(){
-        ListPreference locationPreference= (ListPreference) findPreference("location");
-        locationPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+    private void setupPreferencePlatformId(){
+        ListPreference platformIdPreference= (ListPreference) findPreference("platformId");
+        platformIdPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Log.d(TAG, preference.getKey() + ":" + newValue.toString());
-                location = newValue.toString();
+                platformId = newValue.toString();
                 Constants.setSharedPreferencesString(preference.getKey(), newValue.toString());
                 preference.setSummary(newValue.toString());
                 return false;
@@ -161,22 +173,19 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         });
 
         if(platformType.equals(PlatformType.AUTOSENSE_CHEST)) {
-            getActivity().setTitle("Settings -> AutoSense-> Chest");
-            locationPreference.setEntries(R.array.chest_entries);
-            locationPreference.setEntryValues(R.array.chest_entries);
-            locationPreference.setEnabled(false);
-            Constants.setSharedPreferencesString("location", "Chest");
-            locationPreference.setSummary("Chest");
-            location = "Chest";
-
-
+            getActivity().setTitle("AutoSense_Chest Settings");
+            platformIdPreference.setEntries(R.array.chest_entries);
+            platformIdPreference.setEntryValues(R.array.chest_entries);
+            platformIdPreference.setEnabled(false);
+            Constants.setSharedPreferencesString("platformId", "Chest");
+            platformIdPreference.setSummary(PlatformId.CHEST);
+            platformId = PlatformId.CHEST;
         }
         else{
-            getActivity().setTitle("Settings -> AutoSense -> Wrist");
-            locationPreference.setEntries(R.array.wrist_entries);
-            locationPreference.setEntryValues(R.array.wrist_entries);
+            getActivity().setTitle("AutoSense_Wrist Settings");
+            platformIdPreference.setEntries(R.array.wrist_entries);
+            platformIdPreference.setEntryValues(R.array.wrist_entries);
         }
-
     }
 
     @Override
@@ -185,9 +194,9 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         if (requestCode == 1) {
             // Make sure the request was successful
             if (resultCode == getActivity().RESULT_OK) {
-                Preference preference=findPreference("platformId");
-                Log.d(TAG,"platformId="+Constants.getSharedPreferenceString("platformId"));
-                preference.setSummary(Constants.getSharedPreferenceString("platformId"));
+                Preference preference=findPreference("deviceId");
+//                Log.d(TAG,"platformId="+Constants.getSharedPreferenceString("platformId"));
+                preference.setSummary(Constants.getSharedPreferenceString("deviceId"));
                 // The user picked a contact.
                 // The Intent's data Uri identifies which contact was selected.
 
@@ -311,14 +320,15 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
     }
 
     private void setAddButton() {
-        final Button button = (Button) getActivity().findViewById(R.id.button_save);
+        final Button button = (Button) getActivity().findViewById(R.id.button_1);
+        button.setText("Save");
 
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (platformId==null || platformId.equals("")) {
+                    Toast.makeText(getActivity(), "!!! PlatformID ID is missing !!!", Toast.LENGTH_LONG).show();
+                } else if (deviceId==null || deviceId.equals(""))
                     Toast.makeText(getActivity(), "!!! Device ID is missing !!!", Toast.LENGTH_LONG).show();
-                } else if (location==null || location.equals(""))
-                    Toast.makeText(getActivity(), "!!! Location is missing !!!", Toast.LENGTH_LONG).show();
                 else {
                     Intent returnIntent = new Intent();
                     getActivity().setResult(getActivity().RESULT_OK, returnIntent);
@@ -330,7 +340,8 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
     }
 
     private void setCancelButton() {
-        final Button button = (Button) getActivity().findViewById(R.id.button_cancel);
+        final Button button = (Button) getActivity().findViewById(R.id.button_2);
+        button.setText("Close");
 
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

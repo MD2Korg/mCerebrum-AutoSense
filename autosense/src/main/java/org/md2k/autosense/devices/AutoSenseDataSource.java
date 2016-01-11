@@ -2,11 +2,17 @@ package org.md2k.autosense.devices;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.datatype.DataTypeFloatArray;
+import org.md2k.datakitapi.datatype.DataTypeInt;
+import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.utilities.datakit.DataKitHandler;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -39,11 +45,15 @@ public class AutoSenseDataSource implements Serializable{
     private double frequency;
     private DataSourceClient dataSourceClient;
     private Context context;
+    int minValue;
+    int maxValue;
 
-    public AutoSenseDataSource(Context context, String dataSourceType, double frequency) {
+    public AutoSenseDataSource(Context context, String dataSourceType, double frequency,int minValue,int maxValue) {
         this.context = context;
         this.dataSourceType = dataSourceType;
         this.frequency=frequency;
+        this.maxValue=maxValue;
+        this.minValue=minValue;
     }
 
     public double getFrequency() {
@@ -62,13 +72,34 @@ public class AutoSenseDataSource implements Serializable{
         return dataSourceClient;
     }
 
-    public DataSourceBuilder createDatSourceBuilder(DataSourceBuilder dataSourceBuilder){
-        return dataSourceBuilder.setId(null).setType(dataSourceType).setMetadata("frequency",String.valueOf(frequency));
+    public DataSourceBuilder createDatSourceBuilder(Platform platform){
+        DataSourceBuilder dataSourceBuilder=new DataSourceBuilder();
+        dataSourceBuilder=dataSourceBuilder.setId(null).setType(dataSourceType).setMetadata(METADATA.FREQUENCY,String.valueOf(frequency)).setPlatform(platform);
+        dataSourceBuilder = dataSourceBuilder.setDataDescriptors(createDataDescriptors());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.FREQUENCY, String.valueOf(frequency));
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, dataSourceType.toLowerCase());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.UNIT, "");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, dataSourceType.toLowerCase());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeInt.class.getName());
+        return dataSourceBuilder;
     }
 
-    public boolean register(DataSourceBuilder dataSourceBuilder) {
-        dataSourceBuilder=createDatSourceBuilder(dataSourceBuilder);
+    public boolean register(Platform platform) {
+        DataSourceBuilder dataSourceBuilder=createDatSourceBuilder(platform);
         dataSourceClient = DataKitHandler.getInstance(context).register(dataSourceBuilder);
         return dataSourceClient != null;
     }
+    ArrayList<HashMap<String, String>>  createDataDescriptors() {
+        ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
+        HashMap<String, String> dataDescriptor = new HashMap<>();
+        dataDescriptor.put(METADATA.NAME, dataSourceType.toLowerCase());
+        dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(minValue));
+        dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(maxValue));
+        dataDescriptor.put(METADATA.FREQUENCY, String.valueOf(frequency));
+        dataDescriptor.put(METADATA.DESCRIPTION, dataSourceType.toLowerCase());
+        dataDescriptor.put(METADATA.DATA_TYPE, int.class.getName());
+        dataDescriptors.add(dataDescriptor);
+        return dataDescriptors;
+    }
+
 }
