@@ -14,6 +14,7 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.utilities.Files;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
@@ -90,7 +91,7 @@ public class AutoSensePlatforms implements Serializable{
     }
 
     public void readDataSourceFromFile() throws FileNotFoundException {
-        ArrayList<DataSource> dataSources = Files.readDataSourceFromFile(Constants.DIR_FILENAME);
+        ArrayList<DataSource> dataSources = Files.readJSONArray(Constants.DIRECTORY + context.getPackageName() + File.separator,Constants.FILENAME,DataSource.class);
         for (int i = 0; i < dataSources.size(); i++) {
             String platformId = dataSources.get(i).getPlatform().getId();
             String platformType = dataSources.get(i).getPlatform().getType();
@@ -143,7 +144,7 @@ public class AutoSensePlatforms implements Serializable{
                 dataSources.add(dataSource);
             }
         }
-        Files.writeDataSourceToFile(Constants.DIRECTORY, Constants.FILENAME, dataSources);
+        Files.writeJSONArray(Constants.DIRECTORY+context.getPackageName()+File.separator, Constants.FILENAME, dataSources);
     }
 
     public void register() {

@@ -36,9 +36,8 @@ import java.io.File;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Constants {
-    public static final String DIRECTORY = Environment.getExternalStorageDirectory() + File.separator + "mCerebrum" + File.separator + "config";
-    public static final String FILENAME = "config_autosense.json";
-    public static final String DIR_FILENAME = DIRECTORY + File.separator + FILENAME;
+    public static final String DIRECTORY = Environment.getExternalStorageDirectory() + File.separator + "mCerebrum"+File.separator;
+    public static final String FILENAME = "config.json";
     public static SharedPreferences sharedPreferences=null;
     public static final String SERVICE_NAME = "org.md2k.autosense.antradio.connection.ServiceAutoSenses";
 
