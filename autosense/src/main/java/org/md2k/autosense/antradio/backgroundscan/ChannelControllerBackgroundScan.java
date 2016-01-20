@@ -238,7 +238,7 @@ public class ChannelControllerBackgroundScan
             Log.d(TAG,"deviceNumber="+deviceNumber);
             String platformType= Constants.getSharedPreferenceString(PlatformType.class.getSimpleName());
             String deviceId=String.format("%X", deviceNumber);
-            AutoSensePlatform autoSensePlatform=new AutoSensePlatform(context, platformType,"",deviceId);
+            AutoSensePlatform autoSensePlatform=new AutoSensePlatform(context, platformType,"",deviceId,"");
             ChannelInfo receivedChannelInfo = new ChannelInfo(autoSensePlatform);
             receivedChannelInfo.broadcastData = dataMessage.getPayload();
             // Passes found channel info onto ChannelService and then onto ChannelList
@@ -253,7 +253,7 @@ public class ChannelControllerBackgroundScan
         
         @Override
         public void onReceiveMessage(MessageFromAntType messageType, AntMessageParcel antParcel) {
-            Log.d(TAG, "Rx: messageType="+messageType+" messageId="+messageType.getMessageId()+" messageId="+antParcel.getMessageId()+" message=" + String.valueOf(antParcel.getMessageContent())+" antpearcel="+antParcel);
+//            Log.d(TAG, "Rx: messageType="+messageType+" messageId="+messageType.getMessageId()+" messageId="+antParcel.getMessageId()+" message=" + String.valueOf(antParcel.getMessageContent())+" antpearcel="+antParcel);
 
             switch(messageType)
             {

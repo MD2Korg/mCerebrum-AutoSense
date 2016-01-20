@@ -326,7 +326,7 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (platformId==null || platformId.equals("")) {
-                    Toast.makeText(getActivity(), "!!! PlatformID ID is missing !!!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "!!! Location is missing !!!", Toast.LENGTH_LONG).show();
                 } else if (deviceId==null || deviceId.equals(""))
                     Toast.makeText(getActivity(), "!!! Device ID is missing !!!", Toast.LENGTH_LONG).show();
                 else {

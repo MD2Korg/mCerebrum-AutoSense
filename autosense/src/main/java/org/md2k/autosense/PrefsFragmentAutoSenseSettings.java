@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -20,6 +19,7 @@ import android.widget.Toast;
 import com.dsi.ant.StoreDownloader;
 
 import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
+import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.utilities.Apps;
@@ -32,17 +32,17 @@ import java.util.List;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p/>
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- *
+ * <p/>
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- *
+ * <p/>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -59,6 +59,7 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
     private static final String TAG = PrefsFragmentAutoSenseSettings.class.getSimpleName();
     static final int ADD_DEVICE = 1;  // The request code
     AutoSensePlatforms autoSensePlatforms = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,10 +70,11 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
         setCancelButton();
         setSaveButton();
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v=super.onCreateView(inflater, container,savedInstanceState);
+        View v = super.onCreateView(inflater, container, savedInstanceState);
         assert v != null;
         ListView lv = (ListView) v.findViewById(android.R.id.list);
         lv.setPadding(0, 0, 0, 0);
@@ -109,7 +111,7 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                 final Intent intent = new Intent(getActivity(), ActivityAutoSensePlatformSettings.class);
                 Constants.setSharedPreferencesString("platformId", "");
                 Constants.setSharedPreferencesString("platformType", PlatformType.AUTOSENSE_CHEST);
-                Constants.setSharedPreferencesString("location", "");
+                Constants.setSharedPreferencesString("deviceId", "");
                 startActivityForResult(intent, ADD_DEVICE);
                 return false;
             }
@@ -122,7 +124,7 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                 final Intent intent = new Intent(getActivity(), ActivityAutoSensePlatformSettings.class);
                 Constants.setSharedPreferencesString("platformId", "");
                 Constants.setSharedPreferencesString("platformType", PlatformType.AUTOSENSE_WRIST);
-                Constants.setSharedPreferencesString("location", "");
+                Constants.setSharedPreferencesString("deviceId", "");
                 startActivityForResult(intent, ADD_DEVICE);
                 return false;
             }
@@ -133,7 +135,7 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
         PreferenceCategory category = (PreferenceCategory) findPreference("autosense_configured");
         category.removeAll();
         // TODO: check ant radio exists
-//        ArrayList<AutoSensePlatform> autoSensePlatforms = this.autoSensePlatforms.getAutoSensePlatform(platformType);
+//        ArrayList<AutoSensePlatform> autoSensePlatforms = this.autoSensePlatforms.find(platformType);
         for (int i = 0; i < autoSensePlatforms.size(); i++) {
             Preference preference = new Preference(getActivity());
             String platformType;
@@ -145,7 +147,7 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                 preference.setIcon(R.drawable.ic_watch_teal_48dp);
             }
             preference.setTitle(platformType + ":" + autoSensePlatforms.get(i).getDeviceId());
-            preference.setSummary("Location: " + autoSensePlatforms.get(i).getPlatformId());
+            preference.setSummary(autoSensePlatforms.get(i).getPlatformId());
             preference.setKey(autoSensePlatforms.get(i).getPlatformType() + ":" + autoSensePlatforms.get(i).getDeviceId());
             preference.setOnPreferenceClickListener(autoSenseListener());
             category.addPreference(preference);
@@ -172,7 +174,7 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                 final String deviceId = getDeviceId(preference.getKey());
                 Constants.setSharedPreferencesString("deviceId", deviceId);
                 Constants.setSharedPreferencesString("platformType", platformType);
-                Constants.setSharedPreferencesString("platformId", autoSensePlatforms.getAutoSensePlatform(platformType, deviceId).getPlatformId());
+                Constants.setSharedPreferencesString("platformId", autoSensePlatforms.find(platformType, null, deviceId).get(0).getPlatformId());
                 AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                 alertDialog.setTitle("Delete Selected Device");
                 alertDialog.setMessage("Delete Device (" + preference.getTitle() + ")?");
@@ -185,7 +187,7 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                 alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Delete",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                autoSensePlatforms.deleteAutoSensePlatform(platformType, deviceId);
+                                autoSensePlatforms.deleteAutoSensePlatform(platformType, null, deviceId);
                                 updatePreferenceScreen();
                             }
                         });
@@ -198,11 +200,11 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
     DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            switch (which){
+            switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
                     Intent intent = new Intent(getActivity(), ServiceAutoSenses.class);
                     getActivity().stopService(intent);
-                    if(saveConfigurationFile()) {
+                    if (saveConfigurationFile()) {
                         intent = new Intent(getActivity(), ServiceAutoSenses.class);
                         getActivity().startService(intent);
                         getActivity().finish();
@@ -226,25 +228,19 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage("Save configuration file and restart the AutoSense Service?").setPositiveButton("Yes", dialogClickListener)
                             .setNegativeButton("No", dialogClickListener).show();
-                }
-                else{
-                    if(saveConfigurationFile())
+                } else {
+                    if (saveConfigurationFile())
                         getActivity().finish();
                 }
             }
         });
     }
+
     boolean saveConfigurationFile() {
         try {
-            if(autoSensePlatforms.getAutoSensePlatform(PlatformType.AUTOSENSE_CHEST).size()!=1){
-                Toast.makeText(getActivity(), "!!!Error: Only 1 chestband can be configured. Can't save the file",Toast.LENGTH_LONG).show();
-                return false;
-
-            }else {
-                autoSensePlatforms.writeDataSourceToFile();
-                Toast.makeText(getActivity(), "Configuration file is saved.", Toast.LENGTH_LONG).show();
-                return true;
-            }
+            autoSensePlatforms.writeDataSourceToFile();
+            Toast.makeText(getActivity(), "Configuration file is saved.", Toast.LENGTH_LONG).show();
+            return true;
         } catch (IOException e) {
             Toast.makeText(getActivity(), "!!!Error:" + e.getMessage(), Toast.LENGTH_LONG).show();
             return false;
@@ -289,22 +285,24 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                 String platformId = Constants.getSharedPreferenceString("platformId");
                 String platformType = Constants.getSharedPreferenceString("platformType");
                 String deviceId = Constants.getSharedPreferenceString("deviceId");
-                if(autoSensePlatforms.getAutoSensePlatform(platformType,deviceId)==null)
+                Log.d(TAG, "platformType=" + platformType + " platformId=" + platformId + " deviceId=" + deviceId);
+                if (autoSensePlatforms.find(platformType, platformId, null).size() != 0) {
+                    Toast.makeText(getActivity(), "Error: A device is already configured with same location...", Toast.LENGTH_SHORT).show();
+                } else if (autoSensePlatforms.find(platformType, null, deviceId).size() != 0)
+                    Toast.makeText(getActivity(), "Error: Device is already configured...", Toast.LENGTH_SHORT).show();
+                else
                     autoSensePlatforms.add(platformType, platformId, deviceId);
-//                else autoSensePlatforms.getAutoSensePlatform(platformType,platformId,deviceId).setLocation(location);
-
-//                Log.d(TAG, platformId + " " + platformType + " " + location);
-
                 updatePreferenceScreen();
-
             }
         }
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
     }
-    void startService(){
+
+    void startService() {
         Intent intent = new Intent(getActivity(), ServiceAutoSenses.class);
         getActivity().startService(intent);
     }

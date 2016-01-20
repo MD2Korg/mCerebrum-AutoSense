@@ -41,15 +41,17 @@ public class AutoSensePlatform implements Serializable{
     protected String platformType;
     protected String deviceId;
     protected Context context;
+    protected String name;
     protected ArrayList<AutoSenseDataSource> autoSenseDataSources;
     public void setDeviceId(String deviceId){
         this.deviceId=deviceId;
     }
-    public AutoSensePlatform(Context context, String platformType, String platformId, String deviceId) {
+    public AutoSensePlatform(Context context, String platformType, String platformId, String deviceId, String name) {
         this.context=context;
         this.platformType = platformType;
         this.platformId = platformId;
         this.deviceId=deviceId;
+        this.name=name;
     }
 
     public String getPlatformId() {
@@ -69,12 +71,15 @@ public class AutoSensePlatform implements Serializable{
         return deviceId;
     }
 
-    public boolean equals(String platformType, String deviceId) {
-        return this.platformType.equals(platformType) && this.deviceId.equals(deviceId);
+    public boolean equals(String platformType, String platformId, String deviceId){
+        if(platformType!=null && !this.platformType.equals(platformType)) return false;
+        if(platformId!=null && !this.platformId.equals(platformId)) return false;
+        if(deviceId!=null && !this.deviceId.equals(deviceId)) return false;
+        return true;
     }
     public void register() {
         for(int i=0;i<autoSenseDataSources.size();i++) {
-            Platform platform=new PlatformBuilder().setId(platformId).setType(platformType).setMetadata(METADATA.DEVICE_ID, deviceId).build();
+            Platform platform=new PlatformBuilder().setId(platformId).setType(platformType).setMetadata(METADATA.DEVICE_ID, deviceId).setMetadata(METADATA.NAME,name).build();
             autoSenseDataSources.get(i).register(platform);
         }
     }

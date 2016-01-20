@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="wrist_entries">
-        <item>Left Wrist</item>
-        <item>Right Wrist</item>
-        <item>Other</item>
+        <item>LEFT_WRIST</item>
+        <item>RIGHT_WRIST</item>
     </string-array>
     <string-array name="wrist_values">
         <item>1</item>
         <item>2</item>
-        <item>3</item>
     </string-array>
     <string-array name="chest_entries">
         <item>CHEST</item>
-        <item>Other</item>
     </string-array>
     <string-array name="chest_values">
         <item>1</item>

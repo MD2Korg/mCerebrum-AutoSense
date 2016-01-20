@@ -80,20 +80,18 @@ public class ServiceAutoSenses extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        if(Constants.LOG_TEXT)
+        if (Constants.LOG_TEXT)
             LoggerText.getInstance();
 
         isRunning = false;
         if (!readSettings()) {
             AlertDialogs.showAlertDialog(this, "Configuration Error", "Configuration file for AutoSense doesn't exist.\n\nPlease go to Menu -> Settings");
             stopSelf();
-        } else if (Constants.LOG_DATAKIT == true) {
-            if (!connectDataKit()) {
-                AlertDialogs.showAlertDialog(this, "DataKit Error", "DataKit is not available.\n\nPlease Install DataKit");
-                stopSelf();
-            } else
-                Toast.makeText(this, "AutoSense Service stared Successfully", Toast.LENGTH_LONG).show();
-        }else{
+        } else if (!connectDataKit()) {
+            AlertDialogs.showAlertDialog(this, "DataKit Error", "DataKit is not available.\n\nPlease Install DataKit");
+            stopSelf();
+        } else {
+            Toast.makeText(this, "AutoSense Service stared Successfully", Toast.LENGTH_LONG).show();
             startAutoSense();
         }
     }
@@ -127,11 +125,10 @@ public class ServiceAutoSenses extends Service {
 
         Log.v(TAG, "...onDestroy");
         if (isRunning) {
-            if(Constants.LOG_DATAKIT)
-                DataKitHandler.getInstance(getApplicationContext()).disconnect();
+            DataKitHandler.getInstance(getApplicationContext()).disconnect();
         }
         isRunning = false;
-        if(Constants.LOG_TEXT)
+        if (Constants.LOG_TEXT)
             LoggerText.getInstance().close();
 
         super.onDestroy();

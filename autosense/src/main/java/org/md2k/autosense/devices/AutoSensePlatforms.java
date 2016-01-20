@@ -5,6 +5,7 @@ import android.content.Context;
 import com.dsi.ant.AntLibVersionInfo;
 import com.dsi.ant.AntSupportChecker;
 
+import org.md2k.autosense.Configuration;
 import org.md2k.autosense.Constants;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSource;
@@ -14,7 +15,6 @@ import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.utilities.Files;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
@@ -74,15 +74,15 @@ public class AutoSensePlatforms implements Serializable{
     public boolean hasAntSupport(Context context) {
         return AntSupportChecker.hasAntFeature(context);
     }
-    public boolean isExists(String platformType, String deviceId) {
+    public boolean isExists(String platformType, String platformId, String deviceId) {
         for (int i = 0; i < autoSensePlatforms.size(); i++)
-            if (autoSensePlatforms.get(i).equals(platformType, deviceId))
+            if (autoSensePlatforms.get(i).equals(platformType, platformId, deviceId))
                 return true;
         return false;
     }
 
     public void add(String platformType, String platformId, String deviceId) {
-        if (!isExists(platformType, deviceId)) {
+        if (!isExists(platformType, platformId, deviceId)) {
             if(platformType.equals(PlatformType.AUTOSENSE_CHEST))
                 autoSensePlatforms.add(new AutoSensePlatformChest(context, platformType, platformId, deviceId));
             else if(platformType.equals(PlatformType.AUTOSENSE_WRIST))
@@ -91,7 +91,7 @@ public class AutoSensePlatforms implements Serializable{
     }
 
     public void readDataSourceFromFile() throws FileNotFoundException {
-        ArrayList<DataSource> dataSources = Files.readJSONArray(Constants.DIRECTORY + context.getPackageName() + File.separator,Constants.FILENAME,DataSource.class);
+        ArrayList<DataSource> dataSources = Configuration.getDataSources();
         for (int i = 0; i < dataSources.size(); i++) {
             String platformId = dataSources.get(i).getPlatform().getId();
             String platformType = dataSources.get(i).getPlatform().getType();
@@ -100,28 +100,20 @@ public class AutoSensePlatforms implements Serializable{
         }
     }
 
-    public void deleteAutoSensePlatform(String platformType, String deviceId) {
+    public void deleteAutoSensePlatform(String platformType, String platformId, String deviceId) {
         for (int i = 0; i < autoSensePlatforms.size(); i++)
-            if (autoSensePlatforms.get(i).equals(platformType, deviceId)) {
+            if (autoSensePlatforms.get(i).equals(platformType, platformId,deviceId)) {
                 autoSensePlatforms.remove(i);
                 return;
             }
     }
 
-    public ArrayList<AutoSensePlatform> getAutoSensePlatform(String platformType) {
+    public ArrayList<AutoSensePlatform> find(String platformType, String platformId, String deviceId) {
         ArrayList<AutoSensePlatform> t_autoSensePlatforms = new ArrayList<>();
         for (int i = 0; i < autoSensePlatforms.size(); i++)
-            if (autoSensePlatforms.get(i).getPlatformType().equals(platformType))
+            if (autoSensePlatforms.get(i).equals(platformType,platformId,deviceId))
                 t_autoSensePlatforms.add(autoSensePlatforms.get(i));
         return t_autoSensePlatforms;
-    }
-
-    public AutoSensePlatform getAutoSensePlatform(String platformType, String deviceId) {
-        for (int i = 0; i < autoSensePlatforms.size(); i++)
-            if (autoSensePlatforms.get(i).equals(platformType, deviceId))
-                return autoSensePlatforms.get(i);
-
-        return null;
     }
 
     public void writeDataSourceToFile() throws IOException {
@@ -144,7 +136,7 @@ public class AutoSensePlatforms implements Serializable{
                 dataSources.add(dataSource);
             }
         }
-        Files.writeJSONArray(Constants.DIRECTORY+context.getPackageName()+File.separator, Constants.FILENAME, dataSources);
+        Configuration.write(dataSources);
     }
 
     public void register() {

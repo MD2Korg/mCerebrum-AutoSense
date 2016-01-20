@@ -35,25 +35,33 @@ import java.util.Arrays;
  */
 public class AutoSensePlatformWrist extends AutoSensePlatform{
     public ArrayList<DATASOURCE> DATASOURCES=new ArrayList<>(Arrays.asList(
-            new DATASOURCE(DataSourceType.ACCELEROMETER_X, 16),
-            new DATASOURCE(DataSourceType.ACCELEROMETER_Y, 16),
-            new DATASOURCE(DataSourceType.ACCELEROMETER_Z, 16),
-            new DATASOURCE(DataSourceType.GYROSCOPE_X, 16),
-            new DATASOURCE(DataSourceType.GYROSCOPE_Y, 16),
-            new DATASOURCE(DataSourceType.GYROSCOPE_Z, 16)
+            new DATASOURCE(DataSourceType.ACCELEROMETER_X, "Accelerometer X",16),
+            new DATASOURCE(DataSourceType.ACCELEROMETER_Y, "Accelerometer Y", 16),
+            new DATASOURCE(DataSourceType.ACCELEROMETER_Z, "Accelerometer Z", 16),
+            new DATASOURCE(DataSourceType.GYROSCOPE_X, "Gyroscope X", 16),
+            new DATASOURCE(DataSourceType.GYROSCOPE_Y, "Gyroscope Y", 16),
+            new DATASOURCE(DataSourceType.GYROSCOPE_Z, "Gyroscope Z", 16)
     ));
-    public AutoSensePlatformWrist(Context context, String platformType, String platformId, String location) {
-        super(context,platformType,platformId,location);
+    public AutoSensePlatformWrist(Context context, String platformType, String platformId, String deviceId) {
+        super(context,platformType,platformId,deviceId, "AutoSense ()");
+        this.name=platformId.toLowerCase();
+        if("LEFT_WRIST".equals(platformId))
+            this.name="Left";
+        else if("RIGHT_WRIST".equals(platformId))
+            this.name="Right";
+
         autoSenseDataSources=new ArrayList<>();
         for (DATASOURCE datasource : DATASOURCES)
-            autoSenseDataSources.add(new AutoSenseDataSource(context, datasource.dataSourceType,datasource.frequency,0,4096));
+            autoSenseDataSources.add(new AutoSenseDataSource(context, datasource.dataSourceType,datasource.name,datasource.frequency,-2048,2048));
     }
     class DATASOURCE{
         String dataSourceType;
         double frequency;
-        DATASOURCE(String dataSourceType, double frequency){
+        String name;
+        DATASOURCE(String dataSourceType, String name, double frequency){
             this.dataSourceType=dataSourceType;
             this.frequency=frequency;
+            this.name=name;
         }
-    };
+    }
 }

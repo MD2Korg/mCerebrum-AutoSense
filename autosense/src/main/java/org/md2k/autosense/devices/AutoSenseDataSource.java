@@ -47,13 +47,15 @@ public class AutoSenseDataSource implements Serializable{
     private Context context;
     int minValue;
     int maxValue;
+    String name;
 
-    public AutoSenseDataSource(Context context, String dataSourceType, double frequency,int minValue,int maxValue) {
+    public AutoSenseDataSource(Context context, String dataSourceType, String name, double frequency,int minValue,int maxValue) {
         this.context = context;
         this.dataSourceType = dataSourceType;
         this.frequency=frequency;
         this.maxValue=maxValue;
         this.minValue=minValue;
+        this.name=name;
     }
 
     public double getFrequency() {
@@ -77,7 +79,7 @@ public class AutoSenseDataSource implements Serializable{
         dataSourceBuilder=dataSourceBuilder.setId(null).setType(dataSourceType).setMetadata(METADATA.FREQUENCY,String.valueOf(frequency)).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setDataDescriptors(createDataDescriptors());
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.FREQUENCY, String.valueOf(frequency));
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, dataSourceType.toLowerCase());
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, name);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.UNIT, "");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, dataSourceType.toLowerCase());
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeInt.class.getName());
@@ -101,5 +103,4 @@ public class AutoSenseDataSource implements Serializable{
         dataDescriptors.add(dataDescriptor);
         return dataDescriptors;
     }
-
 }

@@ -34,9 +34,9 @@ import org.md2k.utilities.datakit.DataKitHandler;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DataExtractorOld {
+public class DataExtractorChest {
 
-    private static final String TAG = DataExtractorOld.class.getSimpleName();
+    private static final String TAG = DataExtractorChest.class.getSimpleName();
     /** The ECG channel for AutoSense. */
     static final byte ECG_CHANNEL = (byte) 0;
     /** The ACCELX channel for AutoSense. */
@@ -75,9 +75,10 @@ public class DataExtractorOld {
         return timestamps;
     }
     public static void prepareAndSendToDataKit(Context context, ChannelInfo newInfo){
+
         DataKitHandler dataKitHandler=DataKitHandler.getInstance(context);
-        int samples[]= DataExtractorOld.getSample(newInfo.broadcastData);
-        String dataSourceType= DataExtractorOld.getDataSourceType(newInfo.broadcastData);
+        int samples[]= DataExtractorChest.getSample(newInfo.broadcastData);
+        String dataSourceType= DataExtractorChest.getDataSourceType(newInfo.broadcastData);
 
         if(dataSourceType!=null){
             if(dataSourceType.equals("BATTERY_SKIN_AMBIENT")){
