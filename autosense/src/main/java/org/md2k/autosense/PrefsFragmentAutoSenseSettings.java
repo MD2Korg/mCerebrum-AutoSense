@@ -286,9 +286,9 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                 String platformType = Constants.getSharedPreferenceString("platformType");
                 String deviceId = Constants.getSharedPreferenceString("deviceId");
                 Log.d(TAG, "platformType=" + platformType + " platformId=" + platformId + " deviceId=" + deviceId);
-                if (autoSensePlatforms.find(platformType, platformId, null).size() != 0) {
+                if (autoSensePlatforms.find(platformType, platformId, null).size() != 0)
                     Toast.makeText(getActivity(), "Error: A device is already configured with same location...", Toast.LENGTH_SHORT).show();
-                } else if (autoSensePlatforms.find(platformType, null, deviceId).size() != 0)
+                else if (autoSensePlatforms.find(platformType, null, deviceId).size() != 0)
                     Toast.makeText(getActivity(), "Error: Device is already configured...", Toast.LENGTH_SHORT).show();
                 else
                     autoSensePlatforms.add(platformType, platformId, deviceId);

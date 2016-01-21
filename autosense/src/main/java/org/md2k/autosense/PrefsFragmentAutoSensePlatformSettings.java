@@ -173,16 +173,16 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         });
 
         if(platformType.equals(PlatformType.AUTOSENSE_CHEST)) {
-            getActivity().setTitle("AutoSense_Chest Settings");
+            getActivity().setTitle("AutoSenseChest Settings");
             platformIdPreference.setEntries(R.array.chest_entries);
             platformIdPreference.setEntryValues(R.array.chest_entries);
             platformIdPreference.setEnabled(false);
-            Constants.setSharedPreferencesString("platformId", "Chest");
+            Constants.setSharedPreferencesString("platformId", "CHEST");
             platformIdPreference.setSummary(PlatformId.CHEST);
             platformId = PlatformId.CHEST;
         }
         else{
-            getActivity().setTitle("AutoSense_Wrist Settings");
+            getActivity().setTitle("AutoSenseWrist Settings");
             platformIdPreference.setEntries(R.array.wrist_entries);
             platformIdPreference.setEntryValues(R.array.wrist_entries);
         }

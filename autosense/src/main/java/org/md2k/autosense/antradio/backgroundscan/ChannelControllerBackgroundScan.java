@@ -235,7 +235,6 @@ public class ChannelControllerBackgroundScan
             
             // Constructing channel info from extended data received from each received message
             int deviceNumber = dataMessage.getExtendedData().getChannelId().getDeviceNumber();
-            Log.d(TAG,"deviceNumber="+deviceNumber);
             String platformType= Constants.getSharedPreferenceString(PlatformType.class.getSimpleName());
             String deviceId=String.format("%X", deviceNumber);
             AutoSensePlatform autoSensePlatform=new AutoSensePlatform(context, platformType,"",deviceId,"");
