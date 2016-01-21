@@ -1,6 +1,7 @@
 package org.md2k.autosense.devices;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.dsi.ant.AntLibVersionInfo;
 import com.dsi.ant.AntSupportChecker;
@@ -64,6 +65,7 @@ public class AutoSensePlatforms implements Serializable{
         try {
             readDataSourceFromFile();
         } catch (FileNotFoundException ignored) {
+            Toast.makeText(context,"ERROR: AutoSense configuration file is not available...",Toast.LENGTH_LONG).show();
         }
     }
 
@@ -92,6 +94,7 @@ public class AutoSensePlatforms implements Serializable{
 
     public void readDataSourceFromFile() throws FileNotFoundException {
         ArrayList<DataSource> dataSources = Configuration.getDataSources();
+        if(dataSources==null) return;
         for (int i = 0; i < dataSources.size(); i++) {
             String platformId = dataSources.get(i).getPlatform().getId();
             String platformType = dataSources.get(i).getPlatform().getType();

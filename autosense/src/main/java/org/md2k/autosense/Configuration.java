@@ -1,6 +1,7 @@
 package org.md2k.autosense;
 
 import android.os.Environment;
+import android.widget.Toast;
 
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.utilities.Files;
@@ -40,12 +41,8 @@ public class Configuration {
     public static final String DEFAULT_CONFIG_FILENAME = "default_config.json";
     public static final String CONFIG_FILENAME = "config.json";
 
-    public static ArrayList<DataSource> read() {
-        try {
+    public static ArrayList<DataSource> read() throws FileNotFoundException {
             return Files.readJSONArray(CONFIG_DIRECTORY, CONFIG_FILENAME, DataSource.class);
-        } catch (FileNotFoundException e) {
-            return null;
-        }
     }
 
     public static ArrayList<DataSource> readDefault() throws FileNotFoundException {
