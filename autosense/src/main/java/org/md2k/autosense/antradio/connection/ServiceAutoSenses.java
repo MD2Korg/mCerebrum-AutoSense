@@ -48,10 +48,9 @@ import org.md2k.utilities.datakit.DataKitHandler;
  */
 
 public class ServiceAutoSenses extends Service {
-    private static final String TAG = ServiceAutoSenses.class.getSimpleName();
     AutoSensePlatforms autoSensePlatforms = null;
     public static boolean isRunning = false;
-
+    DataKitHandler dataKitHandler;
     private ServiceAutoSense.ChannelServiceComm mChannelService;
 
     private boolean mChannelServiceBound = false;
@@ -62,7 +61,7 @@ public class ServiceAutoSenses extends Service {
     }
 
     private boolean connectDataKit() {
-        DataKitHandler dataKitHandler = DataKitHandler.getInstance(getApplicationContext());
+        dataKitHandler = DataKitHandler.getInstance(getApplicationContext());
         return dataKitHandler.connect(new OnConnectionListener() {
             @Override
             public void onConnected() {
@@ -117,15 +116,14 @@ public class ServiceAutoSenses extends Service {
 
     @Override
     public void onDestroy() {
-        Log.v(TAG, "onDestroy...");
         doUnbindChannelService();
         stopService(new Intent(this, ServiceAutoSense.class));
 
         mChannelServiceConnection = null;
 
-        Log.v(TAG, "...onDestroy");
         if (isRunning) {
-            DataKitHandler.getInstance(getApplicationContext()).disconnect();
+            dataKitHandler.disconnect();
+            dataKitHandler.close();
         }
         isRunning = false;
         if (Constants.LOG_TEXT)
@@ -137,7 +135,6 @@ public class ServiceAutoSenses extends Service {
     private ServiceConnection mChannelServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder serviceBinder) {
-            Log.v(TAG, "mChannelServiceConnection.onServiceConnected...");
 
             mChannelService = (ServiceAutoSense.ChannelServiceComm) serviceBinder;
 
@@ -145,7 +142,6 @@ public class ServiceAutoSenses extends Service {
                 @Override
                 public void onChannelChanged(final ChannelInfo newInfo) {
                     if (newInfo.status == 1) {
-                        Log.e(TAG, "onChannelChanged() error=" + newInfo.status);
                         mChannelService.clearChannel(newInfo.autoSensePlatform);
                         addNewChannel(newInfo.autoSensePlatform);
                     }
