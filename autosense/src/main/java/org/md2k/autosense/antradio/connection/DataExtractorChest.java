@@ -4,9 +4,9 @@ import android.content.Context;
 
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -76,20 +76,20 @@ public class DataExtractorChest {
     }
     public static void prepareAndSendToDataKit(Context context, ChannelInfo newInfo){
 
-        DataKitHandler dataKitHandler=DataKitHandler.getInstance(context);
+        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
         int samples[]= DataExtractorChest.getSample(newInfo.broadcastData);
         String dataSourceType= DataExtractorChest.getDataSourceType(newInfo.broadcastData);
 
         if(dataSourceType!=null){
             if(dataSourceType.equals("BATTERY_SKIN_AMBIENT")){
-                dataKitHandler.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.BATTERY).getDataSourceClient(),new DataTypeInt(newInfo.timestamp,samples[0]));
-                dataKitHandler.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.SKIN_TEMPERATURE).getDataSourceClient(),new DataTypeInt(newInfo.timestamp,samples[1]));
-                dataKitHandler.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.AMBIENT_TEMPERATURE).getDataSourceClient(),new DataTypeInt(newInfo.timestamp,samples[2]));
+                dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.BATTERY).getDataSourceClient(),new DataTypeInt(newInfo.timestamp,samples[0]));
+                dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.SKIN_TEMPERATURE).getDataSourceClient(),new DataTypeInt(newInfo.timestamp,samples[1]));
+                dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.AMBIENT_TEMPERATURE).getDataSourceClient(),new DataTypeInt(newInfo.timestamp,samples[2]));
             }
             else{
                 long timestamps[]=correctTimeStamp(newInfo.autoSensePlatform,dataSourceType,newInfo.timestamp);
                 for(int i=0;i<5;i++)
-                    dataKitHandler.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(),new DataTypeInt(timestamps[i],samples[i]));
+                    dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(),new DataTypeInt(timestamps[i],samples[i]));
             }
         }
     }

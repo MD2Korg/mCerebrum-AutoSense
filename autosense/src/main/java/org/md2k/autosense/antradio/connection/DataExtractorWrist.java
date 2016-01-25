@@ -4,9 +4,9 @@ import android.content.Context;
 
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.utilities.datakit.DataKitHandler;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -89,14 +89,14 @@ public class DataExtractorWrist {
 
     public static void prepareAndSendToDataKit(Context context, ChannelInfo newInfo) {
 
-        DataKitHandler dataKitHandler = DataKitHandler.getInstance(context);
+        DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
         int samples[] = DataExtractorWrist.getSample(newInfo.broadcastData);
         String dataSourceType = DataExtractorWrist.getDataSourceType(newInfo.broadcastData);
 
         if (dataSourceType != null) {
             long timestamps[] = correctTimeStamp(newInfo.autoSensePlatform, dataSourceType, newInfo.timestamp);
             for (int i = 0; i < 5; i++)
-                dataKitHandler.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeInt(timestamps[i], samples[i]));
+                dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeInt(timestamps[i], samples[i]));
         }
     }
 

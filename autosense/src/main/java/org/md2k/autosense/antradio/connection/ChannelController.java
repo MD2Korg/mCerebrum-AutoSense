@@ -20,11 +20,6 @@ import org.md2k.autosense.Constants;
 import org.md2k.autosense.LoggerText;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
-import org.md2k.datakitapi.DataKitApi;
-import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.messagehandler.OnConnectionListener;
-import org.md2k.datakitapi.source.datasource.DataSource;
-import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.time.DateTime;
 
 /**

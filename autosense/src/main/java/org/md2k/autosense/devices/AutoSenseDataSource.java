@@ -2,13 +2,13 @@ package org.md2k.autosense.devices;
 
 import android.content.Context;
 
+import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataTypeFloatArray;
 import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
 import org.md2k.datakitapi.source.platform.Platform;
-import org.md2k.utilities.datakit.DataKitHandler;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -88,7 +88,7 @@ public class AutoSenseDataSource implements Serializable{
 
     public boolean register(Platform platform) {
         DataSourceBuilder dataSourceBuilder=createDatSourceBuilder(platform);
-        dataSourceClient = DataKitHandler.getInstance(context).register(dataSourceBuilder);
+        dataSourceClient = DataKitAPI.getInstance(context).register(dataSourceBuilder);
         return dataSourceClient != null;
     }
     ArrayList<HashMap<String, String>>  createDataDescriptors() {
