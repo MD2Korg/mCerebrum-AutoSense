@@ -11,6 +11,7 @@
         android:theme="@style/app_theme_teal_light">
         <activity
             android:name=".ActivityMain"
+            android:screenOrientation="portrait"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,6 +22,7 @@
             android:name=".ActivityAutoSenseSettings"
             android:enabled="true"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:label="Settings -> AutoSense">
             <intent-filter>
                 <action android:name="org.md2k.autosense.ActivityAutoSenseSettings" />
@@ -31,6 +33,7 @@
             android:name=".ActivityAutoSensePlatformSettings"
             android:enabled="true"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:label="Settings: AutoSense Chest"></activity>
 
         <service android:name=".antradio.backgroundscan.ServiceBackgroundScan" />
