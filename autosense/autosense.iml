@@ -88,5 +88,6 @@
     <orderEntry type="library" exported="" name="appcompat-v7-23.1.1" level="project" />
     <orderEntry type="module" module-name="datakitapi" exported="" />
     <orderEntry type="module" module-name="utilities" exported="" />
+    <orderEntry type="library" exported="" name="android-android-23" level="project" />
   </component>
 </module>

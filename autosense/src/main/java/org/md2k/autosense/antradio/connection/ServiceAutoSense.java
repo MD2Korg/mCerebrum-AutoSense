@@ -69,6 +69,8 @@ public class ServiceAutoSense extends Service {
     private AntService mAntRadioService = null;
     private AntChannelProvider mAntChannelProvider = null;
     private boolean mAllowAddChannel = false;
+    DataExtractorChest dataExtractorChest;
+    DataExtractorWrist dataExtractorWrist;
 
     private ServiceConnection mAntRadioServiceConnection = new ServiceConnection() {
         @Override
@@ -237,10 +239,12 @@ public class ServiceAutoSense extends Service {
                                     mListener.onChannelChanged(newInfo);
                                     return;
                                 }
-                                if(newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_CHEST))
-                                    DataExtractorChest.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
-                                else
-                                    DataExtractorWrist.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
+                                if(newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_CHEST)) {
+                                    dataExtractorChest.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
+                                }
+                                else if(newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_WRIST)) {
+                                    dataExtractorWrist.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
+                                }
                                 Intent intent = new Intent("autosense");
                                 // You can also include some extra data.
                                 intent.putExtra("operation", "data");
@@ -347,6 +351,8 @@ public class ServiceAutoSense extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        dataExtractorChest=new DataExtractorChest(getApplicationContext());
+        dataExtractorWrist=new DataExtractorWrist(getApplicationContext());
 
         mAntRadioServiceBound = false;
 

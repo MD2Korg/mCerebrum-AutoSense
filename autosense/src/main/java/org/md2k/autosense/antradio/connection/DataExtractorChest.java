@@ -52,7 +52,12 @@ public class DataExtractorChest {
     /** The SKIN, AMBIENCE, BATTERY channels for AutoSense. */
     static final byte MISC_CHANNEL = (byte) 8;
 
-    private static int[] decodeAutoSenseSamples(byte[] ANTRxMessage)
+    DataKitAPI dataKitAPI;
+    DataExtractorChest(Context context){
+        dataKitAPI=DataKitAPI.getInstance(context);
+    }
+
+    private int[] decodeAutoSenseSamples(byte[] ANTRxMessage)
     {
         int[] samples = new int[5];
            /* Decode 5 samples of 12 bits each */
@@ -64,21 +69,19 @@ public class DataExtractorChest {
 
         return samples;
     }
-    public static int[] getSample(byte[] ANTRxMessage){
+    public int[] getSample(byte[] ANTRxMessage){
         return decodeAutoSenseSamples(ANTRxMessage);
     }
-    private static long[] correctTimeStamp(AutoSensePlatform autoSensePlatform, String dataSourceType, long timestamp){
+    private long[] correctTimeStamp(AutoSensePlatform autoSensePlatform, String dataSourceType, long timestamp){
         long diff=(long)(1000.0/autoSensePlatform.getAutoSenseDataSource(dataSourceType).getFrequency());
         long timestamps[]=new long[5];
         for (int i=0;i<5;i++)
             timestamps[i]=timestamp-(4-i)*diff;
         return timestamps;
     }
-    public static void prepareAndSendToDataKit(Context context, ChannelInfo newInfo){
-
-        DataKitAPI dataKitAPI=DataKitAPI.getInstance(context);
-        int samples[]= DataExtractorChest.getSample(newInfo.broadcastData);
-        String dataSourceType= DataExtractorChest.getDataSourceType(newInfo.broadcastData);
+    public void prepareAndSendToDataKit(Context context, ChannelInfo newInfo){
+        int samples[]= getSample(newInfo.broadcastData);
+        String dataSourceType= getDataSourceType(newInfo.broadcastData);
 
         if(dataSourceType!=null){
             if(dataSourceType.equals("BATTERY_SKIN_AMBIENT")){
@@ -94,7 +97,7 @@ public class DataExtractorChest {
         }
     }
 
-    public static String getDataSourceType(byte[] ANTRxMessage) {
+    public String getDataSourceType(byte[] ANTRxMessage) {
         final byte[] fixed_send_order = {0, 1, 0, 2, 0, 7, 0, 3, 0, 4, 0, 7, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, 8};
         byte mSequenceNumber = (byte) (ANTRxMessage[8] & 0x0F);
         switch (fixed_send_order[mSequenceNumber]) {

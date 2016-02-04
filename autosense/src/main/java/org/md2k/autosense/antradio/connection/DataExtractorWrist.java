@@ -48,6 +48,11 @@ public class DataExtractorWrist {
 
     static final byte NINE_AXIS_NULL_PACKET_CHANNEL = (byte) 15;
 
+    DataKitAPI dataKitAPI;
+    DataExtractorWrist(Context context){
+        dataKitAPI=DataKitAPI.getInstance(context);
+    }
+
     private static int[] decodeAutoSenseSamples(byte[] ANTRxMessage) {
         int[] samples = new int[5];
            /* Decode 5 samples of 12 bits each */
@@ -60,17 +65,17 @@ public class DataExtractorWrist {
         return samples;
     }
 
-    public static int[] getSample(byte[] ANTRxMessage) {
+    public int[] getSample(byte[] ANTRxMessage) {
         int[] samples=decodeAutoSenseSamples(ANTRxMessage);
         return convertSamplesToTwosComplement(samples);
     }
-    private static int[] convertSamplesToTwosComplement(int[] samples) {
+    private int[] convertSamplesToTwosComplement(int[] samples) {
         for(int i=0; i<samples.length; i++) {
             samples[i] = TwosComplement(samples[i], 12);
         }
         return samples;
     }
-    public static int TwosComplement(int x, int nBits) {
+    public int TwosComplement(int x, int nBits) {
         int msb = x>>(nBits-1);
         if(msb==1) {
             return -1*( (~x & ((1<<nBits)-1) ) +1);
@@ -79,7 +84,7 @@ public class DataExtractorWrist {
         }
     }
 
-    private static long[] correctTimeStamp(AutoSensePlatform autoSensePlatform, String dataSourceType, long timestamp) {
+    private long[] correctTimeStamp(AutoSensePlatform autoSensePlatform, String dataSourceType, long timestamp) {
         long diff = (long) (1000.0 / autoSensePlatform.getAutoSenseDataSource(dataSourceType).getFrequency());
         long timestamps[] = new long[5];
         for (int i = 0; i < 5; i++)
@@ -87,11 +92,10 @@ public class DataExtractorWrist {
         return timestamps;
     }
 
-    public static void prepareAndSendToDataKit(Context context, ChannelInfo newInfo) {
+    public void prepareAndSendToDataKit(Context context, ChannelInfo newInfo) {
 
-        DataKitAPI dataKitAPI = DataKitAPI.getInstance(context);
-        int samples[] = DataExtractorWrist.getSample(newInfo.broadcastData);
-        String dataSourceType = DataExtractorWrist.getDataSourceType(newInfo.broadcastData);
+        int samples[] = getSample(newInfo.broadcastData);
+        String dataSourceType = getDataSourceType(newInfo.broadcastData);
 
         if (dataSourceType != null) {
             long timestamps[] = correctTimeStamp(newInfo.autoSensePlatform, dataSourceType, newInfo.timestamp);
@@ -100,7 +104,7 @@ public class DataExtractorWrist {
         }
     }
 
-    public static String getDataSourceType(byte[] ANTRxMessage) {
+    public String getDataSourceType(byte[] ANTRxMessage) {
         byte mSequenceNumber = (byte) (ANTRxMessage[8] & 0x0F);
         switch (mSequenceNumber) {
             case NINE_AXIS_ACCL_X_CHANNEL:
