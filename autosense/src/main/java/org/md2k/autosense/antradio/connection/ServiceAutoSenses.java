@@ -76,6 +76,7 @@ public class ServiceAutoSenses extends Service {
             @Override
             public void onException(Status status) {
                 Log.d(TAG,"onException...");
+                autoSensePlatforms.unregister();
                 Toast.makeText(ServiceAutoSenses.this, "AutoSense Stopped. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
                 stopSelf();
             }
@@ -127,6 +128,7 @@ public class ServiceAutoSenses extends Service {
         mChannelServiceConnection = null;
 
         if (isRunning) {
+            autoSensePlatforms.unregister();
             dataKitAPI.disconnect();
             dataKitAPI.close();
         }

@@ -2,6 +2,9 @@ package org.md2k.autosense.devices;
 
 import android.content.Context;
 
+import org.md2k.autosense.data_quality.DataQualityACL;
+import org.md2k.autosense.data_quality.DataQualityECG;
+import org.md2k.autosense.data_quality.DataQualityRIP;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 
 import java.util.ArrayList;
@@ -49,6 +52,8 @@ public class AutoSensePlatformWrist extends AutoSensePlatform{
             this.name="AutoSense (Left Wrist)";
         else if("RIGHT_WRIST".equals(platformId))
             this.name="AutoSense (Right Wrist)";
+        dataQuality=new ArrayList<>();
+        dataQuality.add(new DataQualityACL());
 
         autoSenseDataSources=new ArrayList<>();
         for (DATASOURCE datasource : DATASOURCES)
@@ -64,4 +69,5 @@ public class AutoSensePlatformWrist extends AutoSensePlatform{
             this.name=name;
         }
     }
+
 }

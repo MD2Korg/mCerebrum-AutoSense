@@ -1,6 +1,8 @@
 package org.md2k.autosense.data_quality;
 
 
+import org.md2k.utilities.data_format.DATA_QUALITY;
+
 import java.util.Arrays;
 
 public class ECGQualityCalculation {
@@ -18,10 +20,6 @@ public class ECGQualityCalculation {
 	private static final int SLOPE_THRESHOLD=50;
 	private static final int RANGE_THRESHOLD=200;
 
-	public final static int DATA_QUALITY_GOOD = 0;
-	public final static int DATA_QUALITY_NOISE = 1;    
-	public final static int DATA_QUALITY_BAND_LOOSE = 2;
-	public final static int DATA_QUALITY_BAND_OFF = 3;
 
 	public final static int DATA_QUALITY_MISSING_DATA=4;
 
@@ -106,6 +104,7 @@ public class ECGQualityCalculation {
 	// ===========================================================
 	public int currentQuality(int[] data){
 		// ===========================================================
+		if(data.length==0) return DATA_QUALITY.BAND_OFF;
 		classifyDataPoints(data);
 		/*large_stuck=0;
 		small_stuck=0;
@@ -120,11 +119,11 @@ public class ECGQualityCalculation {
 		classifyBuffer();
 
 		if(bad_segments>BAD_SEGMENTS_THRESHOLD){
-			return DATA_QUALITY_BAND_OFF;
+			return DATA_QUALITY.BAND_OFF;
 			//}else if(2*amplitude_very_small>envelBuff.length){
 			//return DATA_QUALITY_BAND_OFF;
 		}else if(2*amplitude_small>envelBuff.length){
-			return DATA_QUALITY_BAND_LOOSE;
+			return DATA_QUALITY.BAND_LOOSE;
 		}
 		//return DATA_QUALITY_GOOD;
 		
@@ -142,10 +141,10 @@ public class ECGQualityCalculation {
 		int range=max-min;
 		float median_slope=getMedian(getFirstDiff(data));
 		if(median_slope>SLOPE_THRESHOLD || range<RANGE_THRESHOLD)
-			return DATA_QUALITY_BAND_LOOSE;
+			return DATA_QUALITY.BAND_LOOSE;
 		if(max>OUTLIER_THRESHOLD_HIGH)
-			return DATA_QUALITY_BAND_OFF;		
-		return DATA_QUALITY_GOOD;
+			return DATA_QUALITY.BAND_OFF;
+		return DATA_QUALITY.GOOD;
 	}
 
 	// getting the maximum value

@@ -2,6 +2,8 @@ package org.md2k.autosense.devices;
 
 import android.content.Context;
 
+import org.md2k.autosense.data_quality.DataQualityECG;
+import org.md2k.autosense.data_quality.DataQualityRIP;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
@@ -51,6 +53,10 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
     public AutoSensePlatformChest(Context context, String platformType, String platformId, String deviceId) {
         super(context,platformType,platformId,deviceId, "AutoSense (Chest)");
         this.platformId= PlatformId.CHEST;
+        dataQuality=new ArrayList<>();
+        dataQuality.add(new DataQualityRIP());
+        dataQuality.add(new DataQualityECG());
+
         autoSenseDataSources=new ArrayList<>();
         for (int i=0;i<DATASOURCES.size();i++) {
             DATASOURCE datasource=DATASOURCES.get(i);

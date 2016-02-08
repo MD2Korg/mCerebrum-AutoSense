@@ -1,5 +1,7 @@
 package org.md2k.autosense.data_quality;
 
+import org.md2k.utilities.data_format.DATA_QUALITY;
+
 import java.util.Arrays;
 
 public class RIPQualityCalculation {
@@ -17,11 +19,7 @@ public class RIPQualityCalculation {
 	private static final int SLOPE_THRESHOLD=1500;
 	private static final int RANGE_THRESHOLD=200;
 	
-	public final static int DATA_QUALITY_GOOD = 0;
-	public final static int DATA_QUALITY_NOISE = 1;    
-	public final static int DATA_QUALITY_BAND_LOOSE = 2;
-	public final static int DATA_QUALITY_BAND_OFF = 3;
-	
+
 //	private final static int RIP_THRESHOLD_BAND_LOOSE = 150;
 //	private final static int RIP_THRESHOLD_BAND_OFF = 20;
 	private final static int RIP_THRESHOLD_BAND_LOOSE = 200;
@@ -113,7 +111,7 @@ public class RIPQualityCalculation {
 	public int currentQuality(int[] data){
 	// ===========================================================
 		//if(Log.DEBUG) Log.d("RipQualityCalculation","data "+data[0]+" "+data[1]+" "+data[2]+" "+data[3]+" "+data[4]);
-		
+		if(data.length==0) return DATA_QUALITY.BAND_OFF;
 		classifyDataPoints(data);
 		classifySegment(data);
 		classBuff[(classHead++)%classBuff.length]=segment_class;
@@ -121,11 +119,11 @@ public class RIPQualityCalculation {
 		//if(Log.DEBUG) Log.d("RipQualityCalculation","Amplitude "+(max_value-min_value));
 		classifyBuffer();
 		if(bad_segments>BAD_SEGMENTS_THRESHOLD){
-			return DATA_QUALITY_BAND_OFF;
+			return DATA_QUALITY.BAND_OFF;
 		}else if(2*amplitude_very_small>envelBuff.length){
-			return DATA_QUALITY_BAND_OFF;
+			return DATA_QUALITY.BAND_OFF;
 		}else if(2*amplitude_small>envelBuff.length){
-			return DATA_QUALITY_BAND_LOOSE;
+			return DATA_QUALITY.BAND_LOOSE;
 		}
 		//assume that 3 seconds data is received by the function. Total 3*21.33=64 samples
 		//return DATA_QUALITY_GOOD;
@@ -138,10 +136,10 @@ public class RIPQualityCalculation {
 		int range=max-min;
 		int max_slope=getMaxValue(getFirstDiff(data));
 		if(min==0 || max_slope>SLOPE_THRESHOLD || range<RANGE_THRESHOLD)
-			return DATA_QUALITY_BAND_LOOSE;
+			return DATA_QUALITY.BAND_LOOSE;
 		if(max>OUTLIER_THRESHOLD_HIGH)
-			return DATA_QUALITY_BAND_OFF;		
-		return DATA_QUALITY_GOOD;
+			return DATA_QUALITY.BAND_OFF;
+		return DATA_QUALITY.GOOD;
 	}
 
 	// getting the maximum value

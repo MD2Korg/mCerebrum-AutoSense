@@ -1,6 +1,12 @@
 package org.md2k.autosense.data_quality;
 
-import java.io.Serializable;
+import android.content.Context;
+
+import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.source.datasource.DataSource;
+import org.md2k.datakitapi.source.datasource.DataSourceClient;
+
+import java.util.ArrayList;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,41 +34,13 @@ import java.io.Serializable;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Status implements Serializable{
-    int statusCode;
-    String statusMessage;
-
-    public static final int GOOD = 0;
-    public static final int LOOSE = 1;
-    public static final int NOISE = 2;
-    public static final int OFF = 3;
-    public static final int NOT_WORN = 4;
-    public static final String[] message = new String[]{
-            "Status: Good",
-            "Error: Loose",
-            "ERROR: Noise",
-            "Error: Off",
-    };
-
-    public Status(int statusCode, String statusMessage) {
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
+public abstract class DataQuality {
+    ArrayList<Integer> samples;
+    DataQuality(){
+        samples=new ArrayList<>();
     }
-
-    public Status(int statusCode) {
-        this.statusCode = statusCode;
-        this.statusMessage = message[statusCode];
-    }
-
-    public String getStatusMessage() {
-        return statusMessage;
-    }
-
-    public Status getStatus() {
-        return this;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
+    public abstract int getStatus();
+    public void add(int sample){
+        samples.add(sample);
     }
 }

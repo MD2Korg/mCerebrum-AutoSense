@@ -7,6 +7,7 @@ import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
+import org.md2k.utilities.Report.Log;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -99,8 +100,15 @@ public class DataExtractorWrist {
 
         if (dataSourceType != null) {
             long timestamps[] = correctTimeStamp(newInfo.autoSensePlatform, dataSourceType, newInfo.timestamp);
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++) {
                 dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeInt(timestamps[i], samples[i]));
+                switch(dataSourceType){
+                    case DataSourceType.ACCELEROMETER_X:
+                        newInfo.autoSensePlatform.dataQuality.get(0).add(samples[i]);
+                        break;
+                }
+
+            }
         }
     }
 
