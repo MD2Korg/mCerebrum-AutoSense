@@ -5,6 +5,7 @@ import android.content.Context;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
 import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 
@@ -36,17 +37,14 @@ import org.md2k.datakitapi.source.datasource.DataSourceType;
  */
 public class DataExtractorWrist {
 
-    private static final String TAG = DataExtractorWrist.class.getSimpleName();
-
     static final byte NINE_AXIS_ACCL_X_CHANNEL = (byte) 0;
     static final byte NINE_AXIS_ACCL_Y_CHANNEL = (byte) 7;
     static final byte NINE_AXIS_ACCL_Z_CHANNEL = (byte) 1;
-
     static final byte NINE_AXIS_GYRO_X_CHANNEL = (byte) 2;
     static final byte NINE_AXIS_GYRO_Y_CHANNEL = (byte) 3;
     static final byte NINE_AXIS_GYRO_Z_CHANNEL = (byte) 4;
-
     static final byte NINE_AXIS_NULL_PACKET_CHANNEL = (byte) 15;
+    private static final String TAG = DataExtractorWrist.class.getSimpleName();
 
     private static int[] decodeAutoSenseSamples(byte[] ANTRxMessage) {
         int[] samples = new int[5];
@@ -95,8 +93,11 @@ public class DataExtractorWrist {
 
         if (dataSourceType != null) {
             long timestamps[] = correctTimeStamp(newInfo.autoSensePlatform, dataSourceType, newInfo.timestamp);
-            for (int i = 0; i < 5; i++)
-                dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeInt(timestamps[i], samples[i]));
+            double[] sample = new double[1];
+            for (int i = 0; i < 5; i++) {
+                sample[0] = samples[i];
+                dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], sample));
+            }
         }
     }
 

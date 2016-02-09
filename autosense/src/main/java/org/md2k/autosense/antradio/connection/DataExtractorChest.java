@@ -5,8 +5,10 @@ import android.content.Context;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
 import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
+import org.md2k.datakitapi.time.DateTime;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -36,7 +38,6 @@ import org.md2k.datakitapi.source.datasource.DataSourceType;
  */
 public class DataExtractorChest {
 
-    private static final String TAG = DataExtractorChest.class.getSimpleName();
     /** The ECG channel for AutoSense. */
     static final byte ECG_CHANNEL = (byte) 0;
     /** The ACCELX channel for AutoSense. */
@@ -51,6 +52,7 @@ public class DataExtractorChest {
     static final byte RIP_CHANNEL = (byte) 7;
     /** The SKIN, AMBIENCE, BATTERY channels for AutoSense. */
     static final byte MISC_CHANNEL = (byte) 8;
+    private static final String TAG = DataExtractorChest.class.getSimpleName();
 
     private static int[] decodeAutoSenseSamples(byte[] ANTRxMessage)
     {
@@ -82,14 +84,26 @@ public class DataExtractorChest {
 
         if(dataSourceType!=null){
             if(dataSourceType.equals("BATTERY_SKIN_AMBIENT")){
-                dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.BATTERY).getDataSourceClient(),new DataTypeInt(newInfo.timestamp,samples[0]));
-                dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.SKIN_TEMPERATURE).getDataSourceClient(),new DataTypeInt(newInfo.timestamp,samples[1]));
-                dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.AMBIENT_TEMPERATURE).getDataSourceClient(),new DataTypeInt(newInfo.timestamp,samples[2]));
+                double[] sample = new double[1];
+                sample[0] = samples[0];
+                DataTypeDoubleArray dataTypeDoubleArray = new DataTypeDoubleArray(DateTime.getDateTime(), sample);
+                dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.BATTERY).getDataSourceClient(), dataTypeDoubleArray);
+
+                sample[0] = samples[1];
+                dataTypeDoubleArray = new DataTypeDoubleArray(DateTime.getDateTime(), sample);
+                dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.SKIN_TEMPERATURE).getDataSourceClient(), dataTypeDoubleArray);
+
+                sample[0] = samples[2];
+                dataTypeDoubleArray = new DataTypeDoubleArray(DateTime.getDateTime(), sample);
+                dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.AMBIENT_TEMPERATURE).getDataSourceClient(), dataTypeDoubleArray);
             }
             else{
                 long timestamps[]=correctTimeStamp(newInfo.autoSensePlatform,dataSourceType,newInfo.timestamp);
-                for(int i=0;i<5;i++)
-                    dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(),new DataTypeInt(timestamps[i],samples[i]));
+                double[] sample = new double[1];
+                for (int i = 0; i < 5; i++) {
+                    sample[0] = samples[i];
+                    dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], sample));
+                }
             }
         }
     }
