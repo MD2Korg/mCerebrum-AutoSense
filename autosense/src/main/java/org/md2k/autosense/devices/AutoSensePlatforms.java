@@ -52,13 +52,6 @@ public class AutoSensePlatforms implements Serializable{
     private static final String TAG = AutoSensePlatforms.class.getSimpleName();
     private ArrayList<AutoSensePlatform> autoSensePlatforms;
     private Context context;
-    public int size() {
-        return autoSensePlatforms.size();
-    }
-    public AutoSensePlatform get(int index) {
-        return autoSensePlatforms.get(index);
-    }
-
     public AutoSensePlatforms(Context context) {
         this.context = context;
         autoSensePlatforms = new ArrayList<>();
@@ -67,6 +60,14 @@ public class AutoSensePlatforms implements Serializable{
         } catch (FileNotFoundException ignored) {
             Toast.makeText(context,"ERROR: AutoSense configuration file is not available...",Toast.LENGTH_LONG).show();
         }
+    }
+
+    public int size() {
+        return autoSensePlatforms.size();
+    }
+
+    public AutoSensePlatform get(int index) {
+        return autoSensePlatforms.get(index);
     }
 
     public String getVersionAntDriver() {
@@ -148,7 +149,8 @@ public class AutoSensePlatforms implements Serializable{
 
         }
     }
-    public void unregister(){
+
+    public void unregister() {
         for (int i = 0; i < autoSensePlatforms.size(); i++) {
             autoSensePlatforms.get(i).unregister();
 

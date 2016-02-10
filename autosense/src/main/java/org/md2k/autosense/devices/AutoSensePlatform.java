@@ -47,27 +47,37 @@ import java.util.HashMap;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AutoSensePlatform implements Serializable{
+    public static final int DELAY = 3000;
     private static final String TAG = AutoSensePlatform.class.getSimpleName();
+    public ArrayList<DataQuality> dataQuality;
     protected String platformId;
     protected String platformType;
     protected String deviceId;
     protected Context context;
     protected String name;
-    public ArrayList<DataQuality> dataQuality;
-    public static final int DELAY=3000;
+    protected ArrayList<AutoSenseDataSource> autoSenseDataSources;
     Handler handler;
     DataSourceClient dataSourceClient;
-    protected ArrayList<AutoSenseDataSource> autoSenseDataSources;
-    public void setDeviceId(String deviceId){
-        this.deviceId=deviceId;
-    }
+    Runnable getDataQuality = new Runnable() {
+        @Override
+        public void run() {
+            int samples[] = new int[dataQuality.size()];
+            for (int i = 0; i < dataQuality.size(); i++) {
+                samples[i] = dataQuality.get(i).getStatus();
+                Log.d(TAG, platformType + " status[" + i + "]=" + samples[i]);
+            }
+            DataTypeIntArray dataTypeIntArray = new DataTypeIntArray(DateTime.getDateTime(), samples);
+            DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeIntArray);
+            handler.postDelayed(getDataQuality, DELAY);
+        }
+    };
     public AutoSensePlatform(Context context, String platformType, String platformId, String deviceId, String name) {
         this.context=context;
         this.platformType = platformType;
         this.platformId = platformId;
         this.deviceId=deviceId;
         this.name=name;
-        handler=new Handler();
+        handler = new Handler();
     }
 
     public String getPlatformId() {
@@ -87,59 +97,54 @@ public class AutoSensePlatform implements Serializable{
         return deviceId;
     }
 
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
     public boolean equals(String platformType, String platformId, String deviceId){
         if(platformType!=null && !this.platformType.equals(platformType)) return false;
         if(platformId!=null && !this.platformId.equals(platformId)) return false;
         if(deviceId!=null && !this.deviceId.equals(deviceId)) return false;
         return true;
     }
+
     public void register() {
-        Platform platform=new PlatformBuilder().setId(platformId).setType(platformType).setMetadata(METADATA.DEVICE_ID, deviceId).setMetadata(METADATA.NAME,name).build();
+        Platform platform = new PlatformBuilder().setId(platformId).setType(platformType).setMetadata(METADATA.DEVICE_ID, deviceId).setMetadata(METADATA.NAME, name).build();
         for(int i=0;i<autoSenseDataSources.size();i++) {
             autoSenseDataSources.get(i).register(platform);
         }
         registerStatus(platform);
         handler.post(getDataQuality);
     }
-    public void unregister(){
-        for(int i=0;i<autoSenseDataSources.size();i++) {
+
+    public void unregister() {
+        for (int i = 0; i < autoSenseDataSources.size(); i++) {
             autoSenseDataSources.get(i).unregister();
         }
         handler.removeCallbacks(getDataQuality);
-        if(dataSourceClient!=null)
+        if (dataSourceClient != null)
             DataKitAPI.getInstance(context).unregister(dataSourceClient);
     }
-    Runnable getDataQuality=new Runnable() {
-        @Override
-        public void run() {
-            int samples[]=new int[dataQuality.size()];
-            for(int i=0;i<dataQuality.size();i++){
-                samples[i]=dataQuality.get(i).getStatus();
-                Log.d(TAG, platformType+" status[" + i + "]=" + samples[i]);
-            }
-            DataTypeIntArray dataTypeIntArray=new DataTypeIntArray(DateTime.getDateTime(),samples);
-            DataKitAPI.getInstance(context).insert(dataSourceClient,dataTypeIntArray);
-            handler.postDelayed(getDataQuality, DELAY);
-        }
-    };
-    public DataSourceBuilder createDatSourceBuilder(Platform platform){
-        DataSourceBuilder dataSourceBuilder=new DataSourceBuilder();
-        dataSourceBuilder=dataSourceBuilder.setId(null).setType(DataSourceType.STATUS).setPlatform(platform);
+
+    public DataSourceBuilder createDatSourceBuilder(Platform platform) {
+        DataSourceBuilder dataSourceBuilder = new DataSourceBuilder();
+        dataSourceBuilder = dataSourceBuilder.setId(null).setType(DataSourceType.STATUS).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setDataDescriptors(createDataDescriptors());
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0/(DELAY/1000.0)))+" Hz");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (DELAY / 1000.0))) + " Hz");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, name);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.UNIT, "");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeIntArray.class.getName());
         return dataSourceBuilder;
     }
-    ArrayList<HashMap<String, String>>  createDataDescriptors() {
+
+    ArrayList<HashMap<String, String>> createDataDescriptors() {
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
         HashMap<String, String> dataDescriptor = new HashMap<>();
         dataDescriptor.put(METADATA.NAME, "Status");
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(-4));
         dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(0));
-        dataDescriptor.put(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0/(DELAY/1000)))+" Hz");
+        dataDescriptor.put(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (DELAY / 1000))) + " Hz");
         dataDescriptor.put(METADATA.DESCRIPTION, "Connection Status");
         dataDescriptor.put(METADATA.DATA_TYPE, int.class.getName());
         dataDescriptors.add(dataDescriptor);
@@ -147,7 +152,7 @@ public class AutoSensePlatform implements Serializable{
     }
 
     public boolean registerStatus(Platform platform) {
-        DataSourceBuilder dataSourceBuilder=createDatSourceBuilder(platform);
+        DataSourceBuilder dataSourceBuilder = createDatSourceBuilder(platform);
         dataSourceClient = DataKitAPI.getInstance(context).register(dataSourceBuilder);
         return dataSourceClient != null;
     }

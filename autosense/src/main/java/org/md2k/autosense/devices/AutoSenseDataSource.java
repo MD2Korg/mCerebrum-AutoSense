@@ -41,13 +41,13 @@ import java.util.HashMap;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AutoSenseDataSource implements Serializable{
+    int minValue;
+    int maxValue;
+    String name;
     private String dataSourceType;
     private double frequency;
     private DataSourceClient dataSourceClient;
     private Context context;
-    int minValue;
-    int maxValue;
-    String name;
 
     public AutoSenseDataSource(Context context, String dataSourceType, String name, double frequency,int minValue,int maxValue) {
         this.context = context;
@@ -91,8 +91,9 @@ public class AutoSenseDataSource implements Serializable{
         dataSourceClient = DataKitAPI.getInstance(context).register(dataSourceBuilder);
         return dataSourceClient != null;
     }
-    public void unregister(){
-        if(dataSourceClient!=null)
+
+    public void unregister() {
+        if (dataSourceClient != null)
             DataKitAPI.getInstance(context).unregister(dataSourceClient);
     }
     ArrayList<HashMap<String, String>>  createDataDescriptors() {

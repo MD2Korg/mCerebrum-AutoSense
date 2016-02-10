@@ -5,6 +5,7 @@ import android.content.Context;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
 import org.md2k.datakitapi.datatype.DataTypeInt;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.utilities.Report.Log;
@@ -37,21 +38,18 @@ import org.md2k.utilities.Report.Log;
  */
 public class DataExtractorWrist {
 
-    private static final String TAG = DataExtractorWrist.class.getSimpleName();
-
     static final byte NINE_AXIS_ACCL_X_CHANNEL = (byte) 0;
     static final byte NINE_AXIS_ACCL_Y_CHANNEL = (byte) 7;
     static final byte NINE_AXIS_ACCL_Z_CHANNEL = (byte) 1;
-
     static final byte NINE_AXIS_GYRO_X_CHANNEL = (byte) 2;
     static final byte NINE_AXIS_GYRO_Y_CHANNEL = (byte) 3;
     static final byte NINE_AXIS_GYRO_Z_CHANNEL = (byte) 4;
-
     static final byte NINE_AXIS_NULL_PACKET_CHANNEL = (byte) 15;
-
+    private static final String TAG = DataExtractorWrist.class.getSimpleName();
     DataKitAPI dataKitAPI;
-    DataExtractorWrist(Context context){
-        dataKitAPI=DataKitAPI.getInstance(context);
+
+    DataExtractorWrist(Context context) {
+        dataKitAPI = DataKitAPI.getInstance(context);
     }
 
     private static int[] decodeAutoSenseSamples(byte[] ANTRxMessage) {
@@ -70,12 +68,14 @@ public class DataExtractorWrist {
         int[] samples=decodeAutoSenseSamples(ANTRxMessage);
         return convertSamplesToTwosComplement(samples);
     }
+
     private int[] convertSamplesToTwosComplement(int[] samples) {
         for(int i=0; i<samples.length; i++) {
             samples[i] = TwosComplement(samples[i], 12);
         }
         return samples;
     }
+
     public int TwosComplement(int x, int nBits) {
         int msb = x>>(nBits-1);
         if(msb==1) {
@@ -101,8 +101,8 @@ public class DataExtractorWrist {
         if (dataSourceType != null) {
             long timestamps[] = correctTimeStamp(newInfo.autoSensePlatform, dataSourceType, newInfo.timestamp);
             for (int i = 0; i < 5; i++) {
-                dataKitAPI.insert(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeInt(timestamps[i], samples[i]));
-                switch(dataSourceType){
+                dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
+                switch (dataSourceType) {
                     case DataSourceType.ACCELEROMETER_X:
                         newInfo.autoSensePlatform.dataQuality.get(0).add(samples[i]);
                         break;
