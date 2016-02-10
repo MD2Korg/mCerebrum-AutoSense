@@ -51,12 +51,41 @@ import org.md2k.utilities.UI.AlertDialogs;
 
 public class ServiceAutoSenses extends Service {
     private static final String TAG = ServiceAutoSenses.class.getSimpleName();
-    AutoSensePlatforms autoSensePlatforms = null;
     public static boolean isRunning = false;
+    AutoSensePlatforms autoSensePlatforms = null;
     DataKitAPI dataKitAPI;
     private ServiceAutoSense.ChannelServiceComm mChannelService;
 
     private boolean mChannelServiceBound = false;
+    private ServiceConnection mChannelServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder serviceBinder) {
+
+            mChannelService = (ServiceAutoSense.ChannelServiceComm) serviceBinder;
+
+            mChannelService.setOnChannelChangedListener(new ServiceAutoSense.ChannelChangedListener() {
+                @Override
+                public void onChannelChanged(final ChannelInfo newInfo) {
+                    if (newInfo.status == 1) {
+                        mChannelService.clearChannel(newInfo.autoSensePlatform);
+                        addNewChannel(newInfo.autoSensePlatform);
+                    }
+                }
+
+                @Override
+                public void onAllowAddChannel(boolean addChannelAllowed) {
+                    for (int i = 0; i < autoSensePlatforms.size(); i++) {
+                        addNewChannel(autoSensePlatforms.get(i));
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            clearAllChannels();
+        }
+    };
 
     private boolean readSettings() {
         autoSensePlatforms = new AutoSensePlatforms(getApplicationContext());
@@ -138,36 +167,6 @@ public class ServiceAutoSenses extends Service {
 
         super.onDestroy();
     }
-
-    private ServiceConnection mChannelServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder serviceBinder) {
-
-            mChannelService = (ServiceAutoSense.ChannelServiceComm) serviceBinder;
-
-            mChannelService.setOnChannelChangedListener(new ServiceAutoSense.ChannelChangedListener() {
-                @Override
-                public void onChannelChanged(final ChannelInfo newInfo) {
-                    if (newInfo.status == 1) {
-                        mChannelService.clearChannel(newInfo.autoSensePlatform);
-                        addNewChannel(newInfo.autoSensePlatform);
-                    }
-                }
-
-                @Override
-                public void onAllowAddChannel(boolean addChannelAllowed) {
-                    for (int i = 0; i < autoSensePlatforms.size(); i++) {
-                        addNewChannel(autoSensePlatforms.get(i));
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            clearAllChannels();
-        }
-    };
 
     public void addNewChannel(AutoSensePlatform autoSensePlatform) {
         if (null != mChannelService) {

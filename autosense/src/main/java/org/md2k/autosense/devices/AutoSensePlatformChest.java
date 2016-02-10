@@ -53,7 +53,7 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
     public AutoSensePlatformChest(Context context, String platformType, String platformId, String deviceId) {
         super(context,platformType,platformId,deviceId, "AutoSense (Chest)");
         this.platformId= PlatformId.CHEST;
-        dataQuality=new ArrayList<>();
+        dataQuality = new ArrayList<>();
         dataQuality.add(new DataQualityRIP());
         dataQuality.add(new DataQualityECG());
 

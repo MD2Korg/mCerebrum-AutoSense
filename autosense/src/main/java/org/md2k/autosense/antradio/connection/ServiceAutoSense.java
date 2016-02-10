@@ -58,20 +58,52 @@ import java.util.HashMap;
 
 public class ServiceAutoSense extends Service {
     private static final String TAG = ServiceAutoSense.class.getSimpleName();
-
-    private Object mCreateChannel_LOCK = new Object();
-
     HashMap<String, ChannelController> mChannelControllerList = new HashMap<>();
-
     ChannelChangedListener mListener;
-
+    DataExtractorChest dataExtractorChest;
+    DataExtractorWrist dataExtractorWrist;
+    HashMap<String, Integer> hm = new HashMap<>();
+    long starttimestamp = 0;
+    private Object mCreateChannel_LOCK = new Object();
     private boolean mAntRadioServiceBound;
     private AntService mAntRadioService = null;
     private AntChannelProvider mAntChannelProvider = null;
     private boolean mAllowAddChannel = false;
-    DataExtractorChest dataExtractorChest;
-    DataExtractorWrist dataExtractorWrist;
+    /**
+     * Receives AntChannelProvider state changes being sent from ANT Radio Service
+     */
+    private final BroadcastReceiver mChannelProviderStateChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (AntChannelProvider.ACTION_CHANNEL_PROVIDER_STATE_CHANGED.equals(intent.getAction())) {
+                boolean update = false;
+                // Retrieving the data contained in the intent
+                int numChannels = intent.getIntExtra(AntChannelProvider.NUM_CHANNELS_AVAILABLE, 0);
+                boolean legacyInterfaceInUse = intent.getBooleanExtra(AntChannelProvider.LEGACY_INTERFACE_IN_USE, false);
 
+                if (mAllowAddChannel) {
+                    // Was a acquire channel allowed
+                    // If no channels available AND legacy interface is not in use, disallow acquiring of channels
+                    if (0 == numChannels && !legacyInterfaceInUse) {
+                        mAllowAddChannel = false;
+                        update = true;
+                    }
+                } else {
+                    // Acquire channels not allowed
+                    // If there are channels OR legacy interface in use, allow acquiring of channels
+                    if (numChannels > 0 || legacyInterfaceInUse) {
+                        mAllowAddChannel = true;
+                        update = true;
+                    }
+                }
+
+                if (update && (null != mListener)) {
+                    // AllowAddChannel has been changed, sending event callback
+                    mListener.onAllowAddChannel(mAllowAddChannel);
+                }
+            }
+        }
+    };
     private ServiceConnection mAntRadioServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -121,52 +153,8 @@ public class ServiceAutoSense extends Service {
 
     };
 
-    public interface ChannelChangedListener {
-        /**
-         * Occurs when a Channel's Info has changed (i.e. a newly created
-         * channel, channel has transmitted or received data, or if channel has
-         * been closed.
-         *
-         * @param newInfo The channel's updated info
-         */
-        void onChannelChanged(ChannelInfo newInfo);
-
-        /**
-         * Occurs when there is adding a channel is being allowed or disallowed.
-         *
-         * @param addChannelAllowed True if adding channels is allowed. False, otherwise.
-         */
-        void onAllowAddChannel(boolean addChannelAllowed);
-    }
-
-    /**
-     * The interface used to communicate with the ChannelService
-     */
-    public class ChannelServiceComm extends Binder {
-        /**
-         * Sets the listener to be used for channel changed event callbacks.
-         *
-         * @param listener The listener that will receive events
-         */
-        void setOnChannelChangedListener(ChannelChangedListener listener) {
-            mListener = listener;
-        }
-
-
-        public ChannelInfo addNewChannel(AutoSensePlatform autoSensePlatform) throws ChannelNotAvailableException {
-            return createNewChannel(autoSensePlatform);
-        }
-
-        /**
-         * Closes all channels currently added.
-         */
-        void clearAllChannels() {
-            closeAllChannels();
-        }
-
-        void clearChannel(AutoSensePlatform autoSensePlatform) {
-            closeChannel(autoSensePlatform);
-        }
+    static void die(String error) {
+        Log.e(TAG, "DIE: " + error);
     }
 
     private void closeChannel(AutoSensePlatform autoSensePlatform) {
@@ -214,9 +202,6 @@ public class ServiceAutoSense extends Service {
         return mAntChannel;
     }
 
-    HashMap<String, Integer> hm = new HashMap<>();
-    long starttimestamp = 0;
-
     private ChannelInfo createNewChannel(final AutoSensePlatform autoSensePlatform) throws ChannelNotAvailableException {
         hm.clear();
         starttimestamp = DateTime.getDateTime();
@@ -239,10 +224,9 @@ public class ServiceAutoSense extends Service {
                                     mListener.onChannelChanged(newInfo);
                                     return;
                                 }
-                                if(newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_CHEST)) {
+                                if (newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_CHEST)) {
                                     dataExtractorChest.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
-                                }
-                                else if(newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_WRIST)) {
+                                } else if (newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_WRIST)) {
                                     dataExtractorWrist.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
                                 }
                                 Intent intent = new Intent("autosense");
@@ -278,42 +262,6 @@ public class ServiceAutoSense extends Service {
     public IBinder onBind(Intent arg0) {
         return new ChannelServiceComm();
     }
-
-    /**
-     * Receives AntChannelProvider state changes being sent from ANT Radio Service
-     */
-    private final BroadcastReceiver mChannelProviderStateChangedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (AntChannelProvider.ACTION_CHANNEL_PROVIDER_STATE_CHANGED.equals(intent.getAction())) {
-                boolean update = false;
-                // Retrieving the data contained in the intent
-                int numChannels = intent.getIntExtra(AntChannelProvider.NUM_CHANNELS_AVAILABLE, 0);
-                boolean legacyInterfaceInUse = intent.getBooleanExtra(AntChannelProvider.LEGACY_INTERFACE_IN_USE, false);
-
-                if (mAllowAddChannel) {
-                    // Was a acquire channel allowed
-                    // If no channels available AND legacy interface is not in use, disallow acquiring of channels
-                    if (0 == numChannels && !legacyInterfaceInUse) {
-                        mAllowAddChannel = false;
-                        update = true;
-                    }
-                } else {
-                    // Acquire channels not allowed
-                    // If there are channels OR legacy interface in use, allow acquiring of channels
-                    if (numChannels > 0 || legacyInterfaceInUse) {
-                        mAllowAddChannel = true;
-                        update = true;
-                    }
-                }
-
-                if (update && (null != mListener)) {
-                    // AllowAddChannel has been changed, sending event callback
-                    mListener.onAllowAddChannel(mAllowAddChannel);
-                }
-            }
-        }
-    };
 
     private void doBindAntRadioService() {
         if (BuildConfig.DEBUG) Log.v(TAG, "doBindAntRadioService");
@@ -351,8 +299,8 @@ public class ServiceAutoSense extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        dataExtractorChest=new DataExtractorChest(getApplicationContext());
-        dataExtractorWrist=new DataExtractorWrist(getApplicationContext());
+        dataExtractorChest = new DataExtractorChest(getApplicationContext());
+        dataExtractorWrist = new DataExtractorWrist(getApplicationContext());
 
         mAntRadioServiceBound = false;
 
@@ -369,8 +317,52 @@ public class ServiceAutoSense extends Service {
         super.onDestroy();
     }
 
-    static void die(String error) {
-        Log.e(TAG, "DIE: " + error);
+    public interface ChannelChangedListener {
+        /**
+         * Occurs when a Channel's Info has changed (i.e. a newly created
+         * channel, channel has transmitted or received data, or if channel has
+         * been closed.
+         *
+         * @param newInfo The channel's updated info
+         */
+        void onChannelChanged(ChannelInfo newInfo);
+
+        /**
+         * Occurs when there is adding a channel is being allowed or disallowed.
+         *
+         * @param addChannelAllowed True if adding channels is allowed. False, otherwise.
+         */
+        void onAllowAddChannel(boolean addChannelAllowed);
+    }
+
+    /**
+     * The interface used to communicate with the ChannelService
+     */
+    public class ChannelServiceComm extends Binder {
+        /**
+         * Sets the listener to be used for channel changed event callbacks.
+         *
+         * @param listener The listener that will receive events
+         */
+        void setOnChannelChangedListener(ChannelChangedListener listener) {
+            mListener = listener;
+        }
+
+
+        public ChannelInfo addNewChannel(AutoSensePlatform autoSensePlatform) throws ChannelNotAvailableException {
+            return createNewChannel(autoSensePlatform);
+        }
+
+        /**
+         * Closes all channels currently added.
+         */
+        void clearAllChannels() {
+            closeAllChannels();
+        }
+
+        void clearChannel(AutoSensePlatform autoSensePlatform) {
+            closeChannel(autoSensePlatform);
+        }
     }
 
 }

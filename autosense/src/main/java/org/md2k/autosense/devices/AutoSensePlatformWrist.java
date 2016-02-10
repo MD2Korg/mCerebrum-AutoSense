@@ -49,10 +49,10 @@ public class AutoSensePlatformWrist extends AutoSensePlatform{
         super(context,platformType,platformId,deviceId, "AutoSense ()");
         this.name=platformId.toLowerCase();
         if("LEFT_WRIST".equals(platformId))
-            this.name="AutoSense (Left Wrist)";
+            this.name = "AutoSense (Left Wrist)";
         else if("RIGHT_WRIST".equals(platformId))
-            this.name="AutoSense (Right Wrist)";
-        dataQuality=new ArrayList<>();
+            this.name = "AutoSense (Right Wrist)";
+        dataQuality = new ArrayList<>();
         dataQuality.add(new DataQualityACL());
 
         autoSenseDataSources=new ArrayList<>();
