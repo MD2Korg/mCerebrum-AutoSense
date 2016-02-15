@@ -58,7 +58,7 @@ public class AutoSensePlatforms implements Serializable{
         try {
             readDataSourceFromFile();
         } catch (FileNotFoundException ignored) {
-            Toast.makeText(context,"ERROR: AutoSense configuration file is not available...",Toast.LENGTH_LONG).show();
+            Toast.makeText(context,"ERROR: AutoSense is not configured properly...please go to \"Settings\"",Toast.LENGTH_LONG).show();
         }
     }
 

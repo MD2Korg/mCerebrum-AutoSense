@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -242,7 +243,7 @@ public class ServiceAutoSense extends Service {
                                 intent.putExtra("count", hm.get(autoSensePlatform.getDeviceId()));
                                 intent.putExtra("timestamp", DateTime.getDateTime());
                                 intent.putExtra("starttimestamp", starttimestamp);
-                                intent.putExtra("data", new DataTypeByteArray(newInfo.timestamp, newInfo.broadcastData));
+                                intent.putExtra("data", (Parcelable) new DataTypeByteArray(newInfo.timestamp, newInfo.broadcastData));
                                 LocalBroadcastManager.getInstance(ServiceAutoSense.this).sendBroadcast(intent);
 
                                 mListener.onChannelChanged(newInfo);

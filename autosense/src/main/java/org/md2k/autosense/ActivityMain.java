@@ -204,7 +204,7 @@ public class ActivityMain extends AppCompatActivity {
         hashMapData.get(platform + "_freq").setText(String.format("%.1f", freq));
 
 
-        DataType data = (DataType) intent.getSerializableExtra("data");
+        DataType data = (DataType) intent.getParcelableExtra("data");
         byte[] sample = ((DataTypeByteArray) data).getSample();
         for (int i = 0; i < sample.length; i++) {
             if (i != 0) sampleStr += ",";
