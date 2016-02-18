@@ -1,8 +1,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <ListPreference
-        android:title="Location"
+        android:title="Placement"
         android:key="platformId"
-        android:icon="@drawable/ic_location_teal_48dp"
+        android:icon="@drawable/ic_watch_teal_48dp"
         android:entries="@array/chest_entries"
         android:entryValues="@array/chest_entries" />
     <EditTextPreference
