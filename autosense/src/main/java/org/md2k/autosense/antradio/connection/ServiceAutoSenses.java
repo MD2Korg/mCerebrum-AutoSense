@@ -112,6 +112,7 @@ public class ServiceAutoSenses extends Service {
         });
     }
 
+
     void startAutoSense() {
         doBindChannelService();
         isRunning = true;

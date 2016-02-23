@@ -141,7 +141,7 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
             String platformType;
             if (autoSensePlatforms.get(i).getPlatformType().equals(PlatformType.AUTOSENSE_CHEST)) {
                 platformType = "Chest";
-                preference.setIcon(R.drawable.ic_chest_white_24dp);
+                preference.setIcon(R.drawable.ic_chest_teal_48dp);
             } else {
                 platformType = "Wrist";
                 preference.setIcon(R.drawable.ic_watch_teal_48dp);

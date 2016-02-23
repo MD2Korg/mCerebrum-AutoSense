@@ -302,14 +302,27 @@ public class ServiceAutoSense extends Service {
         super.onCreate();
         dataExtractorChest = new DataExtractorChest(getApplicationContext());
         dataExtractorWrist = new DataExtractorWrist(getApplicationContext());
-
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("restart"));
         mAntRadioServiceBound = false;
 
         doBindAntRadioService();
     }
-
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            AutoSensePlatform autoSensePlatform= (AutoSensePlatform) intent.getSerializableExtra(AutoSensePlatform.class.getSimpleName());
+            closeChannel(autoSensePlatform);
+            try {
+                createNewChannel(autoSensePlatform);
+            } catch (ChannelNotAvailableException e) {
+                e.printStackTrace();
+            }
+        }
+    };
     @Override
     public void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(
+                mMessageReceiver);
         closeAllChannels();
 
         doUnbindAntRadioService();

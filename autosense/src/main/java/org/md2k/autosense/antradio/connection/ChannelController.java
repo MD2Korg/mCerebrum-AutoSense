@@ -67,7 +67,6 @@ public class ChannelController {
 
     public ChannelController(AntChannel antChannel, AutoSensePlatform autoSensePlatform,
                              ChannelBroadcastListener broadcastListener) {
-        Log.d(TAG,"channel controller..................");
         mAntChannel = antChannel;
         mChannelInfo = new ChannelInfo(autoSensePlatform);
         mChannelBroadcastListener = broadcastListener;

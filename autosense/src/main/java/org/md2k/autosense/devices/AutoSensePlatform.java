@@ -1,7 +1,9 @@
 package org.md2k.autosense.devices;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.autosense.data_quality.DataQuality;
 import org.md2k.datakitapi.DataKitAPI;
@@ -15,6 +17,7 @@ import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,7 +50,9 @@ import java.util.HashMap;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AutoSensePlatform implements Serializable{
-    public static final int DELAY = 3000;
+    public static final int DELAY = 5000;
+    public static final int RESTART_NO_DATA=30000;
+    int noData=0;
     private static final String TAG = AutoSensePlatform.class.getSimpleName();
     public ArrayList<DataQuality> dataQuality;
     protected String platformId;
@@ -66,6 +71,15 @@ public class AutoSensePlatform implements Serializable{
                 samples[i] = dataQuality.get(i).getStatus();
                 Log.d(TAG, platformType + " status[" + i + "]=" + samples[i]);
             }
+            if(samples[0]== DATA_QUALITY.BAND_OFF)
+                noData+=DELAY;
+            else noData=0;
+            if(noData==RESTART_NO_DATA){
+                Intent intent=new Intent("restart");
+                intent.putExtra(AutoSensePlatform.class.getSimpleName(), AutoSensePlatform.this);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            }
+
             DataTypeIntArray dataTypeIntArray = new DataTypeIntArray(DateTime.getDateTime(), samples);
             DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeIntArray);
             handler.postDelayed(getDataQuality, DELAY);

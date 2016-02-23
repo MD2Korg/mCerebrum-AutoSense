@@ -3,12 +3,12 @@
         android:title="ANT Radio">
         <Preference
             android:key="antradio_support"
-            android:icon="@drawable/ic_antradio"
+            android:icon="@drawable/ic_antradio_teal_48dp"
             android:title="Support"
             />
         <Preference
             android:key="version"
-            android:icon="@drawable/ic_antradio"
+            android:icon="@drawable/ic_antradio_teal_48dp"
             android:title="Firmware Version" />
     </PreferenceCategory>
     <PreferenceCategory
@@ -19,7 +19,7 @@
         android:key="autosense_available" />
     <Preference
         android:key="add_autosense_chest"
-        android:icon="@drawable/ic_chest_white_24dp"
+        android:icon="@drawable/ic_chest_teal_48dp"
         android:title="Add Chest Device" />
     <Preference
         android:key="add_autosense_wrist"
