@@ -19,6 +19,9 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
+
+import io.fabric.sdk.android.Fabric;
 import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.datatype.DataType;
@@ -62,10 +65,36 @@ public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
     HashMap<String, TextView> hashMapData = new HashMap<>();
     AutoSensePlatforms autoSensePlatforms = null;
+    Handler mHandler = new Handler();
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            {
+                long time = Apps.serviceRunningTime(ActivityMain.this, Constants.SERVICE_NAME);
+                if (time < 0) {
+                    ((TextView) findViewById(R.id.button_app_status)).setText("START");
+                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_off));
+
+                } else {
+
+                    ((TextView) findViewById(R.id.button_app_status)).setText(DateTime.convertTimestampToTimeStr(time));
+                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_on));
+                }
+                mHandler.postDelayed(this, 1000);
+            }
+        }
+    };
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateTable(intent);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
 
         setContentView(R.layout.activity_main);
         final Button buttonService = (Button) findViewById(R.id.button_app_status);
@@ -84,6 +113,7 @@ public class ActivityMain extends AppCompatActivity {
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
+
     void configureAppStatus() {
         findViewById(R.id.button_app_status).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,13 +244,6 @@ public class ActivityMain extends AppCompatActivity {
         hashMapData.get(platform + "_sample").setText(sampleStr);
     }
 
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateTable(intent);
-        }
-    };
-
     @Override
     public void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
@@ -237,24 +260,4 @@ public class ActivityMain extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
         super.onPause();
     }
-
-    Handler mHandler = new Handler();
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            {
-                long time = Apps.serviceRunningTime(ActivityMain.this, Constants.SERVICE_NAME);
-                if (time < 0) {
-                    ((TextView) findViewById(R.id.button_app_status)).setText("START");
-                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_off));
-
-                } else {
-
-                    ((TextView) findViewById(R.id.button_app_status)).setText(DateTime.convertTimestampToTimeStr(time));
-                    findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_on));
-                }
-                mHandler.postDelayed(this, 1000);
-            }
-        }
-    };
 }
