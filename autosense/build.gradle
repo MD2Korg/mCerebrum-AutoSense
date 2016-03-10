@@ -23,6 +23,7 @@ android {
         targetSdkVersion 21
         versionCode 11
         versionName '0.5.2'
+        
     }
     buildTypes {
         release {
