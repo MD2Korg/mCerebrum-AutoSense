@@ -11,7 +11,7 @@ This Android application integrates the Autosense platform into mCerebrum's data
 Karen Hovsepian, Mustafa al'absi, Emre Ertin, Thomas Kamarck, Motoshiro Nakajima, Santosh Kumar [pdf](http://dl.acm.org/citation.cfm?id=2807526) -->
 
 # Install
-Download and install [Datakit](https://github.com/MD2Korg/mCerebrum-DataKit/releases/latest) and the the latest [ AutoSense](https://github.com/MD2Korg/mCerebrum-AutoSense/releases/latest).
+Download and install [Datakit](https://github.com/MD2Korg/mCerebrum-DataKit/releases/latest) and the latest [ AutoSense](https://github.com/MD2Korg/mCerebrum-AutoSense/releases/latest).
 
 #### Enable unsigned applications
 - Go to Settings.
