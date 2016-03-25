@@ -1,11 +1,5 @@
 package org.md2k.autosense.data_quality;
 
-import android.content.Context;
-
-import org.md2k.datakitapi.source.datasource.DataSource;
-
-import java.util.ArrayList;
-
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -36,6 +30,7 @@ public class DataQualityECG extends DataQuality {
     ECGQualityCalculation ecgQualityCalculation;
 
     public DataQualityECG() {
+        super();
         ecgQualityCalculation = new ECGQualityCalculation();
     }
 

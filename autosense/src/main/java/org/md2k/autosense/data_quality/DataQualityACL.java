@@ -33,6 +33,7 @@ public class DataQualityACL extends DataQuality {
     ACLQualityCalculation aclQualityCalculation;
 
     public DataQualityACL() {
+        super();
         aclQualityCalculation = new ACLQualityCalculation();
     }
 

@@ -3,8 +3,6 @@ package org.md2k.autosense.devices;
 import android.content.Context;
 
 import org.md2k.autosense.data_quality.DataQualityACL;
-import org.md2k.autosense.data_quality.DataQualityECG;
-import org.md2k.autosense.data_quality.DataQualityRIP;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 
 import java.util.ArrayList;

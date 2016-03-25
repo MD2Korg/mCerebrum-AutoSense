@@ -5,8 +5,6 @@ import android.content.Context;
 import org.md2k.autosense.data_quality.DataQualityECG;
 import org.md2k.autosense.data_quality.DataQualityRIP;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.datakitapi.source.platform.Platform;
-import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformId;
 
 import java.util.ArrayList;
