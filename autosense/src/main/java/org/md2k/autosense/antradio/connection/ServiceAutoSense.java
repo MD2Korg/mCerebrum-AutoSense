@@ -21,7 +21,6 @@ import com.dsi.ant.channel.ChannelNotAvailableException;
 import com.dsi.ant.channel.PredefinedNetwork;
 
 import org.md2k.autosense.BuildConfig;
-import org.md2k.autosense.Constants;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
@@ -161,7 +160,8 @@ public class ServiceAutoSense extends Service {
     private void closeChannel(AutoSensePlatform autoSensePlatform) {
         synchronized (mChannelControllerList) {
             ChannelController channelController = mChannelControllerList.get(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
-            channelController.close();
+            if(channelController!=null)
+                channelController.close();
             mChannelControllerList.remove(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
         }
     }
