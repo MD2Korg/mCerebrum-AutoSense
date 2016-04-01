@@ -52,8 +52,8 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
         super(context,platformType,platformId,deviceId, "AutoSense (Chest)");
         this.platformId= PlatformId.CHEST;
         dataQuality = new ArrayList<>();
-        dataQuality.add(new DataQualityRIP());
-        dataQuality.add(new DataQualityECG());
+        dataQuality.add(new DataQualityRIP(context));
+        dataQuality.add(new DataQualityECG(context));
 
         autoSenseDataSources=new ArrayList<>();
         for (int i=0;i<DATASOURCES.size();i++) {

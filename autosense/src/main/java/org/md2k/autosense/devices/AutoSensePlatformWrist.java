@@ -51,7 +51,7 @@ public class AutoSensePlatformWrist extends AutoSensePlatform{
         else if("RIGHT_WRIST".equals(platformId))
             this.name = "AutoSense (Right Wrist)";
         dataQuality = new ArrayList<>();
-        dataQuality.add(new DataQualityACL());
+        dataQuality.add(new DataQualityACL(context));
 
         autoSenseDataSources=new ArrayList<>();
         for (DATASOURCE datasource : DATASOURCES)

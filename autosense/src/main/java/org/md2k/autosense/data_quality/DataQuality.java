@@ -3,10 +3,14 @@ package org.md2k.autosense.data_quality;
 import android.content.Context;
 
 import org.md2k.datakitapi.DataKitAPI;
-import org.md2k.datakitapi.source.datasource.DataSource;
+import org.md2k.datakitapi.datatype.DataTypeInt;
+import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
+import org.md2k.datakitapi.source.platform.Platform;
+import org.md2k.datakitapi.time.DateTime;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -35,9 +39,14 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public abstract class DataQuality {
+    Context context;
     ArrayList<Integer> samples;
+    DataSourceClient dataSourceClient;
+    abstract public DataSourceBuilder createDatSourceBuilder(Platform platform);
+    abstract public ArrayList<HashMap<String, String>> createDataDescriptors();
 
-    DataQuality() {
+    DataQuality(Context context) {
+        this.context=context;
         samples = new ArrayList<>();
     }
 
@@ -45,5 +54,20 @@ public abstract class DataQuality {
 
     public void add(int sample) {
         samples.add(sample);
+    }
+    public void insertToDataKit(){
+        int sample=getStatus();
+        DataTypeInt dataTypeInt = new DataTypeInt(DateTime.getDateTime(), sample);
+        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeInt);
+    }
+    public boolean register(Platform platform) {
+        DataSourceBuilder dataSourceBuilder = createDatSourceBuilder(platform);
+        dataSourceClient = DataKitAPI.getInstance(context).register(dataSourceBuilder);
+        return dataSourceClient != null;
+    }
+
+    public void unregister(){
+        if (dataSourceClient != null)
+            DataKitAPI.getInstance(context).unregister(dataSourceClient);
     }
 }
