@@ -8,6 +8,7 @@ import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
+import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,7 +74,7 @@ public class DataQualityECG extends DataQuality {
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
         dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(4));
         dataDescriptor.put(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000))) + " Hz");
-        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Quality of ECG. Values= GOOD(0), BAND_OFF(1), NOT_WORN(2), BAND_LOOSE(3), NOISE(4)");
+        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Quality of ECG. Values="+ DATA_QUALITY.METADATA_STR);
         dataDescriptor.put(METADATA.DATA_TYPE, int.class.getName());
         dataDescriptors.add(dataDescriptor);
         return dataDescriptors;
