@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -59,6 +58,7 @@ import java.util.HashMap;
 public class ServiceAutoSense extends Service {
     private static final String TAG = ServiceAutoSense.class.getSimpleName();
     HashMap<String, ChannelController> mChannelControllerList = new HashMap<>();
+    public static final String INTENT_RESTART="intent_restart";
     ChannelChangedListener mListener;
     DataExtractorChest dataExtractorChest;
     DataExtractorWrist dataExtractorWrist;
@@ -159,6 +159,7 @@ public class ServiceAutoSense extends Service {
 
     private void closeChannel(AutoSensePlatform autoSensePlatform) {
         synchronized (mChannelControllerList) {
+            Log.d(TAG,"closeChannel()...platformType="+autoSensePlatform.getPlatformType()+" deviceId="+autoSensePlatform.getDeviceId());
             ChannelController channelController = mChannelControllerList.get(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
             if(channelController!=null)
                 channelController.close();
@@ -203,8 +204,9 @@ public class ServiceAutoSense extends Service {
         return mAntChannel;
     }
 
-    private ChannelInfo createNewChannel(final AutoSensePlatform autoSensePlatform) throws ChannelNotAvailableException {
-        hm.clear();
+    private ChannelInfo createNewChannel(AutoSensePlatform autoSensePlatform) throws ChannelNotAvailableException {
+        Log.d(TAG, "createNewChannel()...platformType=" + autoSensePlatform.getPlatformType() + " deviceId=" + autoSensePlatform.getDeviceId());
+//        hm.clear();
         starttimestamp = DateTime.getDateTime();
         ChannelController channelController = null;
 
@@ -233,17 +235,20 @@ public class ServiceAutoSense extends Service {
                                 Intent intent = new Intent("autosense");
                                 // You can also include some extra data.
                                 intent.putExtra("operation", "data");
-                                intent.putExtra("deviceId", autoSensePlatform.getDeviceId());
-                                intent.putExtra("platformType", autoSensePlatform.getPlatformType());
+                                intent.putExtra("deviceId", newInfo.autoSensePlatform.getDeviceId());
+                                intent.putExtra("platformType", newInfo.autoSensePlatform.getPlatformType());
                                 intent.putExtra("dataSourceType", "autosense");
-                                if (!hm.containsKey(autoSensePlatform.getDeviceId())) {
-                                    hm.put(autoSensePlatform.getDeviceId(), 0);
+                                if (!hm.containsKey(newInfo.autoSensePlatform.getDeviceId())) {
+                                    hm.put(newInfo.autoSensePlatform.getDeviceId(), 0);
+                                    Log.d(TAG, "count=0 deviceId=" + newInfo.autoSensePlatform.getDeviceId() + " type=" + newInfo.autoSensePlatform.getPlatformType());
+
                                 }
-                                hm.put(autoSensePlatform.getDeviceId(), hm.get(autoSensePlatform.getDeviceId()) + 1);
-                                intent.putExtra("count", hm.get(autoSensePlatform.getDeviceId()));
+                                Log.d(TAG,"count="+hm.get(newInfo.autoSensePlatform.getDeviceId())+"  deviceId="+newInfo.autoSensePlatform.getDeviceId()+" type="+newInfo.autoSensePlatform.getPlatformType());
+                                hm.put(newInfo.autoSensePlatform.getDeviceId(), hm.get(newInfo.autoSensePlatform.getDeviceId()) + 1);
+                                intent.putExtra("count", hm.get(newInfo.autoSensePlatform.getDeviceId()));
                                 intent.putExtra("timestamp", DateTime.getDateTime());
                                 intent.putExtra("starttimestamp", starttimestamp);
-                                intent.putExtra("data", (Parcelable) new DataTypeByteArray(newInfo.timestamp, newInfo.broadcastData));
+                                intent.putExtra("data", new DataTypeByteArray(newInfo.timestamp, newInfo.broadcastData));
                                 LocalBroadcastManager.getInstance(ServiceAutoSense.this).sendBroadcast(intent);
 
                                 mListener.onChannelChanged(newInfo);
@@ -300,9 +305,10 @@ public class ServiceAutoSense extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d(TAG,"ServiceAutoSense()...");
         dataExtractorChest = new DataExtractorChest(getApplicationContext());
         dataExtractorWrist = new DataExtractorWrist(getApplicationContext());
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("restart"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(INTENT_RESTART));
         mAntRadioServiceBound = false;
 
         doBindAntRadioService();
@@ -311,6 +317,7 @@ public class ServiceAutoSense extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             AutoSensePlatform autoSensePlatform= (AutoSensePlatform) intent.getSerializableExtra(AutoSensePlatform.class.getSimpleName());
+            Log.d(TAG,"close Channel...platformType="+autoSensePlatform.getPlatformType()+" platformId="+autoSensePlatform.getPlatformId()+" deviceId="+autoSensePlatform.getDeviceId());
             closeChannel(autoSensePlatform);
             try {
                 createNewChannel(autoSensePlatform);

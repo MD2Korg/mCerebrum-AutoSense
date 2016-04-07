@@ -24,7 +24,6 @@ import android.widget.Toast;
 
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.antradio.backgroundscan.ServiceBackgroundScan;
-import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.platform.PlatformId;
 import org.md2k.datakitapi.source.platform.PlatformType;
 
@@ -326,7 +325,7 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (platformId==null || platformId.equals("")) {
-                    Toast.makeText(getActivity(), "!!! Location is missing !!!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "!!! Placement is missing !!!", Toast.LENGTH_LONG).show();
                 } else if (deviceId==null || deviceId.equals(""))
                     Toast.makeText(getActivity(), "!!! Device ID is missing !!!", Toast.LENGTH_LONG).show();
                 else {

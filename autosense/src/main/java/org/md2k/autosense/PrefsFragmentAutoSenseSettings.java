@@ -19,7 +19,6 @@ import android.widget.Toast;
 import com.dsi.ant.StoreDownloader;
 
 import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
-import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.utilities.Apps;
@@ -287,7 +286,7 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                 String deviceId = Constants.getSharedPreferenceString("deviceId");
                 Log.d(TAG, "platformType=" + platformType + " platformId=" + platformId + " deviceId=" + deviceId);
                 if (autoSensePlatforms.find(platformType, platformId, null).size() != 0)
-                    Toast.makeText(getActivity(), "Error: A device is already configured with same location...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Error: A device is already configured with same placement...", Toast.LENGTH_SHORT).show();
                 else if (autoSensePlatforms.find(platformType, null, deviceId).size() != 0)
                     Toast.makeText(getActivity(), "Error: Device is already configured...", Toast.LENGTH_SHORT).show();
                 else

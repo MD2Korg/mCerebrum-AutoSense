@@ -1,7 +1,6 @@
 package org.md2k.autosense;
 
 import android.os.Environment;
-import android.widget.Toast;
 
 import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.utilities.Files;

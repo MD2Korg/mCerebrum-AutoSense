@@ -6,6 +6,7 @@ import org.md2k.autosense.data_quality.DataQualityECG;
 import org.md2k.autosense.data_quality.DataQualityRIP;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.PlatformId;
+import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +38,7 @@ import java.util.Arrays;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AutoSensePlatformChest extends AutoSensePlatform{
+    private static final String TAG = AutoSensePlatformChest.class.getSimpleName();
     public ArrayList<DATASOURCE> DATASOURCES=new ArrayList<>(Arrays.asList(
             new DATASOURCE(DataSourceType.RESPIRATION,"Respiration", 64.0/3),
             new DATASOURCE(DataSourceType.ECG,"ECG",64.0),
@@ -54,6 +56,7 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
         dataQuality = new ArrayList<>();
         dataQuality.add(new DataQualityRIP(context));
         dataQuality.add(new DataQualityECG(context));
+        Log.d(TAG, "dataQuality=" + this + " platformId=" + platformId + " platformType=" + platformType + " deviceId=" + deviceId);
 
         autoSenseDataSources=new ArrayList<>();
         for (int i=0;i<DATASOURCES.size();i++) {

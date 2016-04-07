@@ -21,7 +21,6 @@ import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 
-import io.fabric.sdk.android.Fabric;
 import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.datatype.DataType;
@@ -32,6 +31,8 @@ import org.md2k.utilities.UI.ActivityAbout;
 import org.md2k.utilities.UI.ActivityCopyright;
 
 import java.util.HashMap;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center

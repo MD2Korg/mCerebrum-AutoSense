@@ -2,12 +2,9 @@ package org.md2k.autosense;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 
 import org.md2k.utilities.Report.Log;
-
-import java.io.File;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center

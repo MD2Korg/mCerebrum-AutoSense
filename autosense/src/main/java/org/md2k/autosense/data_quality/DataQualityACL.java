@@ -47,16 +47,20 @@ public class DataQualityACL extends DataQuality {
     public DataQualityACL(Context context) {
         super(context);
         aclQualityCalculation = new ACLQualityCalculation();
+        Log.d(TAG, "DataQualityACL=" + this);
     }
 
     public int getStatus() {
+        int status;
         int size = samples.size();
-        Log.d(TAG, "acl_sample_size=" + size);
         int samps[] = new int[size];
         for (int i = 0; i < size; i++)
             samps[i] = samples.get(i);
         samples.clear();
-        return aclQualityCalculation.currentQuality(samps);
+        status= aclQualityCalculation.currentQuality(samps);
+        Log.d(TAG, "dataQuality="+this+" acl_sample_size=" + size+" status="+status);
+        return status;
+
     }
     public DataSourceBuilder createDatSourceBuilder(Platform platform) {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder();

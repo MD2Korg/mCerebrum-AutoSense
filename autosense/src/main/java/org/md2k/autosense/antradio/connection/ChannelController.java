@@ -1,6 +1,5 @@
 package org.md2k.autosense.antradio.connection;
 
-import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 

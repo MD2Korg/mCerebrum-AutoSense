@@ -1,29 +1,8 @@
 package org.md2k.autosense;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
-
-import com.dsi.ant.StoreDownloader;
-
-import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
-import org.md2k.autosense.devices.AutoSensePlatforms;
-import org.md2k.datakitapi.source.platform.PlatformType;
-import org.md2k.utilities.Apps;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>

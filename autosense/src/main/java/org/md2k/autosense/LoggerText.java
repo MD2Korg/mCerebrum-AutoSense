@@ -2,14 +2,6 @@ package org.md2k.autosense;
 
 import android.os.Environment;
 
-import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
-import org.md2k.datakitapi.datatype.DataTypeFloat;
-import org.md2k.datakitapi.datatype.DataTypeFloatArray;
-import org.md2k.datakitapi.datatype.DataTypeInt;
-import org.md2k.datakitapi.datatype.DataTypeIntArray;
-import org.md2k.datakitapi.source.datasource.DataSourceType;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

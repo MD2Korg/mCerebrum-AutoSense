@@ -55,8 +55,7 @@ public abstract class DataQuality {
     public void add(int sample) {
         samples.add(sample);
     }
-    public void insertToDataKit(){
-        int sample=getStatus();
+    public void insertToDataKit(int sample){
         DataTypeInt dataTypeInt = new DataTypeInt(DateTime.getDateTime(), sample);
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeInt);
     }

@@ -104,7 +104,7 @@ public class ServiceAutoSenses extends Service {
         }, new OnExceptionListener() {
             @Override
             public void onException(Status status) {
-                Log.d(TAG,"onException...");
+                Log.d(TAG, "onException...");
                 autoSensePlatforms.unregister();
                 Toast.makeText(ServiceAutoSenses.this, "AutoSense Stopped. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
                 stopSelf();
@@ -142,11 +142,16 @@ public class ServiceAutoSenses extends Service {
     }
 
     private void doUnbindChannelService() {
-        if (mChannelServiceBound) {
-            // Telling ChannelService to close all the channels
-            mChannelService.clearAllChannels();
-            unbindService(mChannelServiceConnection);
-            mChannelServiceBound = false;
+        try {
+            if (mChannelServiceBound) {
+                // Telling ChannelService to close all the channels
+                if (mChannelService != null)
+                    mChannelService.clearAllChannels();
+                unbindService(mChannelServiceConnection);
+                mChannelServiceBound = false;
+            }
+        } catch (Exception e) {
+
         }
     }
 
@@ -180,17 +185,21 @@ public class ServiceAutoSenses extends Service {
             } catch (ChannelNotAvailableException e) {
                 // Occurs when a channel is not available. Printing out the
                 // stack trace will show why no channels are available.
-                Toast.makeText(this, "Channel Not Available", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "Channel Not Available", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     private void clearAllChannels() {
-        if (null != mChannelService) {
-            // Telling ChannelService to close all the channels
-            mChannelService.clearAllChannels();
+        try {
+            if (null != mChannelService) {
+                // Telling ChannelService to close all the channels
+                mChannelService.clearAllChannels();
+            }
+            mChannelService = null;
+        }catch(Exception e){
+
         }
-        mChannelService = null;
     }
 
 

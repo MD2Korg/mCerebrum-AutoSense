@@ -7,20 +7,17 @@ import com.dsi.ant.AntLibVersionInfo;
 import com.dsi.ant.AntSupportChecker;
 
 import org.md2k.autosense.Configuration;
-import org.md2k.autosense.Constants;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSource;
-import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
 import org.md2k.datakitapi.source.platform.PlatformType;
-import org.md2k.utilities.Files;
+import org.md2k.utilities.Report.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.EmptyStackException;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -85,11 +82,16 @@ public class AutoSensePlatforms implements Serializable{
     }
 
     public void add(String platformType, String platformId, String deviceId) {
+        Log.d(TAG, "AutoSensePlatforms()...add()");
         if (!isExists(platformType, platformId, deviceId)) {
-            if(platformType.equals(PlatformType.AUTOSENSE_CHEST))
+            if(platformType.equals(PlatformType.AUTOSENSE_CHEST)) {
                 autoSensePlatforms.add(new AutoSensePlatformChest(context, platformType, platformId, deviceId));
-            else if(platformType.equals(PlatformType.AUTOSENSE_WRIST))
+                Log.d(TAG, "AutoSensePlatforms()...add() platformType="+platformType+" platformId="+platformId+" deviceId="+deviceId);
+            }
+            else if(platformType.equals(PlatformType.AUTOSENSE_WRIST)) {
                 autoSensePlatforms.add(new AutoSensePlatformWrist(context, platformType, platformId, deviceId));
+                Log.d(TAG, "AutoSensePlatforms()...add() platformType=" + platformType + " platformId=" + platformId + " deviceId=" + deviceId);
+            }
         }
     }
 
