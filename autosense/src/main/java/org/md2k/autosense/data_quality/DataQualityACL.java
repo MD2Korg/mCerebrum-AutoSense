@@ -52,12 +52,18 @@ public class DataQualityACL extends DataQuality {
 
     public int getStatus() {
         int status;
+        Log.d(TAG,"getStatus...0");
         int size = samples.size();
+        Log.d(TAG,"getStatus...1");
         int samps[] = new int[size];
+        Log.d(TAG,"getStatus...2");
         for (int i = 0; i < size; i++)
             samps[i] = samples.get(i);
+        Log.d(TAG,"getStatus...3");
         samples.clear();
+        Log.d(TAG, "getStatus...4");
         status= aclQualityCalculation.currentQuality(samps);
+        Log.d(TAG,"getStatus...5");
         Log.d(TAG, "dataQuality="+this+" acl_sample_size=" + size+" status="+status);
         return status;
 

@@ -52,11 +52,15 @@ public class DataQualityRIP extends DataQuality {
 
     public int getStatus() {
         int size = samples.size();
+        Log.d(TAG,"rip_sample_size="+size);
         int samps[] = new int[size];
         for (int i = 0; i < size; i++)
             samps[i] = samples.get(i);
         samples.clear();
-        return ripQualityCalculation.currentQuality(samps);
+        Log.d(TAG, "before ... dataQuality=" + this + " rip_sample_size=" + size);
+        int status= ripQualityCalculation.currentQuality(samps);
+        Log.d(TAG, "dataQuality="+this+" rip_sample_size=" + size+" status="+status);
+        return status;
     }
     public DataSourceBuilder createDatSourceBuilder(Platform platform) {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder();

@@ -117,9 +117,11 @@ public class ChannelController {
 
                     Log.d(TAG, "Opened channel with device number: " + mChannelInfo.DEVICE_NUMBER);
                 } catch (RemoteException e) {
+                    close();
                     channelError(e);
                 } catch (AntCommandFailedException e) {
                     // This will release, and therefore unassign if required
+                    close();
                     channelError("Open failed", e);
                 }
             }
@@ -277,12 +279,13 @@ public class ChannelController {
         // TODO kill all our resources
         if (null != mAntChannel) {
             mIsOpen = false;
-
             // Releasing the channel to make it available for others.
             // After releasing, the AntChannel instance cannot be reused.
             mAntChannel.release();
             mAntChannel = null;
         }
+
+
         displayChannelError("Channel Closed");
     }
 }

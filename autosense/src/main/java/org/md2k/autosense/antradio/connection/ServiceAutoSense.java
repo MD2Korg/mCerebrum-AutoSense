@@ -58,12 +58,12 @@ import java.util.HashMap;
 public class ServiceAutoSense extends Service {
     private static final String TAG = ServiceAutoSense.class.getSimpleName();
     HashMap<String, ChannelController> mChannelControllerList = new HashMap<>();
-    public static final String INTENT_RESTART="intent_restart";
+    public static final String INTENT_RESTART = "intent_restart";
     ChannelChangedListener mListener;
     DataExtractorChest dataExtractorChest;
     DataExtractorWrist dataExtractorWrist;
-    HashMap<String, Integer> hm = new HashMap<>();
-    long starttimestamp = 0;
+    HashMap<String, Long> hm = new HashMap<>();
+    //    long starttimestamp = 0;
     private Object mCreateChannel_LOCK = new Object();
     private boolean mAntRadioServiceBound;
     private AntService mAntRadioService = null;
@@ -158,13 +158,11 @@ public class ServiceAutoSense extends Service {
     }
 
     private void closeChannel(AutoSensePlatform autoSensePlatform) {
-        synchronized (mChannelControllerList) {
-            Log.d(TAG,"closeChannel()...platformType="+autoSensePlatform.getPlatformType()+" deviceId="+autoSensePlatform.getDeviceId());
-            ChannelController channelController = mChannelControllerList.get(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
-            if(channelController!=null)
-                channelController.close();
-            mChannelControllerList.remove(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
-        }
+        Log.d(TAG, "closeChannel()...platformType=" + autoSensePlatform.getPlatformType() + " deviceId=" + autoSensePlatform.getDeviceId());
+        ChannelController channelController = mChannelControllerList.get(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
+        if (channelController != null)
+            channelController.close();
+        mChannelControllerList.remove(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
     }
 
     private void closeAllChannels() {
@@ -207,7 +205,7 @@ public class ServiceAutoSense extends Service {
     private ChannelInfo createNewChannel(AutoSensePlatform autoSensePlatform) throws ChannelNotAvailableException {
         Log.d(TAG, "createNewChannel()...platformType=" + autoSensePlatform.getPlatformType() + " deviceId=" + autoSensePlatform.getDeviceId());
 //        hm.clear();
-        starttimestamp = DateTime.getDateTime();
+        //starttimestamp = DateTime.getDateTime();
         ChannelController channelController = null;
 
         synchronized (mCreateChannel_LOCK) {
@@ -239,15 +237,14 @@ public class ServiceAutoSense extends Service {
                                 intent.putExtra("platformType", newInfo.autoSensePlatform.getPlatformType());
                                 intent.putExtra("dataSourceType", "autosense");
                                 if (!hm.containsKey(newInfo.autoSensePlatform.getDeviceId())) {
-                                    hm.put(newInfo.autoSensePlatform.getDeviceId(), 0);
-                                    Log.d(TAG, "count=0 deviceId=" + newInfo.autoSensePlatform.getDeviceId() + " type=" + newInfo.autoSensePlatform.getPlatformType());
-
+                                    hm.put(newInfo.autoSensePlatform.getDeviceId(), 0L);
                                 }
-                                Log.d(TAG,"count="+hm.get(newInfo.autoSensePlatform.getDeviceId())+"  deviceId="+newInfo.autoSensePlatform.getDeviceId()+" type="+newInfo.autoSensePlatform.getPlatformType());
+                                if (!hm.containsKey(newInfo.autoSensePlatform.getDeviceId() + "_starttimestamp"))
+                                    hm.put(newInfo.autoSensePlatform.getDeviceId() + "_starttimestamp", DateTime.getDateTime());
                                 hm.put(newInfo.autoSensePlatform.getDeviceId(), hm.get(newInfo.autoSensePlatform.getDeviceId()) + 1);
                                 intent.putExtra("count", hm.get(newInfo.autoSensePlatform.getDeviceId()));
                                 intent.putExtra("timestamp", DateTime.getDateTime());
-                                intent.putExtra("starttimestamp", starttimestamp);
+                                intent.putExtra("starttimestamp", hm.get(newInfo.autoSensePlatform.getDeviceId() + "_starttimestamp"));
                                 intent.putExtra("data", new DataTypeByteArray(newInfo.timestamp, newInfo.broadcastData));
                                 LocalBroadcastManager.getInstance(ServiceAutoSense.this).sendBroadcast(intent);
 
@@ -305,7 +302,7 @@ public class ServiceAutoSense extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG,"ServiceAutoSense()...");
+        Log.d(TAG, "ServiceAutoSense()...");
         dataExtractorChest = new DataExtractorChest(getApplicationContext());
         dataExtractorWrist = new DataExtractorWrist(getApplicationContext());
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter(INTENT_RESTART));
@@ -313,19 +310,21 @@ public class ServiceAutoSense extends Service {
 
         doBindAntRadioService();
     }
+
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            AutoSensePlatform autoSensePlatform= (AutoSensePlatform) intent.getSerializableExtra(AutoSensePlatform.class.getSimpleName());
-            Log.d(TAG,"close Channel...platformType="+autoSensePlatform.getPlatformType()+" platformId="+autoSensePlatform.getPlatformId()+" deviceId="+autoSensePlatform.getDeviceId());
-            closeChannel(autoSensePlatform);
+            AutoSensePlatform autoSensePlatform = (AutoSensePlatform) intent.getSerializableExtra(AutoSensePlatform.class.getSimpleName());
+            Log.d(TAG, "close Channel...platformType=" + autoSensePlatform.getPlatformType() + " platformId=" + autoSensePlatform.getPlatformId() + " deviceId=" + autoSensePlatform.getDeviceId());
             try {
+                closeChannel(autoSensePlatform);
                 createNewChannel(autoSensePlatform);
             } catch (ChannelNotAvailableException e) {
                 e.printStackTrace();
             }
         }
     };
+
     @Override
     public void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(

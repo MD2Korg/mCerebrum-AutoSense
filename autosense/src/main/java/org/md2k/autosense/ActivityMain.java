@@ -227,7 +227,7 @@ public class ActivityMain extends AppCompatActivity {
     void updateTable(Intent intent) {
         String sampleStr = "";
         String platform = intent.getStringExtra("platformType") + ":" + intent.getStringExtra("deviceId");
-        int count = intent.getIntExtra("count", 0);
+        long count = intent.getLongExtra("count", 0);
         hashMapData.get(platform + "_count").setText(String.valueOf(count));
 
         double time = (intent.getLongExtra("timestamp", 0) - intent.getLongExtra("starttimestamp", 0)) / 1000.0;
