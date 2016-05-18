@@ -58,20 +58,11 @@ public abstract class DataQuality {
     public void add(int sample) {
         samples.add(sample);
     }
-    public void insertToDataKit(int sample){
+
+    public void insertToDataKit(int sample) throws DataKitException {
         DataTypeInt dataTypeInt = new DataTypeInt(DateTime.getDateTime(), sample);
-        try {
-            DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeInt);
-        } catch (DataKitException e) {
-            try {
-                unregister();
-                reconnect();
-                DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeInt);
-            } catch (DataKitException e1) {
-//                Toast.makeText(context, "Reconnection Error", Toast.LENGTH_LONG).show();
-                e1.printStackTrace();
-            }
-        }
+        DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeInt);
+
     }
 
     public boolean register(Platform platform) throws DataKitException {

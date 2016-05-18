@@ -64,26 +64,36 @@ public class AutoSensePlatform implements Serializable {
             try {
                 int samples[] = new int[dataQuality.size()];
                 Log.d(TAG, "runnableDataQuality..1...platformId=" + platformId + " deviceId=" + deviceId + " size=" + dataQuality.size());
-                for (int i = 0; i < dataQuality.size(); i++) {
-                    Log.d(TAG, "runnableDataQuality..2...platformId=" + platformId + " deviceId=" + deviceId + " size=" + dataQuality.size());
-                    samples[i] = dataQuality.get(i).getStatus();
-                    Log.d(TAG, "runnableDataQuality..3...platformId=" + platformId + " deviceId=" + deviceId + " size=" + dataQuality.size());
-                    Log.d(TAG, platformType + " status[" + i + "]=" + samples[i]);
-                    dataQuality.get(i).insertToDataKit(samples[i]);
-                    Log.d(TAG, "runnableDataQuality..4...platformId=" + platformId + " deviceId=" + deviceId + " size=" + dataQuality.size());
+                try {
+                    for (int i = 0; i < dataQuality.size(); i++) {
+                        Log.d(TAG, "runnableDataQuality..2...platformId=" + platformId + " deviceId=" + deviceId + " size=" + dataQuality.size());
+                        samples[i] = dataQuality.get(i).getStatus();
+                        Log.d(TAG, "runnableDataQuality..3...platformId=" + platformId + " deviceId=" + deviceId + " size=" + dataQuality.size());
+                        Log.d(TAG, platformType + " status[" + i + "]=" + samples[i]);
+
+                        dataQuality.get(i).insertToDataKit(samples[i]);
+                        Log.d(TAG, "runnableDataQuality..4...platformId=" + platformId + " deviceId=" + deviceId + " size=" + dataQuality.size());
+                    }
+                } catch (DataKitException e) {
+                    Intent intent = new Intent(ServiceAutoSense.INTENT_RESTART);
+                    intent.putExtra(AutoSensePlatform.class.getSimpleName(), AutoSensePlatform.this);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    //TODO: Figure out why this intent does not restart the AutoSense data collection and connection to DataKit
+                    //Toast.makeText(context, "Reconnection Error", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
                 }
                 if (samples[0] == DATA_QUALITY.BAND_OFF)
                     noData += DELAY;
                 else noData = 0;
                 if (noData >= RESTART_NO_DATA) {
-                    Log.d(TAG,"restart ..platformId="+platformId+" platformType="+platformType);
+                    Log.d(TAG, "restart ..platformId=" + platformId + " platformType=" + platformType);
                     Intent intent = new Intent(ServiceAutoSense.INTENT_RESTART);
                     intent.putExtra(AutoSensePlatform.class.getSimpleName(), AutoSensePlatform.this);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     noData = 0;
                 }
-            }catch (Exception e){
-                Log.e(TAG,"platformId="+platformId+" platformType="+platformType+" e="+e.getMessage());
+            } catch (Exception e) {
+                Log.e(TAG, "platformId=" + platformId + " platformType=" + platformType + " e=" + e.getMessage());
 
             }
             handler.postDelayed(runnableDataQuality, DELAY);
@@ -130,7 +140,7 @@ public class AutoSensePlatform implements Serializable {
     }
 
     public void register() {
-        Log.d(TAG,"register()...platformId="+platformId+" platformType="+platformType+" deviceId="+deviceId);
+        Log.d(TAG, "register()...platformId=" + platformId + " platformType=" + platformType + " deviceId=" + deviceId);
         Platform platform = new PlatformBuilder().setId(platformId).setType(platformType).setMetadata(METADATA.DEVICE_ID, deviceId).setMetadata(METADATA.NAME, name).build();
         for (int i = 0; i < autoSenseDataSources.size(); i++) {
             try {
@@ -141,7 +151,7 @@ public class AutoSensePlatform implements Serializable {
                 e.printStackTrace();
             }
         }
-        for(int i=0;i<dataQuality.size();i++)
+        for (int i = 0; i < dataQuality.size(); i++)
             try {
                 dataQuality.get(i).register(platform);
             } catch (DataKitException e) {
@@ -158,7 +168,7 @@ public class AutoSensePlatform implements Serializable {
             try {
                 autoSenseDataSources.get(i).unregister();
             } catch (DataKitException e) {
-                Toast.makeText(context, "Unable to unregister AutoSense", Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, "Unable to unregister AutoSense", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
         }
@@ -166,7 +176,7 @@ public class AutoSensePlatform implements Serializable {
             try {
                 dataQuality.get(i).unregister();
             } catch (DataKitException e) {
-                Toast.makeText(context, "Unable to unregister DataQuality", Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, "Unable to unregister DataQuality", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
     }
