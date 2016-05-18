@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.dsi.ant.channel.ChannelNotAvailableException;
@@ -17,26 +16,25 @@ import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.DataKitAPI;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
-import org.md2k.datakitapi.messagehandler.OnExceptionListener;
-import org.md2k.datakitapi.status.Status;
 import org.md2k.utilities.UI.AlertDialogs;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -94,22 +92,20 @@ public class ServiceAutoSenses extends Service {
 
     private void connectDataKit() {
         dataKitAPI = DataKitAPI.getInstance(getApplicationContext());
-        dataKitAPI.connect(new OnConnectionListener() {
-            @Override
-            public void onConnected() {
-                autoSensePlatforms.register();
-                Toast.makeText(ServiceAutoSenses.this, "AutoSense Started successfully", Toast.LENGTH_LONG).show();
-                startAutoSense();
-            }
-        }, new OnExceptionListener() {
-            @Override
-            public void onException(Status status) {
-                Log.d(TAG, "onException...");
-                autoSensePlatforms.unregister();
-                Toast.makeText(ServiceAutoSenses.this, "AutoSense Stopped. Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
-                stopSelf();
-            }
-        });
+        try {
+            dataKitAPI.connect(new OnConnectionListener() {
+                @Override
+                public void onConnected() {
+                    autoSensePlatforms.register();
+                    Toast.makeText(ServiceAutoSenses.this, "AutoSense Started successfully", Toast.LENGTH_LONG).show();
+                    startAutoSense();
+                }
+            });
+        } catch (DataKitException e) {
+            autoSensePlatforms.unregister();
+            Toast.makeText(ServiceAutoSenses.this, "AutoSense Stopped. DataKitException", Toast.LENGTH_LONG).show();
+            stopSelf();
+        }
     }
 
 
@@ -165,7 +161,6 @@ public class ServiceAutoSenses extends Service {
         if (isRunning) {
             autoSensePlatforms.unregister();
             dataKitAPI.disconnect();
-            dataKitAPI.close();
         }
         isRunning = false;
         if (Constants.LOG_TEXT)

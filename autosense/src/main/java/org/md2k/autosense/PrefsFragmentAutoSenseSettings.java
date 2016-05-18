@@ -27,21 +27,21 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -55,9 +55,30 @@ import java.util.List;
  */
 
 public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
-    private static final String TAG = PrefsFragmentAutoSenseSettings.class.getSimpleName();
     static final int ADD_DEVICE = 1;  // The request code
+    private static final String TAG = PrefsFragmentAutoSenseSettings.class.getSimpleName();
     AutoSensePlatforms autoSensePlatforms = null;
+    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    Intent intent = new Intent(getActivity(), ServiceAutoSenses.class);
+                    getActivity().stopService(intent);
+                    if (saveConfigurationFile()) {
+                        intent = new Intent(getActivity(), ServiceAutoSenses.class);
+                        getActivity().startService(intent);
+                        getActivity().finish();
+                    }
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    Toast.makeText(getActivity(), "Configuration file is not saved.", Toast.LENGTH_LONG).show();
+                    getActivity().finish();
+                    break;
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,7 +115,6 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
     private void createMySharedPreference() {
         Constants.createSharedPreference(getActivity());
     }
-
 
     public void updatePreferenceScreen() {
         setupPreferenceScreenAntRadio();
@@ -195,28 +215,6 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
             }
         };
     }
-
-    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            switch (which) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    Intent intent = new Intent(getActivity(), ServiceAutoSenses.class);
-                    getActivity().stopService(intent);
-                    if (saveConfigurationFile()) {
-                        intent = new Intent(getActivity(), ServiceAutoSenses.class);
-                        getActivity().startService(intent);
-                        getActivity().finish();
-                    }
-                    break;
-
-                case DialogInterface.BUTTON_NEGATIVE:
-                    Toast.makeText(getActivity(), "Configuration file is not saved.", Toast.LENGTH_LONG).show();
-                    getActivity().finish();
-                    break;
-            }
-        }
-    };
 
     private void setSaveButton() {
         final Button button = (Button) getActivity().findViewById(R.id.button_1);

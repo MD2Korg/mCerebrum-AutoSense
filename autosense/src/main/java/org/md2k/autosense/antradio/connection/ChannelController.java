@@ -21,21 +21,21 @@ import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.time.DateTime;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -59,10 +59,6 @@ public class ChannelController {
     private ChannelInfo mChannelInfo;
 
     private boolean mIsOpen;
-
-    static public abstract class ChannelBroadcastListener {
-        public abstract void onBroadcastChanged(ChannelInfo newInfo);
-    }
 
     public ChannelController(AntChannel antChannel, AutoSensePlatform autoSensePlatform,
                              ChannelBroadcastListener broadcastListener) {
@@ -130,6 +126,73 @@ public class ChannelController {
         }
 
         return mIsOpen;
+    }
+
+    public ChannelInfo getCurrentInfo() {
+        return mChannelInfo;
+    }
+
+    void displayChannelError(String displayText) {
+        mChannelInfo.die(displayText);
+    }
+
+    void channelError(RemoteException e) {
+        String logString = "Remote service communication failed.";
+
+        Log.e(TAG, logString);
+
+        displayChannelError(logString);
+    }
+
+    void channelError(String error, AntCommandFailedException e) {
+        StringBuilder logString;
+
+        if (e.getResponseMessage() != null) {
+            String initiatingMessageId = "0x" + Integer.toHexString(
+                    e.getResponseMessage().getInitiatingMessageId());
+            String rawResponseCode = "0x" + Integer.toHexString(
+                    e.getResponseMessage().getRawResponseCode());
+
+            logString = new StringBuilder(error)
+                    .append(". Command ")
+                    .append(initiatingMessageId)
+                    .append(" failed with code ")
+                    .append(rawResponseCode);
+        } else {
+            String attemptedMessageId = "0x" + Integer.toHexString(
+                    e.getAttemptedMessageType().getMessageId());
+            String failureReason = e.getFailureReason().toString();
+
+            logString = new StringBuilder(error)
+                    .append(". Command ")
+                    .append(attemptedMessageId)
+                    .append(" failed with reason ")
+                    .append(failureReason);
+        }
+
+        Log.e(TAG, logString.toString());
+
+        mAntChannel.release();
+
+        displayChannelError("ANT Command Failed");
+    }
+
+    public void close() {
+        // TODO kill all our resources
+        if (null != mAntChannel) {
+            mIsOpen = false;
+            // Releasing the channel to make it available for others.
+            // After releasing, the AntChannel instance cannot be reused.
+            mAntChannel.release();
+            mAntChannel = null;
+        }
+
+
+        displayChannelError("Channel Closed");
+    }
+
+    static public abstract class ChannelBroadcastListener {
+        public abstract void onBroadcastChanged(ChannelInfo newInfo);
     }
 
     /**
@@ -224,68 +287,5 @@ public class ChannelController {
                     break;
             }
         }
-    }
-
-    public ChannelInfo getCurrentInfo() {
-        return mChannelInfo;
-    }
-
-    void displayChannelError(String displayText) {
-        mChannelInfo.die(displayText);
-    }
-
-    void channelError(RemoteException e) {
-        String logString = "Remote service communication failed.";
-
-        Log.e(TAG, logString);
-
-        displayChannelError(logString);
-    }
-
-    void channelError(String error, AntCommandFailedException e) {
-        StringBuilder logString;
-
-        if (e.getResponseMessage() != null) {
-            String initiatingMessageId = "0x" + Integer.toHexString(
-                    e.getResponseMessage().getInitiatingMessageId());
-            String rawResponseCode = "0x" + Integer.toHexString(
-                    e.getResponseMessage().getRawResponseCode());
-
-            logString = new StringBuilder(error)
-                    .append(". Command ")
-                    .append(initiatingMessageId)
-                    .append(" failed with code ")
-                    .append(rawResponseCode);
-        } else {
-            String attemptedMessageId = "0x" + Integer.toHexString(
-                    e.getAttemptedMessageType().getMessageId());
-            String failureReason = e.getFailureReason().toString();
-
-            logString = new StringBuilder(error)
-                    .append(". Command ")
-                    .append(attemptedMessageId)
-                    .append(" failed with reason ")
-                    .append(failureReason);
-        }
-
-        Log.e(TAG, logString.toString());
-
-        mAntChannel.release();
-
-        displayChannelError("ANT Command Failed");
-    }
-
-    public void close() {
-        // TODO kill all our resources
-        if (null != mAntChannel) {
-            mIsOpen = false;
-            // Releasing the channel to make it available for others.
-            // After releasing, the AntChannel instance cannot be reused.
-            mAntChannel.release();
-            mAntChannel = null;
-        }
-
-
-        displayChannelError("Channel Closed");
     }
 }

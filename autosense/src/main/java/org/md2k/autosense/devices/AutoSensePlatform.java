@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
+import android.widget.Toast;
 
 import org.md2k.autosense.antradio.connection.ServiceAutoSense;
 import org.md2k.autosense.data_quality.DataQuality;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
@@ -16,21 +18,21 @@ import org.md2k.utilities.data_format.DATA_QUALITY;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -45,7 +47,6 @@ import java.util.ArrayList;
 public class AutoSensePlatform implements Serializable {
     public static final int DELAY = 5000;
     public static final int RESTART_NO_DATA = 30000;
-    int noData = 0;
     private static final String TAG = AutoSensePlatform.class.getSimpleName();
     public ArrayList<DataQuality> dataQuality;
     protected String platformId;
@@ -54,6 +55,7 @@ public class AutoSensePlatform implements Serializable {
     protected Context context;
     protected String name;
     protected ArrayList<AutoSenseDataSource> autoSenseDataSources;
+    int noData = 0;
     Handler handler;
 
     Runnable runnableDataQuality = new Runnable() {
@@ -131,19 +133,41 @@ public class AutoSensePlatform implements Serializable {
         Log.d(TAG,"register()...platformId="+platformId+" platformType="+platformType+" deviceId="+deviceId);
         Platform platform = new PlatformBuilder().setId(platformId).setType(platformType).setMetadata(METADATA.DEVICE_ID, deviceId).setMetadata(METADATA.NAME, name).build();
         for (int i = 0; i < autoSenseDataSources.size(); i++) {
-            autoSenseDataSources.get(i).register(platform);
+            try {
+                autoSenseDataSources.get(i).register(platform);
+            } catch (DataKitException e) {
+                //TODO: Restart service?
+                Toast.makeText(context, "Registration Error: AutoSense", Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
         }
         for(int i=0;i<dataQuality.size();i++)
-            dataQuality.get(i).register(platform);
+            try {
+                dataQuality.get(i).register(platform);
+            } catch (DataKitException e) {
+                //TODO: Restart service?
+                Toast.makeText(context, "Registration Error: DataQuality", Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
         handler.post(runnableDataQuality);
     }
 
     public void unregister() {
         handler.removeCallbacks(runnableDataQuality);
         for (int i = 0; i < autoSenseDataSources.size(); i++) {
-            autoSenseDataSources.get(i).unregister();
+            try {
+                autoSenseDataSources.get(i).unregister();
+            } catch (DataKitException e) {
+                Toast.makeText(context, "Unable to unregister AutoSense", Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
         }
         for (int i = 0; i < dataQuality.size(); i++)
-            dataQuality.get(i).unregister();
+            try {
+                dataQuality.get(i).unregister();
+            } catch (DataKitException e) {
+                Toast.makeText(context, "Unable to unregister DataQuality", Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
     }
 }

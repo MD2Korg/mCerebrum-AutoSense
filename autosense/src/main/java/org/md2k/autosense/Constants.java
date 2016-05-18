@@ -6,7 +6,7 @@ import android.preference.PreferenceManager;
 
 import org.md2k.utilities.Report.Log;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
@@ -33,10 +33,9 @@ import org.md2k.utilities.Report.Log;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Constants {
-    public static SharedPreferences sharedPreferences=null;
     public static final String SERVICE_NAME = "org.md2k.autosense.antradio.connection.ServiceAutoSenses";
-
     public static final boolean LOG_TEXT =false;
+    public static SharedPreferences sharedPreferences = null;
 
     public static void createSharedPreference(Context context){
         Log.d("Constants", "SharedPreference:" + context.getPackageName());

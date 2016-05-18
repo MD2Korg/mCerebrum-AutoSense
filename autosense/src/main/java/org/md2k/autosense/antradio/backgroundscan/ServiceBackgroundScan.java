@@ -26,7 +26,7 @@ import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.datakitapi.source.platform.PlatformType;
 
 import java.util.ArrayList;
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
@@ -56,30 +56,71 @@ import java.util.ArrayList;
 public class ServiceBackgroundScan extends Service
 {
     private static final String TAG = "ChannelService";
-    private Object mCreateChannel_LOCK = new Object();
     ArrayList<ChannelInfo> mChannelInfoList = new ArrayList<>();
     SharedPreferences sharedPreferences;
-
     ChannelChangedListener mListener;
-
+    int CHANNEL_PROOF_DEVICE_TYPE = (byte) 0x01;
+    int CHANNEL_PROOF_TRANSMISSION_TYPE = 0;
+    int WILDCARD_SEARCH_DEVICE_NUMBER = 0;
+    int CHANNEL_PROOF_PERIOD = 0x04EC;//8070;
+    int CHANNEL_PROOF_FREQUENCY = 0x50;
+    private Object mCreateChannel_LOCK = new Object();
     private boolean mAntRadioServiceBound;
     private AntService mAntRadioService = null;
     private AntChannelProvider mAntChannelProvider = null;
-
     private boolean mAllowAcquireBackgroundScanChannel = false;
     private boolean mBackgroundScanAcquired = false;
     private boolean mBackgroundScanInProgress = false;
     private boolean mActivityIsRunning = false;
-
-    int CHANNEL_PROOF_DEVICE_TYPE = (byte)0x01;
-    int CHANNEL_PROOF_TRANSMISSION_TYPE = 0;
-
-    int WILDCARD_SEARCH_DEVICE_NUMBER = 0;
-
-    int CHANNEL_PROOF_PERIOD = 0x04EC;//8070;
-    int CHANNEL_PROOF_FREQUENCY = 0x50;
-
     private ChannelControllerBackgroundScan mBackgroundScanController;
+    // Receives Channel Provider state changes
+    private final BroadcastReceiver mChannelProviderStateChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Only respond to state changes if activity is running.
+            if (!mActivityIsRunning) return;
+
+            if (AntChannelProvider.ACTION_CHANNEL_PROVIDER_STATE_CHANGED.equals(intent.getAction())) {
+                int numChannels = intent.getIntExtra(AntChannelProvider.NUM_CHANNELS_AVAILABLE, 0);
+                boolean legacyInterfaceInUse = intent.getBooleanExtra(AntChannelProvider.LEGACY_INTERFACE_IN_USE, false);
+
+                if (numChannels > 0) {
+                    // retrieve the number of channels with the background scanning capability
+                    numChannels = getNumberOfChannelsAvailable();
+                }
+
+                if (mAllowAcquireBackgroundScanChannel) {
+                    // Was a acquire channel allowed
+                    // If no channels available AND legacy interface is not in use, disallow acquiring of channels
+                    if (0 == numChannels && !legacyInterfaceInUse) {
+                        // not any more
+                        mAllowAcquireBackgroundScanChannel = false;
+                    }
+                } else {
+                    // Acquire channels not allowed
+                    // If there are channels OR legacy interface in use, allow acquiring of channels
+                    if (numChannels > 0 || legacyInterfaceInUse) {
+                        // now there are
+                        mAllowAcquireBackgroundScanChannel = true;
+                    }
+                }
+
+                if (null != mListener) {
+                    if (mAllowAcquireBackgroundScanChannel) {
+                        try {
+                            // Try and acquire a channel to be used for background scanning
+                            // If successful, allow user to start scan
+                            acquireBackgroundScanningChannel();
+                            mListener.onAllowStartScan(!mBackgroundScanInProgress && mBackgroundScanAcquired);
+                        } catch (ChannelNotAvailableException e) {
+                            // Channel is not yet available; disallow user to start scan
+                            mListener.onAllowStartScan(false);
+                        }
+                    }
+                }
+            }
+        }
+    };
     private ServiceConnection mAntRadioServiceConnection = new ServiceConnection()
     {
         @Override
@@ -124,34 +165,11 @@ public class ServiceBackgroundScan extends Service
         }
     };
 
-    public interface ChannelChangedListener
+    static void die(String error)
     {
-        void onChannelChanged(ChannelInfo newInfo);
-        void onAllowStartScan(boolean allowStartScan);
+        Log.e(TAG, "DIE: " + error);
     }
-    public class ChannelServiceComm extends Binder
-    {
-        public void setOnChannelChangedListener(ChannelChangedListener listener)
-        {
-            mListener = listener;
-        }
-        public ArrayList<ChannelInfo> getCurrentChannelInfoForAllChannels()
-        {
-            return mChannelInfoList;
-        }
-        public void setActivityIsRunning(boolean isRunning) {
-            mActivityIsRunning = isRunning;
-            if(isRunning && mAllowAcquireBackgroundScanChannel) {
-                try {
-                    // If activity has started running; try and acquire
-                    acquireBackgroundScanningChannel();
-                    mListener.onAllowStartScan(!mBackgroundScanInProgress && mBackgroundScanAcquired);
-                } catch (ChannelNotAvailableException e) {
-                    mListener.onAllowStartScan(false);
-                }
-            }
-        }
-    }
+
     private void closeBackgroundScanChannel()
     {
         if(mBackgroundScanController != null)
@@ -268,60 +286,9 @@ public class ServiceBackgroundScan extends Service
         return new ChannelServiceComm();
     }
     
-    // Receives Channel Provider state changes
-    private final BroadcastReceiver mChannelProviderStateChangedReceiver = new BroadcastReceiver()
-    {
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            // Only respond to state changes if activity is running.
-            if(!mActivityIsRunning) return;
-            
-            if(AntChannelProvider.ACTION_CHANNEL_PROVIDER_STATE_CHANGED.equals(intent.getAction())) {
-                int numChannels = intent.getIntExtra(AntChannelProvider.NUM_CHANNELS_AVAILABLE, 0);
-                boolean legacyInterfaceInUse = intent.getBooleanExtra(AntChannelProvider.LEGACY_INTERFACE_IN_USE, false);
-                
-                if(numChannels > 0) {
-                    // retrieve the number of channels with the background scanning capability
-                    numChannels = getNumberOfChannelsAvailable();
-                }
-                
-                if(mAllowAcquireBackgroundScanChannel) {
-                    // Was a acquire channel allowed
-                    // If no channels available AND legacy interface is not in use, disallow acquiring of channels
-                    if(0 == numChannels && !legacyInterfaceInUse) {
-                        // not any more
-                        mAllowAcquireBackgroundScanChannel = false;
-                    }
-                } else {
-                    // Acquire channels not allowed
-                    // If there are channels OR legacy interface in use, allow acquiring of channels
-                    if(numChannels > 0 || legacyInterfaceInUse) {
-                        // now there are
-                        mAllowAcquireBackgroundScanChannel = true;
-                    }
-                }
-                
-                if(null != mListener) {
-                    if(mAllowAcquireBackgroundScanChannel) {
-                        try {
-                            // Try and acquire a channel to be used for background scanning
-                            // If successful, allow user to start scan
-                            acquireBackgroundScanningChannel();
-                            mListener.onAllowStartScan(!mBackgroundScanInProgress && mBackgroundScanAcquired);
-                        } catch (ChannelNotAvailableException e) {
-                            // Channel is not yet available; disallow user to start scan
-                            mListener.onAllowStartScan(false);
-                        }
-                    }
-                }
-            }
-        }
-    };
-    
     private int getNumberOfChannelsAvailable() {
         if(null != mAntChannelProvider) {
-            
+
             // In order to get the number of channels that are capable of
             // background scanning, a Capabilities object must be created with
             // the background scanning feature set to true.
@@ -332,9 +299,9 @@ public class ServiceBackgroundScan extends Service
                 // By passing in Capabilities object this will return the number
                 // of channels capable of background scanning.
                 int numChannels = mAntChannelProvider.getNumChannelsAvailable(capabilities);
-                
+
                 Log.i(TAG, "Number of channels with background scanning capabilities: " + numChannels);
-                
+
                 return numChannels;
             } catch (RemoteException e) {
                 Log.i(TAG, "", e);
@@ -342,27 +309,28 @@ public class ServiceBackgroundScan extends Service
         }
         return 0;
     }
+
     private void doBindAntRadioService()
     {
         if(BuildConfig.DEBUG) Log.v(TAG, "doBindAntRadioService");
-        
+
         // Start listing for channel available intents
         registerReceiver(mChannelProviderStateChangedReceiver, new IntentFilter(AntChannelProvider.ACTION_CHANNEL_PROVIDER_STATE_CHANGED));
-        
+
         mAntRadioServiceBound = AntService.bindService(this, mAntRadioServiceConnection);
     }
-    
+
     private void doUnbindAntRadioService()
     {
         if(BuildConfig.DEBUG) Log.v(TAG, "doUnbindAntRadioService");
-        
+
         // Stop listing for channel available intents
         try{
             unregisterReceiver(mChannelProviderStateChangedReceiver);
         } catch (IllegalArgumentException exception) {
             if(BuildConfig.DEBUG) Log.d(TAG, "Attempting to unregister a never registered Channel Provider State Changed receiver.");
         }
-        
+
         if(mAntRadioServiceBound)
         {
             try
@@ -386,23 +354,48 @@ public class ServiceBackgroundScan extends Service
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         mAntRadioServiceBound = false;
-        
+
         doBindAntRadioService();
     }
-    
+
     @Override
     public void onDestroy()
     {
         closeBackgroundScanChannel();
         doUnbindAntRadioService();
         mAntChannelProvider = null;
-        
+
         super.onDestroy();
     }
 
-    static void die(String error)
+    public interface ChannelChangedListener {
+        void onChannelChanged(ChannelInfo newInfo);
+
+        void onAllowStartScan(boolean allowStartScan);
+    }
+
+    public class ChannelServiceComm extends Binder
     {
-        Log.e(TAG, "DIE: " + error);
+        public void setOnChannelChangedListener(ChannelChangedListener listener) {
+            mListener = listener;
+        }
+
+        public ArrayList<ChannelInfo> getCurrentChannelInfoForAllChannels() {
+            return mChannelInfoList;
+        }
+
+        public void setActivityIsRunning(boolean isRunning) {
+            mActivityIsRunning = isRunning;
+            if (isRunning && mAllowAcquireBackgroundScanChannel) {
+                try {
+                    // If activity has started running; try and acquire
+                    acquireBackgroundScanningChannel();
+                    mListener.onAllowStartScan(!mBackgroundScanInProgress && mBackgroundScanAcquired);
+                } catch (ChannelNotAvailableException e) {
+                    mListener.onAllowStartScan(false);
+                }
+            }
+        }
     }
 
 }

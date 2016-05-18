@@ -42,7 +42,7 @@ import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.source.platform.PlatformType;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
@@ -71,17 +71,14 @@ import org.md2k.datakitapi.source.platform.PlatformType;
 
 public class ChannelControllerBackgroundScan
 {
+    private static final String TAG = ChannelControllerBackgroundScan.class.getSimpleName();
     Context context;
     private int CHANNEL_PROOF_DEVICE_TYPE;
     private int CHANNEL_PROOF_TRANSMISSION_TYPE;
-
     // Set to 0 (wildcard) to find all devices.
     private int WILDCARD_SEARCH_DEVICE_NUMBER;
-
     private int CHANNEL_PROOF_PERIOD;
     private int CHANNEL_PROOF_FREQUENCY;
-    private static final String TAG = ChannelControllerBackgroundScan.class.getSimpleName();
-
     private AntChannel mBackgroundScanChannel;
     private ChannelBroadcastListener mChannelBroadcastListener;
 
@@ -90,13 +87,37 @@ public class ChannelControllerBackgroundScan
     private boolean mIsOpen;
     private boolean mBackgroundScanInProgress = false;
     private boolean mBackgroundScanIsConfigured = false;
+    private IAntAdapterEventHandler mAdapterEventHandler = new IAntAdapterEventHandler() {
 
-    static public abstract class ChannelBroadcastListener
-    {
-        public abstract void onBroadcastChanged(ChannelInfo newInfo);
-        public abstract void onBackgroundScanStateChange(boolean backgroundScanInProgress, boolean backgroundScanIsConfigured);
-        public abstract void onChannelDeath();
-    }
+        @Override
+        public void onEventBufferSettingsChange(EventBufferSettings newEventBufferSettings) {
+            // Not using the event buffer; can ignore these events
+        }
+
+        @Override
+        // Called whenever the background scan state has changed
+        public void onBackgroundScanStateChange(BackgroundScanState newBackgroundScanState) {
+            Log.i(TAG, "Received Background scan state change: " + newBackgroundScanState.toString());
+
+            // Applications can use this to determine if it is safe to
+            // open a background scan if scan was previously used by other app
+            mBackgroundScanInProgress = newBackgroundScanState.isInProgress();
+            mBackgroundScanIsConfigured = newBackgroundScanState.isConfigured();
+
+            mChannelBroadcastListener.onBackgroundScanStateChange(mBackgroundScanInProgress, mBackgroundScanIsConfigured);
+        }
+
+        @Override
+        public void onBurstStateChange(BurstState newBurstSate) {
+            // Not bursting; can ignore these events
+        }
+
+        @Override
+        public void onLibConfigChange(LibConfig newLibConfig) {
+            Log.i(TAG, "Received Lib Config change: " + newLibConfig.toString());
+        }
+
+    };
     public ChannelControllerBackgroundScan(Context context, AntChannel antChannel, ChannelBroadcastListener broadcastListener, int deviceType, int transmissionType, int wildcard, int period, int frequency)
     {
         this.context=context;
@@ -197,42 +218,28 @@ public class ChannelControllerBackgroundScan
         }
     }
 
-    private IAntAdapterEventHandler mAdapterEventHandler = new IAntAdapterEventHandler() {
+    public void close() {
+        // TODO kill all our resources
+        if (null != mBackgroundScanChannel) {
+            mIsOpen = false;
 
-        @Override
-        public void onEventBufferSettingsChange(EventBufferSettings newEventBufferSettings) {
-            // Not using the event buffer; can ignore these events
+            mBackgroundScanChannel.release();
+            mBackgroundScanChannel = null;
         }
-        
-        @Override
-        // Called whenever the background scan state has changed
-        public void onBackgroundScanStateChange(BackgroundScanState newBackgroundScanState) {
-            Log.i(TAG, "Received Background scan state change: " + newBackgroundScanState.toString());
-            
-            // Applications can use this to determine if it is safe to
-            // open a background scan if scan was previously used by other app
-            mBackgroundScanInProgress = newBackgroundScanState.isInProgress();
-            mBackgroundScanIsConfigured = newBackgroundScanState.isConfigured();
-            
-            mChannelBroadcastListener.onBackgroundScanStateChange(mBackgroundScanInProgress, mBackgroundScanIsConfigured);
-        }
+    }
 
-        @Override
-        public void onBurstStateChange(BurstState newBurstSate) {
-            // Not bursting; can ignore these events
-        }
+    static public abstract class ChannelBroadcastListener {
+        public abstract void onBroadcastChanged(ChannelInfo newInfo);
 
-        @Override
-        public void onLibConfigChange(LibConfig newLibConfig) {
-            Log.i(TAG, "Received Lib Config change: " + newLibConfig.toString());
-        }
-        
-    };
+        public abstract void onBackgroundScanStateChange(boolean backgroundScanInProgress, boolean backgroundScanIsConfigured);
+
+        public abstract void onChannelDeath();
+    }
     
     public class ChannelEventCallback implements IAntChannelEventHandler
     {
         private void updateData(DataMessage dataMessage) {
-            
+
             // Constructing channel info from extended data received from each received message
             int deviceNumber = dataMessage.getExtendedData().getChannelId().getDeviceNumber();
             String platformType= Constants.getSharedPreferenceString(PlatformType.class.getSimpleName());
@@ -249,7 +256,7 @@ public class ChannelControllerBackgroundScan
         {
             mChannelBroadcastListener.onChannelDeath();
         }
-        
+
         @Override
         public void onReceiveMessage(MessageFromAntType messageType, AntMessageParcel antParcel) {
 //            Log.d(TAG, "Rx: messageType="+messageType+" messageId="+messageType.getMessageId()+" messageId="+antParcel.getMessageId()+" message=" + String.valueOf(antParcel.getMessageContent())+" antpearcel="+antParcel);
@@ -267,7 +274,7 @@ public class ChannelControllerBackgroundScan
                     break;
                 case CHANNEL_EVENT:
                     ChannelEventMessage eventMessage = new ChannelEventMessage(antParcel);
-                    
+
                     switch(eventMessage.getEventCode())
                     {
                         case TX:
@@ -297,18 +304,6 @@ public class ChannelControllerBackgroundScan
                  // TODO More complex communication will need to handle these message types
                     break;
             }
-        }
-    }
-    
-    public void close()
-    {
-        // TODO kill all our resources
-        if (null != mBackgroundScanChannel)
-        {
-            mIsOpen = false;
-            
-            mBackgroundScanChannel.release();
-            mBackgroundScanChannel = null;
         }
     }
 }
