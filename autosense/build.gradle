@@ -1,3 +1,7 @@
+version = '0.6.1'
+apply from: 'versioning.gradle'
+
+
 buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
@@ -21,8 +25,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 21
-        versionCode 16
-        versionName '0.6.0'
+        versionCode buildVersionCode()
+        versionName version
     }
     buildTypes {
         release {
