@@ -104,6 +104,7 @@ public class ServiceAutoSenses extends Service {
         } catch (DataKitException e) {
             autoSensePlatforms.unregister();
             Toast.makeText(ServiceAutoSenses.this, "AutoSense Stopped. DataKitException", Toast.LENGTH_LONG).show();
+            onDestroy();
             stopSelf();
         }
     }
