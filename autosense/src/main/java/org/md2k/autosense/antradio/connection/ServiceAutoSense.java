@@ -23,6 +23,7 @@ import org.md2k.autosense.BuildConfig;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
+import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.datakitapi.time.DateTime;
 
@@ -32,17 +33,17 @@ import java.util.HashMap;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -56,9 +57,9 @@ import java.util.HashMap;
  */
 
 public class ServiceAutoSense extends Service {
+    public static final String INTENT_RESTART = "intent_restart";
     private static final String TAG = ServiceAutoSense.class.getSimpleName();
     HashMap<String, ChannelController> mChannelControllerList = new HashMap<>();
-    public static final String INTENT_RESTART = "intent_restart";
     ChannelChangedListener mListener;
     DataExtractorChest dataExtractorChest;
     DataExtractorWrist dataExtractorWrist;
@@ -152,6 +153,19 @@ public class ServiceAutoSense extends Service {
         }
 
     };
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            AutoSensePlatform autoSensePlatform = (AutoSensePlatform) intent.getSerializableExtra(AutoSensePlatform.class.getSimpleName());
+            Log.d(TAG, "close Channel...platformType=" + autoSensePlatform.getPlatformType() + " platformId=" + autoSensePlatform.getPlatformId() + " deviceId=" + autoSensePlatform.getDeviceId());
+            try {
+                closeChannel(autoSensePlatform);
+                createNewChannel(autoSensePlatform);
+            } catch (ChannelNotAvailableException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     static void die(String error) {
         Log.e(TAG, "DIE: " + error);
@@ -223,9 +237,19 @@ public class ServiceAutoSense extends Service {
                                 return;
                             }
                             if (newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_CHEST)) {
-                                dataExtractorChest.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
+                                try {
+                                    dataExtractorChest.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
+                                } catch (DataKitException e) {
+                                    onDestroy();
+                                    e.printStackTrace();
+                                }
                             } else if (newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_WRIST)) {
-                                dataExtractorWrist.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
+                                try {
+                                    dataExtractorWrist.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
+                                } catch (DataKitException e) {
+                                    onDestroy();
+                                    e.printStackTrace();
+                                }
                             }
                             Intent intent = new Intent("autosense");
                             // You can also include some extra data.
@@ -306,20 +330,6 @@ public class ServiceAutoSense extends Service {
 
         doBindAntRadioService();
     }
-
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            AutoSensePlatform autoSensePlatform = (AutoSensePlatform) intent.getSerializableExtra(AutoSensePlatform.class.getSimpleName());
-            Log.d(TAG, "close Channel...platformType=" + autoSensePlatform.getPlatformType() + " platformId=" + autoSensePlatform.getPlatformId() + " deviceId=" + autoSensePlatform.getDeviceId());
-            try {
-                closeChannel(autoSensePlatform);
-                createNewChannel(autoSensePlatform);
-            } catch (ChannelNotAvailableException e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
     @Override
     public void onDestroy() {

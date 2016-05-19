@@ -29,7 +29,7 @@ import org.md2k.datakitapi.source.platform.PlatformType;
 
 import java.util.ArrayList;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
@@ -66,159 +66,6 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
     private SparseArray<Integer> mIdChannelListIndexMap = new SparseArray<>();
 
     private boolean mChannelServiceBound = false;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        if(Constants.sharedPreferences==null) Constants.createSharedPreference(getActivity());
-
-        platformType=Constants.getSharedPreferenceString("platformType");
-        platformId=Constants.getSharedPreferenceString("platformId");
-        deviceId=Constants.getSharedPreferenceString("deviceId");
-        addPreferencesFromResource(R.xml.pref_autosense_platform);
-
-        mChannelServiceBound = false;
-        mChannelListAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_single_choice,
-                android.R.id.text1, mChannelDisplayList);
-        ListView listView_channelList = (ListView) getActivity().findViewById(R.id.listView_channelList);
-        listView_channelList.setAdapter(mChannelListAdapter);
-        listView_channelList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String item = ((TextView) view).getText().toString().trim();
-                Preference preference = findPreference("deviceId");
-                deviceId = item;
-                Constants.setSharedPreferencesString("deviceId", item);
-                preference.setSummary(item);
-            }
-        });
-        mChannelDisplayList.clear();
-        mIdChannelListIndexMap.clear();
-        mChannelListAdapter.notifyDataSetChanged();
-
-        if (!mChannelServiceBound)
-            doBindChannelService();
-
-        setupPreferencePlatformId();
-        setupPreferenceDeviceId();
-        setAddButton();
-        setCancelButton();
-    }
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View v=super.onCreateView(inflater, container,savedInstanceState);
-        assert v != null;
-        ListView lv = (ListView) v.findViewById(android.R.id.list);
-        lv.setPadding(0, 0, 0, 0);
-        return v;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                getActivity().finish();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onResume() {
-        // if null then will be set in onServiceConnected()
-        if (mChannelService != null) {
-            mChannelService.setActivityIsRunning(true);
-        }
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        if (mChannelService != null) {
-            mChannelService.setActivityIsRunning(false);
-        }
-        super.onPause();
-    }
-
-    private void setupPreferenceDeviceId(){
-        Preference preference = findPreference("deviceId");
-        preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Log.d(TAG,preference.getKey()+" "+newValue.toString());
-                deviceId=newValue.toString().trim();
-                Constants.setSharedPreferencesString(preference.getKey(), newValue.toString().trim());
-                preference.setSummary(newValue.toString().trim());
-                return false;
-            }
-        });
-
-    }
-    private void setupPreferencePlatformId(){
-        ListPreference platformIdPreference= (ListPreference) findPreference("platformId");
-        platformIdPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Log.d(TAG, preference.getKey() + ":" + newValue.toString());
-                platformId = newValue.toString();
-                Constants.setSharedPreferencesString(preference.getKey(), newValue.toString());
-                preference.setSummary(newValue.toString());
-                return false;
-            }
-        });
-
-        if(platformType.equals(PlatformType.AUTOSENSE_CHEST)) {
-            getActivity().setTitle("AutoSenseChest Settings");
-            platformIdPreference.setEntries(R.array.chest_entries);
-            platformIdPreference.setEntryValues(R.array.chest_entries);
-            platformIdPreference.setEnabled(false);
-            Constants.setSharedPreferencesString("platformId", "CHEST");
-            platformIdPreference.setSummary(PlatformId.CHEST);
-            platformId = PlatformId.CHEST;
-        }
-        else{
-            getActivity().setTitle("AutoSenseWrist Settings");
-            platformIdPreference.setEntries(R.array.wrist_entries);
-            platformIdPreference.setEntryValues(R.array.wrist_entries);
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Check which request we're responding to
-        if (requestCode == 1) {
-            // Make sure the request was successful
-            if (resultCode == getActivity().RESULT_OK) {
-                Preference preference=findPreference("deviceId");
-//                Log.d(TAG,"platformId="+Constants.getSharedPreferenceString("platformId"));
-                preference.setSummary(Constants.getSharedPreferenceString("deviceId"));
-                // The user picked a contact.
-                // The Intent's data Uri identifies which contact was selected.
-
-                // Do something with the contact here (bigger example below)
-            }
-        }
-    }
-    @Override
-    public void onDestroy() {
-        Log.v(TAG, "onDestroy...");
-        doUnbindChannelService();
-
-        if (getActivity().isFinishing()) {
-            getActivity().stopService(new Intent(getActivity(), ServiceBackgroundScan.class));
-        }
-
-        mChannelServiceConnection = null;
-
-        Log.v(TAG, "...onDestroy");
-
-        super.onDestroy();
-    }
-
     private ServiceConnection mChannelServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder serviceBinder) {
@@ -277,6 +124,177 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         }
     };
 
+    private static String getDisplayText(ChannelInfo channelInfo) {
+        Log.v(TAG, "getDisplayText...");
+        String displayText;
+
+        if (channelInfo.error) {
+            displayText = String.format("#%X !:%s", channelInfo.DEVICE_NUMBER,
+                    channelInfo.getErrorString());
+        } else {
+            displayText = String.format("%X", channelInfo.DEVICE_NUMBER);
+            Log.d(TAG, "deviceNumber: " + displayText + " number:" + channelInfo.DEVICE_NUMBER);
+        }
+
+        Log.v(TAG, "...getDisplayText");
+
+        return displayText;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if(Constants.sharedPreferences==null) Constants.createSharedPreference(getActivity());
+
+        platformType=Constants.getSharedPreferenceString("platformType");
+        platformId=Constants.getSharedPreferenceString("platformId");
+        deviceId=Constants.getSharedPreferenceString("deviceId");
+        addPreferencesFromResource(R.xml.pref_autosense_platform);
+
+        mChannelServiceBound = false;
+        mChannelListAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_single_choice,
+                android.R.id.text1, mChannelDisplayList);
+        ListView listView_channelList = (ListView) getActivity().findViewById(R.id.listView_channelList);
+        listView_channelList.setAdapter(mChannelListAdapter);
+        listView_channelList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String item = ((TextView) view).getText().toString().trim();
+                Preference preference = findPreference("deviceId");
+                deviceId = item;
+                Constants.setSharedPreferencesString("deviceId", item);
+                preference.setSummary(item);
+            }
+        });
+        mChannelDisplayList.clear();
+        mIdChannelListIndexMap.clear();
+        mChannelListAdapter.notifyDataSetChanged();
+
+        if (!mChannelServiceBound)
+            doBindChannelService();
+
+        setupPreferencePlatformId();
+        setupPreferenceDeviceId();
+        setAddButton();
+        setCancelButton();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View v=super.onCreateView(inflater, container,savedInstanceState);
+        assert v != null;
+        ListView lv = (ListView) v.findViewById(android.R.id.list);
+        lv.setPadding(0, 0, 0, 0);
+        return v;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                getActivity().finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume() {
+        // if null then will be set in onServiceConnected()
+        if (mChannelService != null) {
+            mChannelService.setActivityIsRunning(true);
+        }
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        if (mChannelService != null) {
+            mChannelService.setActivityIsRunning(false);
+        }
+        super.onPause();
+    }
+
+    private void setupPreferenceDeviceId(){
+        Preference preference = findPreference("deviceId");
+        preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Log.d(TAG,preference.getKey()+" "+newValue.toString());
+                deviceId=newValue.toString().trim();
+                Constants.setSharedPreferencesString(preference.getKey(), newValue.toString().trim());
+                preference.setSummary(newValue.toString().trim());
+                return false;
+            }
+        });
+
+    }
+
+    private void setupPreferencePlatformId(){
+        ListPreference platformIdPreference= (ListPreference) findPreference("platformId");
+        platformIdPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Log.d(TAG, preference.getKey() + ":" + newValue.toString());
+                platformId = newValue.toString();
+                Constants.setSharedPreferencesString(preference.getKey(), newValue.toString());
+                preference.setSummary(newValue.toString());
+                return false;
+            }
+        });
+
+        if(platformType.equals(PlatformType.AUTOSENSE_CHEST)) {
+            getActivity().setTitle("AutoSenseChest Settings");
+            platformIdPreference.setEntries(R.array.chest_entries);
+            platformIdPreference.setEntryValues(R.array.chest_entries);
+            platformIdPreference.setEnabled(false);
+            Constants.setSharedPreferencesString("platformId", "CHEST");
+            platformIdPreference.setSummary(PlatformId.CHEST);
+            platformId = PlatformId.CHEST;
+        }
+        else{
+            getActivity().setTitle("AutoSenseWrist Settings");
+            platformIdPreference.setEntries(R.array.wrist_entries);
+            platformIdPreference.setEntryValues(R.array.wrist_entries);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == 1) {
+            // Make sure the request was successful
+            if (resultCode == getActivity().RESULT_OK) {
+                Preference preference=findPreference("deviceId");
+//                Log.d(TAG,"platformId="+Constants.getSharedPreferenceString("platformId"));
+                preference.setSummary(Constants.getSharedPreferenceString("deviceId"));
+                // The user picked a contact.
+                // The Intent's data Uri identifies which contact was selected.
+
+                // Do something with the contact here (bigger example below)
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.v(TAG, "onDestroy...");
+        doUnbindChannelService();
+
+        if (getActivity().isFinishing()) {
+            getActivity().stopService(new Intent(getActivity(), ServiceBackgroundScan.class));
+        }
+
+        mChannelServiceConnection = null;
+
+        Log.v(TAG, "...onDestroy");
+
+        super.onDestroy();
+    }
 
     private void refreshList() {
         Log.v(TAG, "refreshList...");
@@ -299,23 +317,6 @@ public class PrefsFragmentAutoSensePlatformSettings extends PreferenceFragment {
         mIdChannelListIndexMap.put(channelInfo.DEVICE_NUMBER, mChannelDisplayList.size());
 
         Log.v(TAG, "...addChannelToList");
-    }
-
-    private static String getDisplayText(ChannelInfo channelInfo){
-        Log.v(TAG, "getDisplayText...");
-        String displayText;
-
-        if (channelInfo.error) {
-            displayText = String.format("#%X !:%s", channelInfo.DEVICE_NUMBER,
-                    channelInfo.getErrorString());
-        } else {
-            displayText = String.format("%X", channelInfo.DEVICE_NUMBER);
-            Log.d(TAG,"deviceNumber: "+displayText+" number:"+channelInfo.DEVICE_NUMBER);
-        }
-
-        Log.v(TAG, "...getDisplayText");
-
-        return displayText;
     }
 
     private void setAddButton() {
