@@ -71,9 +71,6 @@ public abstract class DataQuality {
         return dataSourceClient != null;
     }
 
-    public void reconnect() throws DataKitException {
-        dataSourceClient = DataKitAPI.getInstance(context).register(dataSourceBuilder);
-    }
 
     public void unregister() throws DataKitException {
         if (dataSourceClient != null)
