@@ -97,7 +97,7 @@ public class ServiceAutoSenses extends Service {
                 @Override
                 public void onConnected() {
                     autoSensePlatforms.register();
-                    Toast.makeText(ServiceAutoSenses.this, "AutoSense Started successfully", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(ServiceAutoSenses.this, "AutoSense Started successfully", Toast.LENGTH_LONG).show();
                     startAutoSense();
                 }
             });
