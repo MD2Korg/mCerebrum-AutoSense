@@ -1,6 +1,5 @@
 package org.md2k.autosense;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,6 +21,7 @@ import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.source.platform.PlatformType;
 import org.md2k.utilities.Apps;
+import org.md2k.utilities.UI.AlertDialogs;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -58,27 +58,6 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
     static final int ADD_DEVICE = 1;  // The request code
     private static final String TAG = PrefsFragmentAutoSenseSettings.class.getSimpleName();
     AutoSensePlatforms autoSensePlatforms = null;
-    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            switch (which) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    Intent intent = new Intent(getActivity(), ServiceAutoSenses.class);
-                    getActivity().stopService(intent);
-                    if (saveConfigurationFile()) {
-                        intent = new Intent(getActivity(), ServiceAutoSenses.class);
-                        getActivity().startService(intent);
-                        getActivity().finish();
-                    }
-                    break;
-
-                case DialogInterface.BUTTON_NEGATIVE:
-                    Toast.makeText(getActivity(), "Configuration file is not saved.", Toast.LENGTH_LONG).show();
-                    getActivity().finish();
-                    break;
-            }
-        }
-    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -194,23 +173,17 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
                 Constants.setSharedPreferencesString("deviceId", deviceId);
                 Constants.setSharedPreferencesString("platformType", platformType);
                 Constants.setSharedPreferencesString("platformId", autoSensePlatforms.find(platformType, null, deviceId).get(0).getPlatformId());
-                AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
-                alertDialog.setTitle("Delete Selected Device");
-                alertDialog.setMessage("Delete Device (" + preference.getTitle() + ")?");
-                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Delete",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                autoSensePlatforms.deleteAutoSensePlatform(platformType, null, deviceId);
-                                updatePreferenceScreen();
-                            }
-                        });
-                alertDialog.show();
+                AlertDialogs.AlertDialog(getActivity(), "Delete Selected Device", "Delete Device (" + preference.getTitle() + ")?", R.drawable.ic_delete_red_48dp, "Delete", "Cancel", null, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == DialogInterface.BUTTON_POSITIVE) {
+                            autoSensePlatforms.deleteAutoSensePlatform(platformType, null, deviceId);
+                            updatePreferenceScreen();
+                        } else {
+                            dialog.dismiss();
+                        }
+                    }
+                });
                 return true;
             }
         };
@@ -222,9 +195,27 @@ public class PrefsFragmentAutoSenseSettings extends PreferenceFragment {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (Apps.isServiceRunning(getActivity(), Constants.SERVICE_NAME)) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage("Save configuration file and restart the AutoSense Service?").setPositiveButton("Yes", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener).show();
+                    AlertDialogs.AlertDialog(getActivity(), "Save and Restart?", "Save configuration file and restart AutoSense App?", R.drawable.ic_info_teal_48dp, "Yes", "Cancel", null, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which) {
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    Intent intent = new Intent(getActivity(), ServiceAutoSenses.class);
+                                    getActivity().stopService(intent);
+                                    if (saveConfigurationFile()) {
+                                        intent = new Intent(getActivity(), ServiceAutoSenses.class);
+                                        getActivity().startService(intent);
+                                        getActivity().finish();
+                                    }
+                                    break;
+
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    Toast.makeText(getActivity(), "Configuration file is not saved.", Toast.LENGTH_LONG).show();
+                                    getActivity().finish();
+                                    break;
+                            }
+                        }
+                    });
                 } else {
                     if (saveConfigurationFile())
                         getActivity().finish();

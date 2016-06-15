@@ -1,8 +1,10 @@
 package org.md2k.autosense.antradio.connection;
 
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -10,8 +12,10 @@ import android.widget.Toast;
 
 import com.dsi.ant.channel.ChannelNotAvailableException;
 
+import org.md2k.autosense.ActivityAutoSenseSettings;
 import org.md2k.autosense.Constants;
 import org.md2k.autosense.LoggerText;
+import org.md2k.autosense.R;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.autosense.devices.AutoSensePlatforms;
@@ -123,9 +127,21 @@ public class ServiceAutoSenses extends Service {
 
         isRunning = false;
         if (!readSettings()) {
-            AlertDialogs.showAlertDialog(this, "Configuration Error", "Configuration file for AutoSense doesn't exist.\n\nPlease go to Menu -> Settings");
+            showAlertDialogConfiguration(this);
             stopSelf();
         } else connectDataKit();
+    }
+    void showAlertDialogConfiguration(final Context context){
+        AlertDialogs.AlertDialog(this, "Error: AutoSense Settings", "Please configure AutoSense", R.drawable.ic_error_red_50dp, "Settings", "Cancel", null, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(which== AlertDialog.BUTTON_POSITIVE){
+                    Intent intent = new Intent(context, ActivityAutoSenseSettings.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                }
+            }
+        });
     }
 
     private void doBindChannelService() {
@@ -147,7 +163,7 @@ public class ServiceAutoSenses extends Service {
                 unbindService(mChannelServiceConnection);
                 mChannelServiceBound = false;
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
     }
@@ -193,7 +209,7 @@ public class ServiceAutoSenses extends Service {
                 mChannelService.clearAllChannels();
             }
             mChannelService = null;
-        }catch(Exception e){
+        }catch(Exception ignored){
 
         }
     }
