@@ -32,7 +32,6 @@ import java.util.Arrays;
  */
 
 public class ECGQualityCalculation {
-    public final static int DATA_QUALITY_MISSING_DATA = 4;
     // ===========================================================
     private static final int BUFF_LENGTH = 3;
     // ========
@@ -193,7 +192,7 @@ public class ECGQualityCalculation {
         classifyBuffer();
 
         if (bad_segments > BAD_SEGMENTS_THRESHOLD) {
-            return DATA_QUALITY.BAND_LOOSE;
+            return DATA_QUALITY.BAND_OFF;
             //}else if(2*amplitude_very_small>envelBuff.length){
             //return DATA_QUALITY_BAND_OFF;
         } else if (2 * amplitude_small > envelBuff.length) {

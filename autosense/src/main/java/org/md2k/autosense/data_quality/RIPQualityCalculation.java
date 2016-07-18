@@ -196,9 +196,9 @@ public class RIPQualityCalculation {
         //if(Log.DEBUG) Log.d("RipQualityCalculation","Amplitude "+(max_value-min_value));
         classifyBuffer();
         if (bad_segments > BAD_SEGMENTS_THRESHOLD) {
-            return DATA_QUALITY.BAND_LOOSE;
+            return DATA_QUALITY.BAND_OFF;
         } else if (2 * amplitude_very_small > envelBuff.length) {
-            return DATA_QUALITY.BAND_LOOSE;
+            return DATA_QUALITY.BAND_OFF;
         } else if (2 * amplitude_small > envelBuff.length) {
             return DATA_QUALITY.BAND_LOOSE;
         }
@@ -216,7 +216,7 @@ public class RIPQualityCalculation {
         if (min == 0 || max_slope > SLOPE_THRESHOLD || range < RANGE_THRESHOLD)
             return DATA_QUALITY.BAND_LOOSE;
         if (max > OUTLIER_THRESHOLD_HIGH)
-            return DATA_QUALITY.BAND_LOOSE;
+            return DATA_QUALITY.BAND_OFF;
         return DATA_QUALITY.GOOD;
     }
 }
