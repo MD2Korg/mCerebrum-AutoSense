@@ -45,7 +45,7 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AutoSensePlatform implements Serializable {
-    public static final int DELAY = 5000;
+    public static final int DELAY = 3000;
     public static final int RESTART_NO_DATA = 30000;
     private static final String TAG = AutoSensePlatform.class.getSimpleName();
     public ArrayList<DataQuality> dataQuality;
