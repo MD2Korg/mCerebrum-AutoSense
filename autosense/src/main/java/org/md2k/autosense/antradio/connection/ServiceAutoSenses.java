@@ -2,13 +2,15 @@ package org.md2k.autosense.antradio.connection;
 
 import android.app.AlertDialog;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.widget.Toast;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.dsi.ant.channel.ChannelNotAvailableException;
 
@@ -53,7 +55,6 @@ import org.md2k.utilities.UI.AlertDialogs;
 
 public class ServiceAutoSenses extends Service {
     private static final String TAG = ServiceAutoSenses.class.getSimpleName();
-    public static boolean isRunning = false;
     AutoSensePlatforms autoSensePlatforms = null;
     DataKitAPI dataKitAPI;
     private ServiceAutoSense.ChannelServiceComm mChannelService;
@@ -106,17 +107,13 @@ public class ServiceAutoSenses extends Service {
                 }
             });
         } catch (DataKitException e) {
-            autoSensePlatforms.unregister();
-            Toast.makeText(ServiceAutoSenses.this, "AutoSense Stopped. DataKitException", Toast.LENGTH_LONG).show();
-            onDestroy();
-            stopSelf();
+            LocalBroadcastManager.getInstance(ServiceAutoSenses.this).sendBroadcast(new Intent(Constants.INTENT_STOP));
         }
     }
 
 
     void startAutoSense() {
         doBindChannelService();
-        isRunning = true;
     }
 
     @Override
@@ -124,18 +121,20 @@ public class ServiceAutoSenses extends Service {
         super.onCreate();
         if (Constants.LOG_TEXT)
             LoggerText.getInstance();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiverStop,
+                new IntentFilter(Constants.INTENT_STOP));
 
-        isRunning = false;
         if (!readSettings()) {
             showAlertDialogConfiguration(this);
             stopSelf();
         } else connectDataKit();
     }
-    void showAlertDialogConfiguration(final Context context){
+
+    void showAlertDialogConfiguration(final Context context) {
         AlertDialogs.AlertDialog(this, "Error: AutoSense Settings", "Please configure AutoSense", R.drawable.ic_error_red_50dp, "Settings", "Cancel", null, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(which== AlertDialog.BUTTON_POSITIVE){
+                if (which == AlertDialog.BUTTON_POSITIVE) {
                     Intent intent = new Intent(context, ActivityAutoSenseSettings.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
@@ -170,16 +169,13 @@ public class ServiceAutoSenses extends Service {
 
     @Override
     public void onDestroy() {
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mMessageReceiverStop);
         doUnbindChannelService();
         stopService(new Intent(this, ServiceAutoSense.class));
 
         mChannelServiceConnection = null;
-
-        if (isRunning) {
-            autoSensePlatforms.unregister();
-            dataKitAPI.disconnect();
-        }
-        isRunning = false;
+        autoSensePlatforms.unregister();
+        dataKitAPI.disconnect();
         if (Constants.LOG_TEXT)
             LoggerText.getInstance().close();
 
@@ -209,7 +205,7 @@ public class ServiceAutoSenses extends Service {
                 mChannelService.clearAllChannels();
             }
             mChannelService = null;
-        }catch(Exception ignored){
+        } catch (Exception ignored) {
 
         }
     }
@@ -219,4 +215,12 @@ public class ServiceAutoSenses extends Service {
     public IBinder onBind(Intent intent) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    private BroadcastReceiver mMessageReceiverStop = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            stopSelf();
+        }
+    };
+
 }

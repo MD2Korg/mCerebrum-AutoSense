@@ -67,7 +67,7 @@ public class ActivityMain extends AppCompatActivity {
     private static final String TAG = ActivityMain.class.getSimpleName();
     HashMap<String, TextView> hashMapData = new HashMap<>();
     AutoSensePlatforms autoSensePlatforms = null;
-    Handler mHandler = new Handler();
+    Handler mHandler;
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -104,6 +104,7 @@ public class ActivityMain extends AppCompatActivity {
 
         // Initialize Fabric with the debug-disabled crashlytics.
         Fabric.with(this, crashlyticsKit);
+        mHandler=new Handler();
 
         setContentView(R.layout.activity_main);
         final Button buttonService = (Button) findViewById(R.id.button_app_status);
@@ -256,7 +257,7 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     public void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter("autosense"));
+                new IntentFilter(Constants.INTENT_RECEIVED_DATA));
         autoSensePlatforms = new AutoSensePlatforms(getApplicationContext());
         prepareTable();
         mHandler.post(runnable);

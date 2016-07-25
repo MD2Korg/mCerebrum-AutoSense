@@ -35,6 +35,8 @@ import org.md2k.utilities.Report.Log;
 public class Constants {
     public static final String SERVICE_NAME = "org.md2k.autosense.antradio.connection.ServiceAutoSenses";
     public static final boolean LOG_TEXT =false;
+    public static final String INTENT_STOP = "stop";
+    public static final String INTENT_RECEIVED_DATA = "received_data";
     public static SharedPreferences sharedPreferences = null;
 
     public static void createSharedPreference(Context context){

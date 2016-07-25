@@ -153,7 +153,7 @@ public class AutoSensePlatforms implements Serializable{
     }
 
     public void unregister() {
-        for (int i = 0; i < autoSensePlatforms.size(); i++) {
+        for (int i = 0; autoSensePlatforms!=null && i < autoSensePlatforms.size(); i++) {
             autoSensePlatforms.get(i).unregister();
 
         }

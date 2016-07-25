@@ -20,6 +20,7 @@ import com.dsi.ant.channel.ChannelNotAvailableException;
 import com.dsi.ant.channel.PredefinedNetwork;
 
 import org.md2k.autosense.BuildConfig;
+import org.md2k.autosense.Constants;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
@@ -240,8 +241,8 @@ public class ServiceAutoSense extends Service {
                                 try {
                                     dataExtractorChest.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
                                 } catch (DataKitException e) {
-                                    onDestroy();
-                                    e.printStackTrace();
+                                    LocalBroadcastManager.getInstance(ServiceAutoSense.this).sendBroadcast(new Intent(Constants.INTENT_STOP));
+                                    return;
                                 }
                             } else if (newInfo.autoSensePlatform.getPlatformType().equals(PlatformType.AUTOSENSE_WRIST)) {
                                 try {
@@ -251,7 +252,7 @@ public class ServiceAutoSense extends Service {
                                     e.printStackTrace();
                                 }
                             }
-                            Intent intent = new Intent("autosense");
+                            Intent intent = new Intent(Constants.INTENT_RECEIVED_DATA);
                             // You can also include some extra data.
                             intent.putExtra("operation", "data");
                             intent.putExtra("deviceId", newInfo.autoSensePlatform.getDeviceId());

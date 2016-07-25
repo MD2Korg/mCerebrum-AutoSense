@@ -188,6 +188,7 @@ public class RIPQualityCalculation {
     public int currentQuality(int[] data) {
         // ===========================================================
         if(data.length==0) return DATA_QUALITY.BAND_OFF;
+        else  if(data.length<=10) return DATA_QUALITY.MISSING;
         //if(Log.DEBUG) Log.d("RipQualityCalculation","data "+data[0]+" "+data[1]+" "+data[2]+" "+data[3]+" "+data[4]);
         classifyDataPoints(data);
         classifySegment(data);
