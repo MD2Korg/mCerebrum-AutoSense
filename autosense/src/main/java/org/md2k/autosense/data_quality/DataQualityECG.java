@@ -8,7 +8,6 @@ import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
-import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
@@ -47,7 +46,6 @@ public class DataQualityECG extends DataQuality {
     public DataQualityECG(Context context) {
         super(context);
         ecgQualityCalculation = new ECGQualityCalculation();
-        Log.d(TAG, "DataQualityECG=" + this);
     }
 
     public int getStatus() {

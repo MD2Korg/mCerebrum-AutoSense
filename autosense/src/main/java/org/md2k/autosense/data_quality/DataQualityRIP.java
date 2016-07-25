@@ -8,7 +8,6 @@ import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
-import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
@@ -47,19 +46,15 @@ public class DataQualityRIP extends DataQuality {
     public DataQualityRIP(Context context) {
         super(context);
         ripQualityCalculation = new RIPQualityCalculation();
-        Log.d(TAG, "DataQualityRIP=" + this);
     }
 
     public int getStatus() {
         int size = samples.size();
-        Log.d(TAG,"rip_sample_size="+size);
         int samps[] = new int[size];
         for (int i = 0; i < size; i++)
             samps[i] = samples.get(i);
         samples.clear();
-        Log.d(TAG, "before ... dataQuality=" + this + " rip_sample_size=" + size);
         int status= ripQualityCalculation.currentQuality(samps);
-        Log.d(TAG, "dataQuality="+this+" rip_sample_size=" + size+" status="+status);
         return status;
     }
     public DataSourceBuilder createDatSourceBuilder(Platform platform) {
