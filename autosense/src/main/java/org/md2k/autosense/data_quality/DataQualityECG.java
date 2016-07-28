@@ -48,14 +48,19 @@ public class DataQualityECG extends DataQuality {
         ecgQualityCalculation = new ECGQualityCalculation();
     }
 
-    public int getStatus() {
-        int size = samples.size();
-        int samps[] = new int[size];
-        for (int i = 0; i < size; i++)
-            samps[i] = samples.get(i);
-        samples.clear();
-        return ecgQualityCalculation.currentQuality(samps);
+    public synchronized int getStatus() {
+        try {
+            int size = samples.size();
+            int samps[] = new int[size];
+            for (int i = 0; i < size; i++)
+                samps[i] = samples.get(i);
+            samples.clear();
+            return ecgQualityCalculation.currentQuality(samps);
+        } catch (Exception e) {
+            return DATA_QUALITY.GOOD;
+        }
     }
+
     public DataSourceBuilder createDatSourceBuilder(Platform platform) {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder();
         dataSourceBuilder = dataSourceBuilder.setId(DataSourceType.ECG).setType(DataSourceType.DATA_QUALITY).setPlatform(platform);
@@ -75,7 +80,7 @@ public class DataQualityECG extends DataQuality {
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
         dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(4));
         dataDescriptor.put(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000))) + " Hz");
-        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Quality of ECG. Values="+ DATA_QUALITY.METADATA_STR);
+        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Quality of ECG. Values=" + DATA_QUALITY.METADATA_STR);
         dataDescriptor.put(METADATA.DATA_TYPE, int.class.getName());
         dataDescriptors.add(dataDescriptor);
         return dataDescriptors;

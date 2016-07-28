@@ -48,15 +48,20 @@ public class DataQualityRIP extends DataQuality {
         ripQualityCalculation = new RIPQualityCalculation();
     }
 
-    public int getStatus() {
-        int size = samples.size();
-        int samps[] = new int[size];
-        for (int i = 0; i < size; i++)
-            samps[i] = samples.get(i);
-        samples.clear();
-        int status= ripQualityCalculation.currentQuality(samps);
-        return status;
+    public synchronized int getStatus() {
+        try {
+            int size = samples.size();
+            int samps[] = new int[size];
+            for (int i = 0; i < size; i++)
+                samps[i] = samples.get(i);
+            samples.clear();
+            int status = ripQualityCalculation.currentQuality(samps);
+            return status;
+        } catch (Exception e) {
+            return DATA_QUALITY.GOOD;
+        }
     }
+
     public DataSourceBuilder createDatSourceBuilder(Platform platform) {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder();
         dataSourceBuilder = dataSourceBuilder.setId(DataSourceType.RESPIRATION).setType(DataSourceType.DATA_QUALITY).setPlatform(platform);
@@ -64,7 +69,7 @@ public class DataQualityRIP extends DataQuality {
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000.0))) + " Hz");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "DataQuality-RIP");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.UNIT, "");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Quality of Respiration. Values="+ DATA_QUALITY.METADATA_STR);
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Quality of Respiration. Values=" + DATA_QUALITY.METADATA_STR);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeInt.class.getName());
         return dataSourceBuilder;
     }

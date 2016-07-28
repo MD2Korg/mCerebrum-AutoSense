@@ -48,16 +48,19 @@ public class DataQualityACL extends DataQuality {
         aclQualityCalculation = new ACLQualityCalculation();
     }
 
-    public int getStatus() {
-        int status;
-        int size = samples.size();
-        int samps[] = new int[size];
-        for (int i = 0; i < size; i++)
-            samps[i] = samples.get(i);
-        samples.clear();
-        status= aclQualityCalculation.currentQuality(samps);
-        return status;
-
+    public synchronized int getStatus() {
+        try {
+            int status;
+            int size = samples.size();
+            int samps[] = new int[size];
+            for (int i = 0; i < size; i++)
+                samps[i] = samples.get(i);
+            samples.clear();
+            status = aclQualityCalculation.currentQuality(samps);
+            return status;
+        }catch (Exception e){
+            return DATA_QUALITY.GOOD;
+        }
     }
     public DataSourceBuilder createDatSourceBuilder(Platform platform) {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder();

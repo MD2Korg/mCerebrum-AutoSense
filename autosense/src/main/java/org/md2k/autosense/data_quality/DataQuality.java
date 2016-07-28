@@ -55,7 +55,8 @@ public abstract class DataQuality {
 
     public abstract int getStatus();
 
-    public void add(int sample) {
+    public synchronized void add(int sample) {
+
         samples.add(sample);
     }
 
