@@ -49,8 +49,6 @@ public class DataQualityRIPVariance extends DataQuality {
 
     }
 
-    ;
-
     public synchronized int getStatus() {
         try {
             int size = samples.size();
