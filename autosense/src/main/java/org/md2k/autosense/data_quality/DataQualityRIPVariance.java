@@ -9,7 +9,6 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,14 +39,17 @@ import java.util.HashMap;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DataQualityRIP extends DataQuality {
-    private static final String TAG = DataQualityRIP.class.getSimpleName();
-    RIPQualityCalculation ripQualityCalculation;
+public class DataQualityRIPVariance extends DataQuality {
+    private static final String TAG = DataQualityRIPVariance.class.getSimpleName();
 
-    public DataQualityRIP(Context context) {
+    private static final double RIP_VARIANCE_THRESHOLD = 100;
+
+    public DataQualityRIPVariance(Context context) {
         super(context);
-        ripQualityCalculation = new RIPQualityCalculation();
+
     }
+
+    ;
 
     public synchronized int getStatus() {
         try {
@@ -56,22 +58,53 @@ public class DataQualityRIP extends DataQuality {
             for (int i = 0; i < size; i++)
                 samps[i] = samples.get(i);
             samples.clear();
-            int status = ripQualityCalculation.currentQuality(samps);
-            Log.d("DATA_QUALITY", "RIP: " + status);
+            int status = currentQuality(samps);
             return status;
         } catch (Exception e) {
-            return DATA_QUALITY.GOOD;
+            return RIP_quality.GOOD.value;
         }
+    }
+
+    private int currentQuality(int[] samples) {
+        if (samples.length == 0) {
+            return RIP_quality.BAD.value;
+        }
+        double K = samples[0];
+        long n = 0;
+        double sum = 0;
+        double sum_sqr = 0;
+        int x;
+
+        double max = 0;
+        double min = 10000;
+
+        for (int i = 0; i < samples.length; i++) {
+            x = samples[i];
+            n++;
+            sum += (x - K);
+            sum_sqr += (x - K) * (x - K);
+
+            if (x > max)
+                max = x;
+            if (x < min)
+                min = x;
+        }
+        double variance = (sum_sqr - (sum * sum) / n) / n;
+        Log.d("DATA_QUALITY", "RIP: VARIANCE: " + variance + " (" + min + "," + max + ")");
+        if (variance < RIP_VARIANCE_THRESHOLD) {
+            return RIP_quality.BAD.value;
+        }
+        return RIP_quality.GOOD.value;
     }
 
     public DataSourceBuilder createDatSourceBuilder(Platform platform) {
         DataSourceBuilder dataSourceBuilder = new DataSourceBuilder();
-        dataSourceBuilder = dataSourceBuilder.setId(DataSourceType.RESPIRATION).setType(DataSourceType.DATA_QUALITY).setPlatform(platform);
+        dataSourceBuilder = dataSourceBuilder.setId(DataSourceType.RESPIRATION).setType(DataSourceType.DATA_VARIANCE).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setDataDescriptors(createDataDescriptors());
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000.0))) + " Hz");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "DataQuality-RIP");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "DataQuality-RIP-Variance");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.UNIT, "");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Quality of Respiration. Values=" + DATA_QUALITY.METADATA_STR);
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Variance of Respiration. Values=GOOD(0), BAD(1)");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeInt.class.getName());
         return dataSourceBuilder;
     }
@@ -79,14 +112,25 @@ public class DataQualityRIP extends DataQuality {
     public ArrayList<HashMap<String, String>> createDataDescriptors() {
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();
         HashMap<String, String> dataDescriptor = new HashMap<>();
-        dataDescriptor.put(METADATA.NAME, "DataQuality");
+        dataDescriptor.put(METADATA.NAME, "DataQuality-Variance");
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
-        dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(4));
+        dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(1));
         dataDescriptor.put(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000))) + " Hz");
-        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Quality of Respiration. Values= GOOD(0), BAND_OFF(1), NOT_WORN(2), BAND_LOOSE(3), NOISE(4)");
+        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Variance of Respiration. Values=GOOD(0), BAD(1)");
         dataDescriptor.put(METADATA.DATA_TYPE, int.class.getName());
         dataDescriptors.add(dataDescriptor);
         return dataDescriptors;
+    }
+
+    private enum RIP_quality {
+        BAD(0),
+        GOOD(1);
+
+        private int value;
+
+        RIP_quality(int value) {
+            this.value = value;
+        }
     }
 
 }
