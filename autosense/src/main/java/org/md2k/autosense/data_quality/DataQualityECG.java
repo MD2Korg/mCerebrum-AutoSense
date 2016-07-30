@@ -8,6 +8,7 @@ import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
+import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
@@ -55,7 +56,9 @@ public class DataQualityECG extends DataQuality {
             for (int i = 0; i < size; i++)
                 samps[i] = samples.get(i);
             samples.clear();
-            return ecgQualityCalculation.currentQuality(samps);
+            int quality = ecgQualityCalculation.currentQuality(samps);
+            Log.d("DATA_QUALITY", "ECG: " + quality);
+            return quality;
         } catch (Exception e) {
             return DATA_QUALITY.GOOD;
         }

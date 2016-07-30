@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.md2k.autosense.data_quality.DataQualityECG;
 import org.md2k.autosense.data_quality.DataQualityRIP;
+import org.md2k.autosense.data_quality.DataQualityRIPVariance;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.PlatformId;
 import org.md2k.utilities.Report.Log;
@@ -54,6 +55,7 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
         super(context,platformType,platformId,deviceId, "AutoSense (Chest)");
         this.platformId= PlatformId.CHEST;
         dataQuality = new ArrayList<>();
+        dataQuality.add(new DataQualityRIPVariance(context)); //WHY DOES THIS ORDER MATTER?
         dataQuality.add(new DataQualityRIP(context));
         dataQuality.add(new DataQualityECG(context));
         Log.d(TAG, "dataQuality=" + this + " platformId=" + platformId + " platformType=" + platformType + " deviceId=" + deviceId);

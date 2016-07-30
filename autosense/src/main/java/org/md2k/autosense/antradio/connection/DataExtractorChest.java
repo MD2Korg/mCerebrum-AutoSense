@@ -100,9 +100,10 @@ public class DataExtractorChest {
                     switch (dataSourceType) {
                         case DataSourceType.RESPIRATION:
                             newInfo.autoSensePlatform.dataQuality.get(0).add(samples[i]);
+                            newInfo.autoSensePlatform.dataQuality.get(1).add(samples[i]);
                             break;
                         case DataSourceType.ECG:
-                            newInfo.autoSensePlatform.dataQuality.get(1).add(samples[i]);
+                            newInfo.autoSensePlatform.dataQuality.get(2).add(samples[i]);
                             break;
                     }
                 }
