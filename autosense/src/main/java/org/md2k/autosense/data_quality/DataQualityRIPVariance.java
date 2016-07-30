@@ -65,7 +65,7 @@ public class DataQualityRIPVariance extends DataQuality {
 
     private int currentQuality(int[] samples) {
         if (samples.length == 0) {
-            return RIP_quality.BAD.value;
+            return RIP_quality.NODATA.value;
         }
         double K = samples[0];
         long n = 0;
@@ -102,7 +102,7 @@ public class DataQualityRIPVariance extends DataQuality {
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000.0))) + " Hz");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "DataQuality-RIP-Variance");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.UNIT, "");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Variance of Respiration. Values=GOOD(0), BAD(1)");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Variance of Respiration. Values=GOOD(0), BAD(1), NODATA(2)");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeInt.class.getName());
         return dataSourceBuilder;
     }
@@ -114,7 +114,7 @@ public class DataQualityRIPVariance extends DataQuality {
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
         dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(1));
         dataDescriptor.put(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000))) + " Hz");
-        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Variance of Respiration. Values=GOOD(0), BAD(1)");
+        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Variance of Respiration. Values=GOOD(0), BAD(1), NODATA(2)");
         dataDescriptor.put(METADATA.DATA_TYPE, int.class.getName());
         dataDescriptors.add(dataDescriptor);
         return dataDescriptors;
@@ -122,7 +122,8 @@ public class DataQualityRIPVariance extends DataQuality {
 
     private enum RIP_quality {
         BAD(0),
-        GOOD(1);
+        GOOD(1),
+        NODATA(2);
 
         private int value;
 
