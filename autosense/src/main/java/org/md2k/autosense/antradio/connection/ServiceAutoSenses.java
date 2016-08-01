@@ -101,9 +101,13 @@ public class ServiceAutoSenses extends Service {
             dataKitAPI.connect(new OnConnectionListener() {
                 @Override
                 public void onConnected() {
-                    autoSensePlatforms.register();
-                    //Toast.makeText(ServiceAutoSenses.this, "AutoSense Started successfully", Toast.LENGTH_LONG).show();
-                    startAutoSense();
+                    try {
+                        autoSensePlatforms.register();
+                        //Toast.makeText(ServiceAutoSenses.this, "AutoSense Started successfully", Toast.LENGTH_LONG).show();
+                        startAutoSense();
+                    }catch (Exception e){
+                        LocalBroadcastManager.getInstance(ServiceAutoSenses.this).sendBroadcast(new Intent(Constants.INTENT_STOP));
+                    }
                 }
             });
         } catch (DataKitException e) {
@@ -174,8 +178,10 @@ public class ServiceAutoSenses extends Service {
         stopService(new Intent(this, ServiceAutoSense.class));
 
         mChannelServiceConnection = null;
+        if(autoSensePlatforms!=null)
         autoSensePlatforms.unregister();
-        dataKitAPI.disconnect();
+        if(dataKitAPI!=null)
+            dataKitAPI.disconnect();
         if (Constants.LOG_TEXT)
             LoggerText.getInstance().close();
 

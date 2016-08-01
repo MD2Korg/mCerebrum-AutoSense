@@ -9,6 +9,7 @@ import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,13 +60,13 @@ public class DataQualityRIPVariance extends DataQuality {
             int status = currentQuality(samps);
             return status;
         } catch (Exception e) {
-            return RIP_quality.GOOD.value;
+            return DATA_QUALITY.GOOD;
         }
     }
 
     private int currentQuality(int[] samples) {
         if (samples.length == 0) {
-            return RIP_quality.NODATA.value;
+            return DATA_QUALITY.BAND_OFF;
         }
         double K = samples[0];
         long n = 0;
@@ -90,9 +91,9 @@ public class DataQualityRIPVariance extends DataQuality {
         double variance = (sum_sqr - (sum * sum) / n) / n;
         Log.d("DATA_QUALITY", "RIP: VARIANCE: " + variance + " (" + min + "," + max + ")");
         if (variance < RIP_VARIANCE_THRESHOLD) {
-            return RIP_quality.BAD.value;
+            return DATA_QUALITY.NOT_WORN;
         }
-        return RIP_quality.GOOD.value;
+        return DATA_QUALITY.GOOD;
     }
 
     public DataSourceBuilder createDatSourceBuilder(Platform platform) {
@@ -102,7 +103,7 @@ public class DataQualityRIPVariance extends DataQuality {
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000.0))) + " Hz");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "DataQuality-RIP-Variance");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.UNIT, "");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Variance of Respiration. Values=GOOD(0), BAD(1), NODATA(2)");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Variance of Respiration. Values=" + DATA_QUALITY.METADATA_STR);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeInt.class.getName());
         return dataSourceBuilder;
     }
@@ -119,17 +120,4 @@ public class DataQualityRIPVariance extends DataQuality {
         dataDescriptors.add(dataDescriptor);
         return dataDescriptors;
     }
-
-    private enum RIP_quality {
-        BAD(0),
-        GOOD(1),
-        NODATA(2);
-
-        private int value;
-
-        RIP_quality(int value) {
-            this.value = value;
-        }
-    }
-
 }
