@@ -64,21 +64,21 @@ public class DataExtractorWrist {
     }
 
     public int[] getSample(byte[] ANTRxMessage) {
-        int[] samples=decodeAutoSenseSamples(ANTRxMessage);
+        int[] samples = decodeAutoSenseSamples(ANTRxMessage);
         return convertSamplesToTwosComplement(samples);
     }
 
     private int[] convertSamplesToTwosComplement(int[] samples) {
-        for(int i=0; i<samples.length; i++) {
+        for (int i = 0; i < samples.length; i++) {
             samples[i] = TwosComplement(samples[i], 12);
         }
         return samples;
     }
 
     public int TwosComplement(int x, int nBits) {
-        int msb = x>>(nBits-1);
-        if(msb==1) {
-            return -1*( (~x & ((1<<nBits)-1) ) +1);
+        int msb = x >> (nBits - 1);
+        if (msb == 1) {
+            return -1 * ((~x & ((1 << nBits) - 1)) + 1);
         } else {
             return x;
         }
@@ -97,10 +97,18 @@ public class DataExtractorWrist {
         int samples[] = getSample(newInfo.broadcastData);
         String dataSourceType = getDataSourceType(newInfo.broadcastData);
 
+        double conversionFactor = 1.0;
+        if (isAccelerometerData(dataSourceType)) {
+            conversionFactor = 1.0 / 1024;
+
+        } else if (isGyroscopeData(dataSourceType)) {
+            conversionFactor = 250.0 / 2048;
+        }
+
         if (dataSourceType != null) {
             long timestamps[] = correctTimeStamp(newInfo.autoSensePlatform, dataSourceType, newInfo.timestamp);
-            for (int i = 0; i < 5; i++) {
-                dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
+            for (int i = 0; i < samples.length; i++) {
+                dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i] * conversionFactor));
 
                 switch (dataSourceType) {
                     case DataSourceType.ACCELEROMETER_X:
@@ -109,6 +117,22 @@ public class DataExtractorWrist {
                 }
 
             }
+        }
+    }
+
+    private boolean isGyroscopeData(String dataSourceType) {
+        if (DataSourceType.GYROSCOPE_X.equals(dataSourceType) || DataSourceType.GYROSCOPE_Y.equals(dataSourceType) || DataSourceType.GYROSCOPE_Z.equals(dataSourceType)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isAccelerometerData(String dataSourceType) {
+        if (DataSourceType.ACCELEROMETER_X.equals(dataSourceType) || DataSourceType.ACCELEROMETER_Y.equals(dataSourceType) || DataSourceType.ACCELEROMETER_Z.equals(dataSourceType)) {
+            return true;
+        } else {
+            return false;
         }
     }
 
