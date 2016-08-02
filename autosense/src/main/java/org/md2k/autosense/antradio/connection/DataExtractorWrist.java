@@ -97,10 +97,18 @@ public class DataExtractorWrist {
         int samples[] = getSample(newInfo.broadcastData);
         String dataSourceType = getDataSourceType(newInfo.broadcastData);
 
+        double conversionFactor = 1.0;
+        if (isAccelerometerData(dataSourceType)) {
+            conversionFactor = 1.0 / 1024;
+
+        } else if (isGyroscopeData(dataSourceType)) {
+            conversionFactor = 250.0 / 2048;
+        }
+
         if (dataSourceType != null) {
             long timestamps[] = correctTimeStamp(newInfo.autoSensePlatform, dataSourceType, newInfo.timestamp);
-            for (int i = 0; i < 5; i++) {
-                dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
+            for (int i = 0; i < samples.length; i++) {
+                dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]*conversionFactor));
 
                 switch (dataSourceType) {
                     case DataSourceType.ACCELEROMETER_X:
@@ -109,6 +117,27 @@ public class DataExtractorWrist {
                 }
 
             }
+        }
+    }
+
+    private boolean isGyroscopeData(String dataSourceType) {
+        switch (dataSourceType) {
+            case DataSourceType.GYROSCOPE_X:
+            case DataSourceType.GYROSCOPE_Y:
+            case DataSourceType.GYROSCOPE_Z:
+                return true;
+        }
+        return false;
+    }
+
+    private boolean isAccelerometerData(String dataSourceType) {
+        switch (dataSourceType) {
+            case DataSourceType.ACCELEROMETER_X:
+            case DataSourceType.ACCELEROMETER_Y:
+            case DataSourceType.ACCELEROMETER_Z:
+                return true;
+            default:
+                return false;
         }
     }
 
