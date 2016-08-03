@@ -24,6 +24,7 @@ import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.UI.AlertDialogs;
 
 /*
@@ -225,6 +226,7 @@ public class ServiceAutoSenses extends Service {
     private BroadcastReceiver mMessageReceiverStop = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG,"Stop");
             stopSelf();
         }
     };
