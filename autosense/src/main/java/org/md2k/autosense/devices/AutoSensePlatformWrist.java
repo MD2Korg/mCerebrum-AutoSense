@@ -57,8 +57,12 @@ public class AutoSensePlatformWrist extends AutoSensePlatform{
         Log.d(TAG, "dataQualities=" + this +" platformId="+platformId+" platformType="+platformType+" deviceId="+deviceId);
 
         autoSenseDataSources=new ArrayList<>();
-        for (DATASOURCE datasource : DATASOURCES)
-            autoSenseDataSources.add(new AutoSenseDataSource(context, datasource.dataSourceType,datasource.name,datasource.frequency,-2048,2048));
+        for (DATASOURCE datasource : DATASOURCES) {
+            if (datasource.dataSourceType.equals(DataSourceType.ACCELEROMETER_X) || datasource.dataSourceType.equals(DataSourceType.ACCELEROMETER_Y) || datasource.dataSourceType.equals(DataSourceType.ACCELEROMETER_Z) )
+                autoSenseDataSources.add(new AutoSenseDataSource(context, datasource.dataSourceType, datasource.name, datasource.frequency, -2, 2));
+            else if (datasource.dataSourceType.equals(DataSourceType.GYROSCOPE_X) || datasource.dataSourceType.equals(DataSourceType.GYROSCOPE_Y) || datasource.dataSourceType.equals(DataSourceType.GYROSCOPE_Z))
+                autoSenseDataSources.add(new AutoSenseDataSource(context, datasource.dataSourceType, datasource.name, datasource.frequency, -250, 250));
+        }
     }
     class DATASOURCE{
         String dataSourceType;
