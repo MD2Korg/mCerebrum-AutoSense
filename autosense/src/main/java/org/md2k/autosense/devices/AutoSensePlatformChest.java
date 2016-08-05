@@ -54,11 +54,11 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
     public AutoSensePlatformChest(Context context, String platformType, String platformId, String deviceId) {
         super(context,platformType,platformId,deviceId, "AutoSense (Chest)");
         this.platformId= PlatformId.CHEST;
-        dataQuality = new ArrayList<>();
-        dataQuality.add(new DataQualityRIPVariance(context)); //WHY DOES THIS ORDER MATTER?
-        dataQuality.add(new DataQualityRIP(context));
-        dataQuality.add(new DataQualityECG(context));
-        Log.d(TAG, "dataQuality=" + this + " platformId=" + platformId + " platformType=" + platformType + " deviceId=" + deviceId);
+        dataQualities = new ArrayList<>();
+        dataQualities.add(new DataQualityRIPVariance(context)); //WHY DOES THIS ORDER MATTER?
+        dataQualities.add(new DataQualityRIP(context));
+        dataQualities.add(new DataQualityECG(context));
+        Log.d(TAG, "dataQualities=" + this + " platformId=" + platformId + " platformType=" + platformType + " deviceId=" + deviceId);
 
         autoSenseDataSources=new ArrayList<>();
         for (int i=0;i<DATASOURCES.size();i++) {

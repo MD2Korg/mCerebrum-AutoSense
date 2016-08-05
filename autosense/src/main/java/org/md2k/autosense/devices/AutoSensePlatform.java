@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.md2k.autosense.Constants;
-import org.md2k.autosense.antradio.connection.ServiceAutoSense;
+import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
 import org.md2k.autosense.data_quality.DataQuality;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
@@ -48,7 +48,7 @@ public class AutoSensePlatform implements Serializable {
     public static final int DELAY = 3000;
     public static final int RESTART_NO_DATA = 30000;
     private static final String TAG = AutoSensePlatform.class.getSimpleName();
-    public ArrayList<DataQuality> dataQuality;
+    public ArrayList<DataQuality> dataQualities;
     protected String platformId;
     protected String platformType;
     protected String deviceId;
@@ -61,11 +61,12 @@ public class AutoSensePlatform implements Serializable {
     Runnable runnableDataQuality = new Runnable() {
         @Override
         public void run() {
-            int samples[] = new int[dataQuality.size()];
+            int samples[] = new int[dataQualities.size()];
+            Log.d(TAG,"runnableDataQuality...size="+ dataQualities.size());
             try {
-                for (int i = 0; i < dataQuality.size(); i++) {
-                    samples[i] = dataQuality.get(i).getStatus();
-                    dataQuality.get(i).insertToDataKit(samples[i]);
+                for (int i = 0; i < dataQualities.size(); i++) {
+                    samples[i] = dataQualities.get(i).getStatus();
+                    dataQualities.get(i).insertToDataKit(samples[i]);
                 }
             } catch (DataKitException e) {
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_STOP));
@@ -75,12 +76,14 @@ public class AutoSensePlatform implements Serializable {
                 noData += DELAY;
             else noData = 0;
             if (noData >= RESTART_NO_DATA) {
-                Intent intent = new Intent(ServiceAutoSense.INTENT_RESTART);
-                intent.putExtra(AutoSensePlatform.class.getSimpleName(), AutoSensePlatform.this);
+                Intent intent = new Intent(ServiceAutoSenses.INTENT_RESTART);
+                intent.putExtra("device_id",deviceId);
+                intent.putExtra("platform_id",platformId);
+                intent.putExtra("platform_type",platformType);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 noData = 0;
             }
-            handler.postDelayed(runnableDataQuality, DELAY);
+            handler.postDelayed(this, DELAY);
         }
     };
 
@@ -134,13 +137,14 @@ public class AutoSensePlatform implements Serializable {
                 return;
             }
         }
-        for (int i = 0; i < dataQuality.size(); i++)
+        for (int i = 0; i < dataQualities.size(); i++)
             try {
-                dataQuality.get(i).register(platform);
+                dataQualities.get(i).register(platform);
             } catch (DataKitException e) {
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Constants.INTENT_STOP));
                 return;
             }
+        handler.removeCallbacks(runnableDataQuality);
         handler.post(runnableDataQuality);
     }
 
@@ -152,9 +156,9 @@ public class AutoSensePlatform implements Serializable {
             } catch (DataKitException ignored) {
             }
         }
-        for (int i = 0; i < dataQuality.size(); i++)
+        for (int i = 0; i < dataQualities.size(); i++)
             try {
-                dataQuality.get(i).unregister();
+                dataQualities.get(i).unregister();
             } catch (DataKitException ignored) {
             }
     }

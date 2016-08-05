@@ -25,7 +25,10 @@ import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
 import org.md2k.utilities.Report.Log;
+import org.md2k.utilities.Report.LogStorage;
 import org.md2k.utilities.UI.AlertDialogs;
+
+import java.util.ArrayList;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -56,6 +59,7 @@ import org.md2k.utilities.UI.AlertDialogs;
 
 public class ServiceAutoSenses extends Service {
     private static final String TAG = ServiceAutoSenses.class.getSimpleName();
+    public static final String INTENT_RESTART = "intent_restart";
     AutoSensePlatforms autoSensePlatforms = null;
     DataKitAPI dataKitAPI;
     private ServiceAutoSense.ChannelServiceComm mChannelService;
@@ -124,10 +128,12 @@ public class ServiceAutoSenses extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
         if (Constants.LOG_TEXT)
             LoggerText.getInstance();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiverStop,
                 new IntentFilter(Constants.INTENT_STOP));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverRestart, new IntentFilter(INTENT_RESTART));
 
         if (!readSettings()) {
             showAlertDialogConfiguration(this);
@@ -175,6 +181,8 @@ public class ServiceAutoSenses extends Service {
     @Override
     public void onDestroy() {
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mMessageReceiverStop);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(
+                mMessageReceiverRestart);
         doUnbindChannelService();
         stopService(new Intent(this, ServiceAutoSense.class));
 
@@ -205,6 +213,11 @@ public class ServiceAutoSenses extends Service {
         }
     }
 
+    private void clearChannel(AutoSensePlatform autoSensePlatform){
+        if(mChannelService!=null)
+            mChannelService.clearChannel(autoSensePlatform);
+    }
+
     private void clearAllChannels() {
         try {
             if (null != mChannelService) {
@@ -217,6 +230,20 @@ public class ServiceAutoSenses extends Service {
         }
     }
 
+    private BroadcastReceiver mMessageReceiverRestart = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+//            AutoSensePlatform autoSensePlatform = (AutoSensePlatform) intent.getSerializableExtra(AutoSensePlatform.class.getSimpleName());
+            String deviceId=intent.getStringExtra("device_id");
+            String platformType=intent.getStringExtra("platform_type");
+            String platformId = intent.getStringExtra("platform_id");
+            ArrayList<AutoSensePlatform> autoSensePlatform = autoSensePlatforms.find(platformType, platformId, deviceId);
+            if(autoSensePlatform!=null && autoSensePlatform.size()>0) {
+                clearChannel(autoSensePlatform.get(0));
+                addNewChannel(autoSensePlatform.get(0));
+            }
+        }
+    };
 
     @Override
     public IBinder onBind(Intent intent) {

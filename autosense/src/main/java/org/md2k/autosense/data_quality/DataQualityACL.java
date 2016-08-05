@@ -8,6 +8,7 @@ import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
+import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class DataQualityACL extends DataQuality {
                 samps[i] = samples.get(i);
             samples.clear();
             status = aclQualityCalculation.currentQuality(samps);
+            Log.d("DATA_QUALITY", "ACL_WRIST: " + status);
             return status;
         }catch (Exception e){
             return DATA_QUALITY.GOOD;

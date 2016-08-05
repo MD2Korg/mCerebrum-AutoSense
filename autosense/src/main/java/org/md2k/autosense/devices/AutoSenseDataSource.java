@@ -95,6 +95,7 @@ public class AutoSenseDataSource implements Serializable{
     public void unregister() throws DataKitException {
         if (dataSourceClient != null)
             DataKitAPI.getInstance(context).unregister(dataSourceClient);
+        dataSourceClient=null;
     }
     ArrayList<HashMap<String, String>>  createDataDescriptors() {
         ArrayList<HashMap<String, String>> dataDescriptors = new ArrayList<>();

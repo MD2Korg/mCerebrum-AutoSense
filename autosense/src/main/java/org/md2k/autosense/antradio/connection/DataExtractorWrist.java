@@ -112,7 +112,7 @@ public class DataExtractorWrist {
 
                 switch (dataSourceType) {
                     case DataSourceType.ACCELEROMETER_X:
-                        newInfo.autoSensePlatform.dataQuality.get(0).add(samples[i]);
+                        newInfo.autoSensePlatform.dataQualities.get(0).add(samples[i]);
                         break;
                 }
 

@@ -44,8 +44,9 @@ public abstract class DataQuality {
     ArrayList<Integer> samples;
     DataSourceClient dataSourceClient;
     DataSourceBuilder dataSourceBuilder;
+
     DataQuality(Context context) {
-        this.context=context;
+        this.context = context;
         samples = new ArrayList<>();
     }
 
@@ -76,5 +77,7 @@ public abstract class DataQuality {
     public void unregister() throws DataKitException {
         if (dataSourceClient != null)
             DataKitAPI.getInstance(context).unregister(dataSourceClient);
+        dataSourceClient = null;
+
     }
 }
