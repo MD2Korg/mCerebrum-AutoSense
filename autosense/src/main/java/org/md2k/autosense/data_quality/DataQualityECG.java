@@ -69,9 +69,9 @@ public class DataQualityECG extends DataQuality {
         dataSourceBuilder = dataSourceBuilder.setId(DataSourceType.ECG).setType(DataSourceType.DATA_QUALITY).setPlatform(platform);
         dataSourceBuilder = dataSourceBuilder.setDataDescriptors(createDataDescriptors());
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000.0))) + " Hz");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "DataQuality-RIP");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.NAME, "DataQuality-ECG");
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.UNIT, "");
-        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Quality of ECG. Values= GOOD(0), BAND_OFF(1), NOT_WORN(2), BAND_LOOSE(3), NOISE(4)");
+        dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DESCRIPTION, "measures the Data Quality of ECG. Values= "+ DATA_QUALITY.METADATA_STR);
         dataSourceBuilder = dataSourceBuilder.setMetadata(METADATA.DATA_TYPE, DataTypeInt.class.getName());
         return dataSourceBuilder;
     }
@@ -81,7 +81,7 @@ public class DataQualityECG extends DataQuality {
         HashMap<String, String> dataDescriptor = new HashMap<>();
         dataDescriptor.put(METADATA.NAME, "DataQuality");
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
-        dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(4));
+        dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(8));
         dataDescriptor.put(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000))) + " Hz");
         dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Quality of ECG. Values=" + DATA_QUALITY.METADATA_STR);
         dataDescriptor.put(METADATA.DATA_TYPE, int.class.getName());

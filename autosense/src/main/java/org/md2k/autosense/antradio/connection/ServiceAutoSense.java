@@ -158,16 +158,17 @@ public class ServiceAutoSense extends Service {
     private void closeChannel(AutoSensePlatform autoSensePlatform) {
         Log.d(TAG, "closeChannel()...platformType=" + autoSensePlatform.getPlatformType() + " deviceId=" + autoSensePlatform.getDeviceId());
         ChannelController channelController = mChannelControllerList.get(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
-        if (channelController != null)
+        if (channelController != null) {
             channelController.close();
+        }
         mChannelControllerList.remove(autoSensePlatform.getPlatformType() + ":" + autoSensePlatform.getDeviceId());
     }
 
     private void closeAllChannels() {
         for (Object o : mChannelControllerList.entrySet()) {
             HashMap.Entry pair = (HashMap.Entry) o;
-            ChannelController channel = (ChannelController) pair.getValue();
-            channel.close();
+            ChannelController channelController = (ChannelController) pair.getValue();
+            channelController.close();
         }
         mChannelControllerList.clear();
 
@@ -231,8 +232,8 @@ public class ServiceAutoSense extends Service {
                                 try {
                                     dataExtractorWrist.prepareAndSendToDataKit(ServiceAutoSense.this, newInfo);
                                 } catch (DataKitException e) {
-                                    onDestroy();
-                                    e.printStackTrace();
+                                    LocalBroadcastManager.getInstance(ServiceAutoSense.this).sendBroadcast(new Intent(Constants.INTENT_STOP));
+                                    return;
                                 }
                             }
                             Intent intent = new Intent(Constants.INTENT_RECEIVED_DATA);

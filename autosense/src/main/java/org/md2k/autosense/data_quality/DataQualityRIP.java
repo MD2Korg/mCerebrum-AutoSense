@@ -81,9 +81,9 @@ public class DataQualityRIP extends DataQuality {
         HashMap<String, String> dataDescriptor = new HashMap<>();
         dataDescriptor.put(METADATA.NAME, "DataQuality");
         dataDescriptor.put(METADATA.MIN_VALUE, String.valueOf(0));
-        dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(4));
+        dataDescriptor.put(METADATA.MAX_VALUE, String.valueOf(8));
         dataDescriptor.put(METADATA.FREQUENCY, String.valueOf(String.valueOf(1.0 / (AutoSensePlatform.DELAY / 1000))) + " Hz");
-        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Quality of Respiration. Values= GOOD(0), BAND_OFF(1), NOT_WORN(2), BAND_LOOSE(3), NOISE(4)");
+        dataDescriptor.put(METADATA.DESCRIPTION, "measures the Data Quality of Respiration. Values= "+DATA_QUALITY.METADATA_STR);
         dataDescriptor.put(METADATA.DATA_TYPE, int.class.getName());
         dataDescriptors.add(dataDescriptor);
         return dataDescriptors;

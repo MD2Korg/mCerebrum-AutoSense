@@ -24,6 +24,7 @@ import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.datakitapi.time.DateTime;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.Report.LogStorage;
 import org.md2k.utilities.UI.AlertDialogs;
@@ -63,6 +64,7 @@ public class ServiceAutoSenses extends Service {
     AutoSensePlatforms autoSensePlatforms = null;
     DataKitAPI dataKitAPI;
     private ServiceAutoSense.ChannelServiceComm mChannelService;
+    private boolean isStopping;
 
     private boolean mChannelServiceBound = false;
     private ServiceConnection mChannelServiceConnection = new ServiceConnection() {
@@ -95,12 +97,12 @@ public class ServiceAutoSenses extends Service {
         }
     };
 
-    private boolean readSettings() {
+    private synchronized boolean readSettings() {
         autoSensePlatforms = new AutoSensePlatforms(getApplicationContext());
         return autoSensePlatforms.size() != 0;
     }
 
-    private void connectDataKit() {
+    private synchronized void connectDataKit() {
         dataKitAPI = DataKitAPI.getInstance(getApplicationContext());
         try {
             dataKitAPI.connect(new OnConnectionListener() {
@@ -128,7 +130,9 @@ public class ServiceAutoSenses extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        isStopping=false;
         LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
+        Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",service_start");
         if (Constants.LOG_TEXT)
             LoggerText.getInstance();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiverStop,
@@ -137,6 +141,7 @@ public class ServiceAutoSenses extends Service {
 
         if (!readSettings()) {
             showAlertDialogConfiguration(this);
+            clear();
             stopSelf();
         } else connectDataKit();
     }
@@ -177,23 +182,27 @@ public class ServiceAutoSenses extends Service {
 
         }
     }
-
-    @Override
-    public void onDestroy() {
+    synchronized void clear(){
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mMessageReceiverStop);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(
-                mMessageReceiverRestart);
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mMessageReceiverRestart);
+        if(isStopping) return;
+        isStopping=false;
         doUnbindChannelService();
         stopService(new Intent(this, ServiceAutoSense.class));
 
         mChannelServiceConnection = null;
         if(autoSensePlatforms!=null)
-        autoSensePlatforms.unregister();
+            autoSensePlatforms.unregister();
         if(dataKitAPI!=null)
             dataKitAPI.disconnect();
         if (Constants.LOG_TEXT)
             LoggerText.getInstance().close();
+    }
 
+    @Override
+    public void onDestroy() {
+        Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",service_stop");
+        clear();
         super.onDestroy();
     }
 
@@ -254,6 +263,8 @@ public class ServiceAutoSenses extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG,"Stop");
+            Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",broadcast_receiver_stop_service");
+            clear();
             stopSelf();
         }
     };
