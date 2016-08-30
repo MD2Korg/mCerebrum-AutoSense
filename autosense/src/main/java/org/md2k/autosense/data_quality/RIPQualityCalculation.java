@@ -40,6 +40,7 @@ public class RIPQualityCalculation {
     private static final int BAD_SEGMENTS_THRESHOLD = 2;
     private static final int SLOPE_THRESHOLD = 1500;
     private static final int RANGE_THRESHOLD = 200;
+    public final static double MINIMUM_EXPECTED_SAMPLES = 3 * (0.33) * 21.33;  //33% of a 3 second window with 10.33 sampling frequency
     //	private final static int RIP_THRESHOLD_BAND_LOOSE = 150;
 //	private final static int RIP_THRESHOLD_BAND_OFF = 20;
     private final static int RIP_THRESHOLD_BAND_LOOSE = 200;
@@ -188,7 +189,7 @@ public class RIPQualityCalculation {
     public int currentQuality(int[] data) {
         // ===========================================================
         if(data.length==0) return DATA_QUALITY.BAND_OFF;
-        else  if(data.length<=10) return DATA_QUALITY.MISSING;
+        else  if(data.length<MINIMUM_EXPECTED_SAMPLES) return DATA_QUALITY.MISSING;
         //if(Log.DEBUG) Log.d("RipQualityCalculation","data "+data[0]+" "+data[1]+" "+data[2]+" "+data[3]+" "+data[4]);
         classifyDataPoints(data);
         classifySegment(data);

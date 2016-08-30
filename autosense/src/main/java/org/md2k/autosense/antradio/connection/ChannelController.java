@@ -173,12 +173,23 @@ public class ChannelController {
         Log.e(TAG, logString.toString());
         try {
             mAntChannel.clearAdapterEventHandler();
+        } catch (RemoteException e1) {
+            e1.printStackTrace();
+        }
+        try {
             mAntChannel.clearChannelEventHandler();
         } catch (RemoteException e1) {
             e1.printStackTrace();
         }
 
         mAntChannel.release();
+        try {
+            mAntChannel.close();
+        } catch (RemoteException e1) {
+            e1.printStackTrace();
+        } catch (AntCommandFailedException e1) {
+            e1.printStackTrace();
+        }
         mAntChannel=null;
 
         displayChannelError("ANT Command Failed");
@@ -192,11 +203,23 @@ public class ChannelController {
             // After releasing, the AntChannel instance cannot be reused.
             try {
                 mAntChannel.clearAdapterEventHandler();
-                mAntChannel.clearChannelEventHandler();
             } catch (RemoteException e1) {
                 e1.printStackTrace();
             }
+            try {
+                mAntChannel.clearChannelEventHandler();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
             mAntChannel.release();
+            try {
+                mAntChannel.close();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (AntCommandFailedException e) {
+                e.printStackTrace();
+            }
             mAntChannel = null;
         }
 
