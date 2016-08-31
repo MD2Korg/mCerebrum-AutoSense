@@ -180,7 +180,7 @@ public class ECGQualityCalculation {
     public int currentQuality(int[] data) {
         // ===========================================================
         if(data.length==0) return DATA_QUALITY.BAND_OFF;
-        else  if(data.length<MINIMUM_EXPECTED_SAMPLES) return DATA_QUALITY.MISSING;
+        else  if(data.length<=10) return DATA_QUALITY.MISSING;
         classifyDataPoints(data);
         /*large_stuck=0;
         small_stuck=0;

@@ -166,8 +166,7 @@ public class ActivityMain extends AppCompatActivity {
                 try {
                     intent.putExtra(org.md2k.utilities.Constants.VERSION_CODE, String.valueOf(this.getPackageManager().getPackageInfo(getPackageName(), 0).versionCode));
                     intent.putExtra(org.md2k.utilities.Constants.VERSION_NAME, this.getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
+                } catch (PackageManager.NameNotFoundException ignored) {
                 }
                 startActivity(intent);
                 break;

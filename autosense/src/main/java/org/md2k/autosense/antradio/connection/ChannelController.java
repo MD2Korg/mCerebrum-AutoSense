@@ -145,54 +145,7 @@ public class ChannelController {
     }
 
     void channelError(String error, AntCommandFailedException e) {
-        StringBuilder logString;
-
-        if (e.getResponseMessage() != null) {
-            String initiatingMessageId = "0x" + Integer.toHexString(
-                    e.getResponseMessage().getInitiatingMessageId());
-            String rawResponseCode = "0x" + Integer.toHexString(
-                    e.getResponseMessage().getRawResponseCode());
-
-            logString = new StringBuilder(error)
-                    .append(". Command ")
-                    .append(initiatingMessageId)
-                    .append(" failed with code ")
-                    .append(rawResponseCode);
-        } else {
-            String attemptedMessageId = "0x" + Integer.toHexString(
-                    e.getAttemptedMessageType().getMessageId());
-            String failureReason = e.getFailureReason().toString();
-
-            logString = new StringBuilder(error)
-                    .append(". Command ")
-                    .append(attemptedMessageId)
-                    .append(" failed with reason ")
-                    .append(failureReason);
-        }
-
-        Log.e(TAG, logString.toString());
-        try {
-            mAntChannel.clearAdapterEventHandler();
-        } catch (RemoteException e1) {
-            e1.printStackTrace();
-        }
-        try {
-            mAntChannel.clearChannelEventHandler();
-        } catch (RemoteException e1) {
-            e1.printStackTrace();
-        }
-
-        mAntChannel.release();
-        try {
-            mAntChannel.close();
-        } catch (RemoteException e1) {
-            e1.printStackTrace();
-        } catch (AntCommandFailedException e1) {
-            e1.printStackTrace();
-        }
-        mAntChannel=null;
-
-        displayChannelError("ANT Command Failed");
+        close();
     }
 
     public void close() {
@@ -202,22 +155,16 @@ public class ChannelController {
             // Releasing the channel to make it available for others.
             // After releasing, the AntChannel instance cannot be reused.
             try {
-                mAntChannel.clearAdapterEventHandler();
-            } catch (RemoteException e1) {
-                e1.printStackTrace();
-            }
-            try {
                 mAntChannel.clearChannelEventHandler();
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                mAntChannel.unassign();
+            } catch (RemoteException | AntCommandFailedException ignored) {
+                Log.d(TAG,"error");
             }
 
             mAntChannel.release();
             try {
-                mAntChannel.close();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            } catch (AntCommandFailedException e) {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             mAntChannel = null;
@@ -237,6 +184,7 @@ public class ChannelController {
      */
     public class ChannelEventCallback implements IAntChannelEventHandler {
         private void updateData(DataMessage data) {
+            if(!mIsOpen) return;
             mChannelInfo.status = 0;
             mChannelInfo.broadcastData = data.getMessageContent();
             mChannelInfo.timestamp= DateTime.getDateTime();

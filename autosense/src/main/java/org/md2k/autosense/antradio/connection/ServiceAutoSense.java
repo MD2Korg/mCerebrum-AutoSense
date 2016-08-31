@@ -79,6 +79,7 @@ public class ServiceAutoSense extends Service {
                 // Retrieving the data contained in the intent
                 int numChannels = intent.getIntExtra(AntChannelProvider.NUM_CHANNELS_AVAILABLE, 0);
                 boolean legacyInterfaceInUse = intent.getBooleanExtra(AntChannelProvider.LEGACY_INTERFACE_IN_USE, false);
+                Log.d(TAG,"numChannel="+numChannels);
 
                 if (mAllowAddChannel) {
                     // Was a acquire channel allowed
@@ -193,8 +194,7 @@ public class ServiceAutoSense extends Service {
                 mAntChannel = mAntChannelProvider.acquireChannel(this, PredefinedNetwork.PUBLIC);
                 Log.d(TAG, "mAntChannel=" + mAntChannel);
                 Log.d(TAG, "...acquireChannel");
-            } catch (RemoteException e) {
-                die("ACP Remote Ex");
+            } catch (RemoteException ignored) {
             }
         }
         return mAntChannel;

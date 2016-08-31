@@ -163,8 +163,6 @@ public class ACLQualityCalculation {
     public int currentQuality(int[] x) {       //just receive x axis, in fact it should work with any single axis.
         int len_x = x.length;
         if (len_x == 0) return DATA_QUALITY.BAND_OFF;
-        if (len_x < MINIMUM_EXPECTED_SAMPLES)
-            return DATA_QUALITY.MISSING;
 
 //		if(len_x<MINIMUM_EXPECTED_SAMPLES)
 //			return DATA_QUALITY.BAND_OFF;
