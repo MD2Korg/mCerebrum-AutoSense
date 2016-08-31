@@ -156,14 +156,14 @@ public class ChannelController {
             // After releasing, the AntChannel instance cannot be reused.
             try {
                 mAntChannel.clearChannelEventHandler();
-                mAntChannel.unassign();
-            } catch (RemoteException | AntCommandFailedException ignored) {
+            } catch (RemoteException ignored) {
                 Log.d(TAG,"error");
             }
 
+
             mAntChannel.release();
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
