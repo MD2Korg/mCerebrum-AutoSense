@@ -42,6 +42,8 @@ public class ECGQualityCalculation {
     private static final int SLOPE_THRESHOLD = 50;
     private static final int RANGE_THRESHOLD = 200;
     private final static int ECK_THRESHOLD_BAND_LOOSE = 47;
+    public final static double MINIMUM_EXPECTED_SAMPLES = 3 * (0.33) * 64;  //33% of a 3 second window with 10.33 sampling frequency
+
     private static final String TAG = "ECKQualityCalculation";
     private static int[] envelBuff;
     private static int envelHead;

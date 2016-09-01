@@ -127,7 +127,7 @@ public class ACLQualityCalculation {
             return (m[middle - 1] + m[middle]) / 2;
         }
     }
-
+/*
     // ===========================================================
     public int currentQuality(int[] x, int[] y, int[] z) {       //three axes accelerometer data received here.
         int len_x = x.length;
@@ -142,7 +142,7 @@ public class ACLQualityCalculation {
 		/* calculate magnitude for each 3 seconds window*/
 
         //find the minimum length
-        if (len_x <= len_y && len_x <= len_z)
+/*        if (len_x <= len_y && len_x <= len_z)
             minLength = len_x;
         else if (len_y <= len_x && len_y <= len_z)
             minLength = len_y;
@@ -159,7 +159,7 @@ public class ACLQualityCalculation {
 
         return DATA_QUALITY.GOOD;
     }
-
+*/
     public int currentQuality(int[] x) {       //just receive x axis, in fact it should work with any single axis.
         int len_x = x.length;
         if (len_x == 0) return DATA_QUALITY.BAND_OFF;

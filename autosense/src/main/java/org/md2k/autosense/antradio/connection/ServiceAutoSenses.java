@@ -223,8 +223,9 @@ public class ServiceAutoSenses extends Service {
     }
 
     private void clearChannel(AutoSensePlatform autoSensePlatform){
-        if(mChannelService!=null)
+        if(mChannelService!=null) {
             mChannelService.clearChannel(autoSensePlatform);
+        }
     }
 
     private void clearAllChannels() {
