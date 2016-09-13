@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.widget.Toast;
 
 import com.dsi.ant.channel.ChannelNotAvailableException;
 
@@ -24,10 +25,12 @@ import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
+import org.md2k.datakitapi.messagehandler.ResultCallback;
 import org.md2k.datakitapi.time.DateTime;
 import org.md2k.utilities.Report.Log;
 import org.md2k.utilities.Report.LogStorage;
 import org.md2k.utilities.UI.AlertDialogs;
+import org.md2k.utilities.permission.PermissionInfo;
 
 import java.util.ArrayList;
 
@@ -130,7 +133,21 @@ public class ServiceAutoSenses extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        isStopping=false;
+        isStopping = false;
+        PermissionInfo permissionInfo = new PermissionInfo();
+        permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
+            @Override
+            public void onResult(Boolean result) {
+                if (!result) {
+                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+                    stopSelf();
+                } else {
+                    load();
+                }
+            }
+        });
+    }
+    void load(){
         LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
         Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",service_start");
         if (Constants.LOG_TEXT)
