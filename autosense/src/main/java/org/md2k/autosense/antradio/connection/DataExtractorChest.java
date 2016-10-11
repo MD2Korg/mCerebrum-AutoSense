@@ -158,25 +158,25 @@ public class DataExtractorChest {
                 }
             } else{
                 long timestamps[]=correctTimeStamp(newInfo.autoSensePlatform,dataSourceType,newInfo.timestamp);
-                int modifienSamples[] = new int[5];
+                int modifiedSamples[] = new int[5];
                 if (dataSourceType.equals(DataSourceType.RESPIRATION)) {
                     for (int i=0; i<5; i++) {
                         updateRip(samples[i]);
-                        modifienSamples[i] = (int) recover_RIP_rawWithMeasuredREF(samples[i]);
+                        modifiedSamples[i] = (int) recover_RIP_rawWithMeasuredREF(samples[i]);
                     }
                 }
                 for (int i = 0; i < 5; i++) {
                     //TODO: sample correction
                     if (dataSourceType.equals(DataSourceType.RESPIRATION)) {
                         dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.RESPIRATION_RAW).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
-                        dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.RESPIRATION).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], modifienSamples[i]));
+                        dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.RESPIRATION).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], modifiedSamples[i]));
                     } else {
                         dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
                     }
                     switch (dataSourceType) {
                         case DataSourceType.RESPIRATION:
-                            newInfo.autoSensePlatform.dataQualities.get(0).add(modifienSamples[i]);
-                            newInfo.autoSensePlatform.dataQualities.get(1).add(modifienSamples[i]);
+                            newInfo.autoSensePlatform.dataQualities.get(0).add(modifiedSamples[i]);
+                            newInfo.autoSensePlatform.dataQualities.get(1).add(modifiedSamples[i]);
                             break;
                         case DataSourceType.ECG:
                             newInfo.autoSensePlatform.dataQualities.get(2).add(samples[i]);
