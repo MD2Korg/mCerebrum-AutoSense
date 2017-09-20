@@ -12,8 +12,7 @@ import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.platform.Platform;
 import org.md2k.datakitapi.source.platform.PlatformBuilder;
-import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.DATA_QUALITY;
+import org.md2k.mcerebrum.core.data_format.DATA_QUALITY;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -62,7 +61,6 @@ public class AutoSensePlatform implements Serializable {
         @Override
         public void run() {
             int samples[] = new int[dataQualities.size()];
-            Log.d(TAG,"runnableDataQuality...size="+ dataQualities.size());
             try {
                 for (int i = 0; i < dataQualities.size(); i++) {
                     samples[i] = dataQualities.get(i).getStatus();
@@ -127,7 +125,6 @@ public class AutoSensePlatform implements Serializable {
     }
 
     public void register() {
-        Log.d(TAG, "register()...platformId=" + platformId + " platformType=" + platformType + " deviceId=" + deviceId);
         Platform platform = new PlatformBuilder().setId(platformId).setType(platformType).setMetadata(METADATA.DEVICE_ID, deviceId).setMetadata(METADATA.NAME, name).build();
         for (int i = 0; i < autoSenseDataSources.size(); i++) {
             try {

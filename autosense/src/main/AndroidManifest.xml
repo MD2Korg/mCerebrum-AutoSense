@@ -3,7 +3,7 @@
     package="org.md2k.autosense">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_LOGS" />`
+     />
 
     <application
         android:allowBackup="true"
@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ActivityAutoSenseSettings"
+            android:name=".ActivitySettings"
             android:enabled="true"
             android:exported="true"
             android:label="Settings -> AutoSense"
@@ -31,18 +31,14 @@
 
         </activity>
         <activity
-            android:name="org.md2k.utilities.permission.ActivityPermission"
+            android:name=".plot.ActivityPlot"
             android:enabled="true"
-            android:exported="true"
-            android:label="Permission"
-            android:screenOrientation="portrait" />
-
+            android:exported="true"></activity>
         <activity
-            android:name=".ActivityAutoSensePlatformSettings"
+            android:name=".plot.ActivityPlotChoice"
             android:enabled="true"
             android:exported="true"
-            android:label="Settings: AutoSense Chest"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"></activity>
 
         <service android:name=".antradio.backgroundscan.ServiceBackgroundScan" />
         <service
@@ -53,6 +49,10 @@
                 <action android:name="org.md2k.autosense.antradio.connection.ServiceConnectDevices"></action>
             </intent-filter>
         </service>
+        <service
+            android:name=".ServiceMCerebrum"
+            android:enabled="true"
+            android:exported="true"></service>
         <service
             android:name=".antradio.connection.ServiceAutoSense"
             android:enabled="true"

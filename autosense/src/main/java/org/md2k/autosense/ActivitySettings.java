@@ -4,9 +4,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.Toast;
+import org.md2k.mcerebrum.commons.permission.Permission;
+import org.md2k.mcerebrum.commons.permission.PermissionCallback;
 
-import org.md2k.datakitapi.messagehandler.ResultCallback;
-import org.md2k.utilities.permission.PermissionInfo;
+import es.dmoral.toasty.Toasty;
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -34,22 +35,21 @@ import org.md2k.utilities.permission.PermissionInfo;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ActivityAutoSenseSettings extends AppCompatActivity {
-    private static final String TAG = ActivityAutoSenseSettings.class.getSimpleName();
+public class ActivitySettings extends AppCompatActivity {
+    private static final String TAG = ActivitySettings.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_autosense_settings);
-        PermissionInfo permissionInfo = new PermissionInfo();
-        permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
+        setContentView(R.layout.activity_settings);
+        Permission.requestPermission(this, new PermissionCallback() {
             @Override
-            public void onResult(Boolean result) {
-                if (!result) {
-                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
+            public void OnResponse(boolean isGranted) {
+                if(isGranted)
                     getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
-                            new PrefsFragmentAutoSenseSettings()).commit();
+                            new PrefsFragmentSettings()).commit();
+                else {
+                    Toasty.error(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             }
         });

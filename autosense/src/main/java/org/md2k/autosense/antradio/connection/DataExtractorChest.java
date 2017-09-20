@@ -1,6 +1,9 @@
 package org.md2k.autosense.antradio.connection;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
@@ -82,6 +85,13 @@ public class DataExtractorChest {
             timestamps[i]=timestamp-(4-i)*diff;
         return timestamps;
     }
+    void broadcast(Context context, String dataSourceType, double value){
+        Intent intent = new Intent("DATA");
+        intent.putExtra("datasourcetype", dataSourceType);
+        intent.putExtra("data",value);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+    }
 
     public void prepareAndSendToDataKit(Context context, ChannelInfo newInfo) throws DataKitException {
         int samples[] = getSample(newInfo.broadcastData);
@@ -90,13 +100,17 @@ public class DataExtractorChest {
         if(dataSourceType!=null){
             if(dataSourceType.equals("BATTERY_SKIN_AMBIENT")){
                 dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.BATTERY).getDataSourceClient(), new DataTypeDoubleArray(newInfo.timestamp, samples[0]));
+                broadcast(context, DataSourceType.BATTERY, samples[0]);
                 dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.SKIN_TEMPERATURE).getDataSourceClient(), new DataTypeDoubleArray(newInfo.timestamp, samples[1]));
+                broadcast(context, DataSourceType.SKIN_TEMPERATURE, samples[1]);
                 dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.AMBIENT_TEMPERATURE).getDataSourceClient(), new DataTypeDoubleArray(newInfo.timestamp, samples[2]));
+                broadcast(context, DataSourceType.AMBIENT_TEMPERATURE, samples[2]);
             }
             else{
                 long timestamps[]=correctTimeStamp(newInfo.autoSensePlatform,dataSourceType,newInfo.timestamp);
                 for (int i = 0; i < 5; i++) {
                     dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
+                    broadcast(context, dataSourceType, samples[i]);
                     switch (dataSourceType) {
                         case DataSourceType.RESPIRATION:
                             newInfo.autoSensePlatform.dataQualities.get(0).add(samples[i]);

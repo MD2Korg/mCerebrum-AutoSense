@@ -7,7 +7,6 @@ import org.md2k.autosense.data_quality.DataQualityRIP;
 import org.md2k.autosense.data_quality.DataQualityRIPVariance;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.PlatformId;
-import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +57,6 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
         dataQualities.add(new DataQualityRIPVariance(context)); //WHY DOES THIS ORDER MATTER?
         dataQualities.add(new DataQualityRIP(context));
         dataQualities.add(new DataQualityECG(context));
-        Log.d(TAG, "dataQualities=" + this + " platformId=" + platformId + " platformType=" + platformType + " deviceId=" + deviceId);
 
         autoSenseDataSources=new ArrayList<>();
         for (int i=0;i<DATASOURCES.size();i++) {

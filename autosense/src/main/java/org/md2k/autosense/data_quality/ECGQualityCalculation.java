@@ -1,7 +1,7 @@
 package org.md2k.autosense.data_quality;
 
 
-import org.md2k.utilities.data_format.DATA_QUALITY;
+import org.md2k.mcerebrum.core.data_format.DATA_QUALITY;
 
 import java.util.Arrays;
 

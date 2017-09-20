@@ -1,10 +1,16 @@
-package org.md2k.autosense;
+package org.md2k.autosense.plot;
+
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-/*
+import org.md2k.autosense.R;
+import org.md2k.mcerebrum.commons.permission.Permission;
+import org.md2k.mcerebrum.commons.permission.PermissionCallback;
+
+/**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
  * All rights reserved.
@@ -31,14 +37,26 @@ import android.view.MenuItem;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ActivityAutoSensePlatformSettings extends AppCompatActivity {
+public class ActivityPlotChoice extends AppCompatActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_autosense_platform_settings);
-        getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
-                new PrefsFragmentAutoSensePlatformSettings()).commit();
+        Permission.requestPermission(this, new PermissionCallback() {
+            @Override
+            public void OnResponse(boolean isGranted) {
+                if (!isGranted) {
+                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    setContentView(R.layout.activity_plot_choice);
+                    getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
+                            new PrefsFragmentPlot()).commit();
 
+                }
+
+            }
+        });
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -47,12 +65,10 @@ public class ActivityAutoSensePlatformSettings extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
             case android.R.id.home:
                 finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
 }

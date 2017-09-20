@@ -1,11 +1,9 @@
 package org.md2k.autosense.antradio.connection;
 
-import android.app.AlertDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -15,24 +13,19 @@ import android.widget.Toast;
 
 import com.dsi.ant.channel.ChannelNotAvailableException;
 
-import org.md2k.autosense.ActivityAutoSenseSettings;
 import org.md2k.autosense.Constants;
 import org.md2k.autosense.LoggerText;
-import org.md2k.autosense.R;
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.messagehandler.OnConnectionListener;
-import org.md2k.datakitapi.messagehandler.ResultCallback;
-import org.md2k.datakitapi.time.DateTime;
-import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.Report.LogStorage;
-import org.md2k.utilities.UI.AlertDialogs;
-import org.md2k.utilities.permission.PermissionInfo;
+import org.md2k.mcerebrum.commons.permission.Permission;
 
 import java.util.ArrayList;
+
+import es.dmoral.toasty.Toasty;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -67,7 +60,6 @@ public class ServiceAutoSenses extends Service {
     AutoSensePlatforms autoSensePlatforms = null;
     DataKitAPI dataKitAPI;
     private ServiceAutoSense.ChannelServiceComm mChannelService;
-    private boolean isStopping;
 
     private boolean mChannelServiceBound = false;
     private ServiceConnection mChannelServiceConnection = new ServiceConnection() {
@@ -133,23 +125,14 @@ public class ServiceAutoSenses extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        isStopping = false;
-        PermissionInfo permissionInfo = new PermissionInfo();
-        permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
-            @Override
-            public void onResult(Boolean result) {
-                if (!result) {
-                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
-                    stopSelf();
-                } else {
-                    load();
-                }
-            }
-        });
+        if (Permission.hasPermission(this)) {
+            load();
+        } else {
+            Toasty.error(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+            stopSelf();
+        }
     }
     void load(){
-        LogStorage.startLogFileStorageProcess(getApplicationContext().getPackageName());
-        Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",service_start");
         if (Constants.LOG_TEXT)
             LoggerText.getInstance();
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiverStop,
@@ -157,23 +140,25 @@ public class ServiceAutoSenses extends Service {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiverRestart, new IntentFilter(INTENT_RESTART));
 
         if (!readSettings()) {
-            showAlertDialogConfiguration(this);
+//            showAlertDialogConfiguration(this);
             clear();
             stopSelf();
         } else connectDataKit();
     }
 
     void showAlertDialogConfiguration(final Context context) {
+/*
         AlertDialogs.AlertDialog(this, "Error: AutoSense Settings", "Please configure AutoSense", R.drawable.ic_error_red_50dp, "Settings", "Cancel", null, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (which == AlertDialog.BUTTON_POSITIVE) {
-                    Intent intent = new Intent(context, ActivityAutoSenseSettings.class);
+                    Intent intent = new Intent(context, ActivitySettings.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                 }
             }
         });
+*/
     }
 
     private void doBindChannelService() {
@@ -202,8 +187,6 @@ public class ServiceAutoSenses extends Service {
     synchronized void clear(){
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mMessageReceiverStop);
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mMessageReceiverRestart);
-        if(isStopping) return;
-        isStopping=false;
         doUnbindChannelService();
         stopService(new Intent(this, ServiceAutoSense.class));
 
@@ -218,7 +201,6 @@ public class ServiceAutoSenses extends Service {
 
     @Override
     public void onDestroy() {
-        Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",service_stop");
         clear();
         super.onDestroy();
     }
@@ -280,8 +262,6 @@ public class ServiceAutoSenses extends Service {
     private BroadcastReceiver mMessageReceiverStop = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG,"Stop");
-            Log.w(TAG,"time="+ DateTime.convertTimeStampToDateTime(DateTime.getDateTime())+",timestamp="+ DateTime.getDateTime()+",broadcast_receiver_stop_service");
             clear();
             stopSelf();
         }

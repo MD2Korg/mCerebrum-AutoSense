@@ -8,8 +8,7 @@ import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.datakitapi.source.platform.Platform;
-import org.md2k.utilities.Report.Log;
-import org.md2k.utilities.data_format.DATA_QUALITY;
+import org.md2k.mcerebrum.core.data_format.DATA_QUALITY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +56,6 @@ public class DataQualityRIP extends DataQuality {
                 samps[i] = samples.get(i);
             samples.clear();
             int status = ripQualityCalculation.currentQuality(samps);
-            Log.d("DATA_QUALITY", "RIP: " + status);
             return status;
         } catch (Exception e) {
             return DATA_QUALITY.GOOD;
