@@ -1,7 +1,7 @@
 package org.md2k.autosense.data_quality;
 
 
-import org.md2k.mcerebrum.core.data_format.DATA_QUALITY;
+import org.md2k.utilities.data_format.DATA_QUALITY;
 
 import java.util.Arrays;
 
@@ -35,13 +35,13 @@ public class ECGQualityCalculation {
     // ===========================================================
     private static final int BUFF_LENGTH = 3;
     // ========
-    private static final int ACCEPTABLE_OUTLIER_PERCENT = 50;
+    private static final int ACCEPTABLE_OUTLIER_PERCENT = 34;
     private static final int OUTLIER_THRESHOLD_HIGH = 4000;
     private static final int OUTLIER_THRESHOLD_LOW = 20;
     private static final int BAD_SEGMENTS_THRESHOLD = 2;
-    private static final int SLOPE_THRESHOLD = 50;
+    private static final int SLOPE_THRESHOLD = 100;
     private static final int RANGE_THRESHOLD = 200;
-    private final static int ECK_THRESHOLD_BAND_LOOSE = 47;
+    private final static int ECK_THRESHOLD_BAND_LOOSE = 100;
     public final static double MINIMUM_EXPECTED_SAMPLES = 3 * (0.33) * 64;  //33% of a 3 second window with 10.33 sampling frequency
 
     private static final String TAG = "ECKQualityCalculation";
@@ -51,14 +51,8 @@ public class ECGQualityCalculation {
     //private final static int ECK_THRESHOLD_BAND_OFF = 20;
     private static int classHead;
     // ========
-    private static int large_stuck = 0;
-    private static int small_stuck = 0;
-    private static int large_flip = 0;
-    private static int small_flip = 0;
-    private static int max_value = 0;
-    private static int min_value = 0;
-    private static int segment_class = 0;
-    private static int discontinuous = 0;
+	private static int[] outlierCounts;	
+	private static int segment_class = 0;
     // ========
     private static int SEGMENT_GOOD = 0;
     private static int SEGMENT_BAD = 1;
@@ -125,29 +119,26 @@ public class ECGQualityCalculation {
     // ===========================================================
     private void classifyDataPoints(int[] data) {
         // ===========================================================
-        large_stuck = 0;
-        small_stuck = 0;
-        large_flip = 0;
-        small_flip = 0;
-        discontinuous = 0;
-        max_value = data[0];
-        min_value = data[0];
-        for (int i = 0; i < data.length; i++) {
-            int im = ((i == 0) ? (data.length - 1) : (i - 1));
-            int ip = ((i == data.length - 1) ? (0) : (i + 1));
-            boolean stuck = ((data[i] == data[im]) && (data[i] == data[ip]));
-            boolean flip = ((Math.abs(data[i] - data[im]) > 4000) || (Math.abs(data[i] - data[ip]) > 4000));
-            boolean disc = ((Math.abs(data[i] - data[im]) > 100) || (Math.abs(data[i] - data[ip]) > 100));
-            if (disc) discontinuous++;
-            if (data[i] > OUTLIER_THRESHOLD_HIGH) {
-                if (stuck) large_stuck++;
-                if (flip) large_flip++;
-            } else if (data[i] < OUTLIER_THRESHOLD_LOW) {
-                if (stuck) small_stuck++;
-                if (flip) small_flip++;
-            } else {
-                if (data[i] > max_value) max_value = data[i];
-                if (data[i] < min_value) min_value = data[i];
+        this.outlierCounts = new int[3];
+		outlierCounts[0] = 0;
+		outlierCounts[1] = data[0];
+		outlierCounts[2] = data[0];
+		for(int i=0;i<data.length;i++){
+            int im=((i==0)?(data.length-1):(i-1));
+            int ip=((i==data.length-1)?(0):(i+1));
+            boolean stuck=((data[i]==data[im])&&(data[i]==data[ip]));
+            boolean flip=((Math.abs(data[i]-data[im])>((int)(OUTLIER_THRESHOLD_HIGH)))||(Math.abs(data[i]-data[ip])>((int)(OUTLIER_THRESHOLD_HIGH))));
+            boolean disc=((Math.abs(data[i]-data[im])>((int)(SLOPE_THRESHOLD)))&& (Math.abs(data[i]-data[ip])>((int)(SLOPE_THRESHOLD))));
+            if(disc) outlierCounts[0]++;
+            else if(stuck) outlierCounts[0]++;
+            else if(flip) outlierCounts[0]++;
+            else if(data[i] >= OUTLIER_THRESHOLD_HIGH){
+                outlierCounts[0]++;
+            }else if(data[i] <= OUTLIER_THRESHOLD_LOW){
+                outlierCounts[0]++;
+            }else{
+                if(data[i] > outlierCounts[1]) outlierCounts[1]=(int)data[i];
+                if(data[i] < outlierCounts[2]) outlierCounts[2]=(int)data[i];
             }
         }
     }
@@ -155,8 +146,7 @@ public class ECGQualityCalculation {
     // ===========================================================
     private void classifySegment(int[] data) {
         // ===========================================================
-        int outliers = large_stuck + large_flip + small_stuck + small_flip;
-        if (100 * outliers > ACCEPTABLE_OUTLIER_PERCENT * data.length) {
+		if (100 * outlierCounts[0] > ACCEPTABLE_OUTLIER_PERCENT * data.length) {
             segment_class = SEGMENT_BAD;
         } else {
             segment_class = SEGMENT_GOOD;
@@ -169,7 +159,7 @@ public class ECGQualityCalculation {
         bad_segments = 0;
         amplitude_small = 0;
         //amplitude_very_small=0;
-        for (int i = 1; i < envelBuff.length; i++) {
+        for (int i = 0; i < envelBuff.length; i++) {
             if (classBuff[i] == SEGMENT_BAD) bad_segments++;
             //if(envelBuff[i]<ECK_THRESHOLD_BAND_OFF) amplitude_very_small++;
             if (envelBuff[i] < ECK_THRESHOLD_BAND_LOOSE) amplitude_small++;
@@ -191,14 +181,16 @@ public class ECGQualityCalculation {
         //segment_class=SEGMENT_GOOD;
 
         classBuff[(classHead++) % classBuff.length] = segment_class;
-        envelBuff[(envelHead++) % envelBuff.length] = max_value - min_value;
-        classifyBuffer();
+        envelBuff[(envelHead++) % envelBuff.length] = outlierCounts[1] - outlierCounts[2];
+		classifyBuffer();
 
-        if (bad_segments > BAD_SEGMENTS_THRESHOLD) {
+        if (segment_class == SEGMENT_BAD) {
             return DATA_QUALITY.NOT_WORN;
             //}else if(2*amplitude_very_small>envelBuff.length){
             //return DATA_QUALITY_BAND_OFF;
         } else if (2 * amplitude_small > envelBuff.length) {
+            return DATA_QUALITY.BAND_LOOSE;
+        } else if((outlierCounts[1]-outlierCounts[2]) <= (int)(ECK_THRESHOLD_BAND_LOOSE)) {
             return DATA_QUALITY.BAND_LOOSE;
         }
         //return DATA_QUALITY_GOOD;
@@ -208,7 +200,7 @@ public class ECGQualityCalculation {
         //fitler_bad_ecg_v2(int[] data);
         //assume that 3 seconds data is received by this function. now segment them into one second window and returns the status as good if just one window give good quality result
 
-        return fitler_bad_ecg_v2(data);
+        return DATA_QUALITY.GOOD;
     }
 
     private int fitler_bad_ecg_v2(int[] data) {
