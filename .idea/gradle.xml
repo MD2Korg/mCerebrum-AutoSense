@@ -14,14 +14,7 @@
             <option value="$PROJECT_DIR$/../mCerebrum-Utilities/utilities" />
           </set>
         </option>
-        <option name="myModules">
-          <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/autosense" />
-            <option value="$PROJECT_DIR$/../mCerebrum-DataKitAPI/datakitapi" />
-            <option value="$PROJECT_DIR$/../mCerebrum-Utilities/utilities" />
-          </set>
-        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

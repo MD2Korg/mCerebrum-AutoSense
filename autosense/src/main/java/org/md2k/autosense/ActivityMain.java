@@ -25,6 +25,7 @@ import com.crashlytics.android.core.CrashlyticsCore;
 
 import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
 import org.md2k.autosense.devices.AutoSensePlatforms;
+import org.md2k.autosense.plot.ActivityPlotChoice;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
 import org.md2k.datakitapi.messagehandler.ResultCallback;
@@ -179,6 +180,12 @@ public class ActivityMain extends AppCompatActivity {
                 intent = new Intent(this, ActivityAutoSenseSettings.class);
                 startActivity(intent);
                 break;
+
+            case R.id.action_plot:
+                intent = new Intent(this, ActivityPlotChoice.class);
+                startActivity(intent);
+                break;
+
             case R.id.action_about:
                 intent = new Intent(this, ActivityAbout.class);
                 try {
