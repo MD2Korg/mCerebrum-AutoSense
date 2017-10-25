@@ -185,10 +185,12 @@ public class ActivityMain extends AppCompatActivity {
                 intent = new Intent(this, ActivitySettings.class);
                 startActivity(intent);
                 break;
+
             case R.id.action_plot:
                 intent = new Intent(this, ActivityPlotChoice.class);
                 startActivity(intent);
                 break;
+
         }
         return super.onOptionsItemSelected(item);
     }

@@ -45,6 +45,7 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class PrefsFragmentPlot extends PreferenceFragment {
+    DeviceManager deviceManager;
 /*
     Preference.OnPreferenceChangeListener onPreferenceChangeListener = new Preference.OnPreferenceChangeListener() {
         @Override
@@ -59,6 +60,7 @@ public class PrefsFragmentPlot extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        deviceManager =new DeviceManager();
         addPreferencesFromResource(R.xml.pref_plot_choice);
         addPreferenceScreenSensors();
     }
@@ -94,6 +96,24 @@ public class PrefsFragmentPlot extends PreferenceFragment {
                 intent.putExtra("deviceid", deviceId);
                 intent.putExtra("platformtype", platformType);
                 intent.putExtra("platformid", platformId);
+    private Preference createPreference(String dataSourceType,String platformId) {
+
+        Preference preference = new Preference(getActivity());
+        preference.setKey(dataSourceType);
+        String title = dataSourceType;
+        title = title.replace("_", " ");
+        title = title.substring(0, 1).toUpperCase() + title.substring(1).toLowerCase();
+        preference.setTitle(title);
+        preference.setSummary(platformId);
+        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent=new Intent(getActivity(), ActivityPlot.class);
+                Platform p = new PlatformBuilder().setId(preference.getSummary().toString()).build();
+                DataSource d = new DataSourceBuilder().setType(preference.getKey()).setPlatform(p).build();
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(DataSource.class.getSimpleName(), d);
+                intent.putExtras(bundle);
                 startActivity(intent);
                 return false;
             }
@@ -119,6 +139,16 @@ public class PrefsFragmentPlot extends PreferenceFragment {
             deviceId = dataSources.get(i).getPlatform().getMetadata().get(METADATA.DEVICE_ID);
             Preference preference = createPreference(dataSourceType, dataSourceId, platformType, platformId, deviceId);
             preferenceCategory.addPreference(preference);
+        String dataSourceType, platformId;
+        PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("dataSourceType");
+        preferenceCategory.removeAll();
+        for (int i = 0; i < deviceManager.size(); i++) {
+            for (org.md2k.motionsense.device.sensor.Sensor sensor : deviceManager.get(i).getSensors().values()) {
+                platformId=deviceManager.get(i).getId();
+                dataSourceType=sensor.getDataSource().getType();
+                Preference preference = createPreference(dataSourceType, platformId);
+                preferenceCategory.addPreference(preference);
+            }
         }
     }
 }
