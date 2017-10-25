@@ -28,17 +28,13 @@ public class ActivityPlot extends RealtimeLineChartActivity {
         dataSourceId = intent.getStringExtra("datasourceid");
 
         if (dataSourceType == null) finish();
-        try {
-            dataSource = getIntent().getExtras().getParcelable(DataSource.class.getSimpleName());
-        }catch (Exception e){
-            finish();
-        }
+
     }
 
     @Override
     public void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter(ActivityMain.INTENT_NAME));
+                new IntentFilter("DATA"));
 
         super.onResume();
     }
@@ -70,36 +66,6 @@ public class ActivityPlot extends RealtimeLineChartActivity {
         legends = new String[]{ds};
         sample = new float[]{(float) d};
         addEntry(sample, legends,300);
-        String ds = intent.getStringExtra("key");
-        String pi = intent.getStringExtra("platformid");
-        if (!ds.equals(dataSource.getType()) || !pi.equals(dataSource.getPlatform().getId())) return;
-        getmChart().getDescription().setText(dataSource.getType());
-        getmChart().getDescription().setPosition(1f, 1f);
-        getmChart().getDescription().setEnabled(true);
-        getmChart().getDescription().setTextColor(Color.WHITE);
-        if (ds.equals(DataSourceType.LED))
-            legends = new String[]{"LED 1", "LED 2", "LED 3"};
-        else if (ds.equals(DataSourceType.ACCELEROMETER)) {
-            legends = new String[]{"Accelerometer X", "Accelerometer Y", "Accelerometer Z"};
-        } else if (ds.equals(DataSourceType.GYROSCOPE)) {
-            legends = new String[]{"Gyroscope X", "Gyroscope Y", "Gyroscope Z"};
-        } else legends = new String[]{ds};
-        DataType data = intent.getParcelableExtra("data");
-        if (data instanceof DataTypeFloat) {
-            sample = new float[]{((DataTypeFloat) data).getSample()};
-        } else if (data instanceof DataTypeFloatArray) {
-            sample = ((DataTypeFloatArray) data).getSample();
-        } else if (data instanceof DataTypeDoubleArray) {
-            double[] samples = ((DataTypeDoubleArray) data).getSample();
-            sample = new float[samples.length];
-            for (int i = 0; i < samples.length; i++) {
-                sample[i] = (float) samples[i];
-            }
-        } else if (data instanceof DataTypeDouble) {
-            double samples = ((DataTypeDouble) data).getSample();
-            sample = new float[]{(float) samples};
-        }
-        addEntry(sample, legends, 600);
     }
 
 }

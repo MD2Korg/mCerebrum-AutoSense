@@ -52,6 +52,7 @@ public class ActivityPlotChoice extends AppCompatActivity {
                     setContentView(R.layout.activity_plot_choice);
                     getFragmentManager().beginTransaction().replace(R.id.layout_preference_fragment,
                             new PrefsFragmentPlot()).commit();
+
                 }
 
             }
