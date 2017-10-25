@@ -3,7 +3,6 @@ package org.md2k.autosense.antradio.connection;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import org.md2k.autosense.antradio.ChannelInfo;
 import org.md2k.autosense.devices.AutoSensePlatform;
@@ -11,6 +10,9 @@ import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -49,13 +51,67 @@ public class DataExtractorChest {
     /** The ACCELZ channel for AutoSense. */
     static final byte ACCELZ_CHANNEL = (byte) 3;
     /** The GSR channel for AutoSense. */
-    static final byte GSR_CHANNEL = (byte) 4;
+    static final byte RIP_BASELINE_CHANNEL = (byte) 4;
     /** The RIP channel for AutoSense. */
     static final byte RIP_CHANNEL = (byte) 7;
     /** The SKIN, AMBIENCE, BATTERY channels for AutoSense. */
     static final byte MISC_CHANNEL = (byte) 8;
     private static final String TAG = DataExtractorChest.class.getSimpleName();
     DataKitAPI dataKitAPI;
+
+    //Matlab code:  Fs = 64/3; b = fir1(128,0.3*2/Fs,bartlett(129));
+    double[] b = new double[]{0, 0.0620, 0.1248, 0.1879, 0.2508, 0.1879, 0.1248, 0.0620, 0};
+    Queue ripQ = new LinkedList();
+
+    double ref = 0;
+    double mean_ref = 0;
+    int mean_ref_count = 0;
+    double mean_rip = 0;
+    int mean_rip_count = 0;
+    double R_36 = 10000;
+    double R_37 = 10000;
+    double R_40 = 604000;  // for the modified mote
+    double G1 = R_40 / (R_36 + R_37);
+
+    double[] convolve1D(double[] in, double[] kernel) {
+        double[] out = new double[in.length];
+
+        for (int i = 0; i < kernel.length - 1; ++i) {
+            out[i] = 0;
+            for (int j = i, k = 0; j >= 0; --j, ++k)
+                out[i] += in[j] * kernel[k];
+        }
+
+        for (int i = kernel.length - 1; i < in.length; ++i) {
+            out[i] = 0;
+            for (int j = i, k = 0; k < kernel.length; --j, ++k)
+                out[i] += in[j] * kernel[k];
+        }
+
+        return out;
+    }
+
+    double recover_RIP_rawWithMeasuredREF(double sample) {
+        ripQ.add(sample);
+        if (ripQ.size() < b.length) return sample;
+
+        Double[] rip = (Double[]) ripQ.toArray(new Double[b.length]);
+        double[] ref_synn_noM = new double[b.length];
+        double[] RIP_synn_noM = new double[b.length];
+        for (int i=0; i<b.length; i++) {
+            ref_synn_noM[i] = ref - mean_ref;
+            RIP_synn_noM[i] = (rip[i]-mean_rip)/G1;
+        }
+
+        double[] ref_synn_noM_LP = convolve1D(ref_synn_noM, b);
+        double[] RIP_raw_measuredREF = new double[b.length];
+
+        for (int i=0; i<b.length; i++) {
+            RIP_raw_measuredREF[i] = (ref_synn_noM_LP[i] + RIP_synn_noM[i])*G1;
+        }
+        ripQ.poll();
+        return RIP_raw_measuredREF[b.length/2];
+    }
 
     DataExtractorChest(Context context) {
         dataKitAPI = DataKitAPI.getInstance(context);
@@ -105,16 +161,34 @@ public class DataExtractorChest {
                 broadcast(context, DataSourceType.SKIN_TEMPERATURE, samples[1]);
                 dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.AMBIENT_TEMPERATURE).getDataSourceClient(), new DataTypeDoubleArray(newInfo.timestamp, samples[2]));
                 broadcast(context, DataSourceType.AMBIENT_TEMPERATURE, samples[2]);
-            }
-            else{
+            } else if(dataSourceType.equals(DataSourceType.RESPIRATION_BASELINE)) {
                 long timestamps[]=correctTimeStamp(newInfo.autoSensePlatform,dataSourceType,newInfo.timestamp);
-                for (int i = 0; i < 5; i++) {
+                for (int i=0; i<5; i++) {
+                    updateRef(samples[i]);
                     dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
                     broadcast(context, dataSourceType, samples[i]);
+                }
+            } else{
+                long timestamps[]=correctTimeStamp(newInfo.autoSensePlatform,dataSourceType,newInfo.timestamp);
+                int modifiedSamples[] = new int[5];
+                if (dataSourceType.equals(DataSourceType.RESPIRATION)) {
+                    for (int i=0; i<5; i++) {
+                        updateRip(samples[i]);
+                        modifiedSamples[i] = (int) recover_RIP_rawWithMeasuredREF(samples[i]);
+                    }
+                }
+                for (int i = 0; i < 5; i++) {
+                    //TODO: sample correction
+                    if (dataSourceType.equals(DataSourceType.RESPIRATION)) {
+                        dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.RESPIRATION_RAW).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
+                        dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(DataSourceType.RESPIRATION).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], modifiedSamples[i]));
+                    } else {
+                        dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
+                    }
                     switch (dataSourceType) {
                         case DataSourceType.RESPIRATION:
-                            newInfo.autoSensePlatform.dataQualities.get(0).add(samples[i]);
-                            newInfo.autoSensePlatform.dataQualities.get(1).add(samples[i]);
+                            newInfo.autoSensePlatform.dataQualities.get(0).add(modifiedSamples[i]);
+                            newInfo.autoSensePlatform.dataQualities.get(1).add(modifiedSamples[i]);
                             break;
                         case DataSourceType.ECG:
                             newInfo.autoSensePlatform.dataQualities.get(2).add(samples[i]);
@@ -123,6 +197,23 @@ public class DataExtractorChest {
                 }
             }
         }
+    }
+
+    static int MAX_VAL = 2000000000;
+    static int RESTART_VAL = 20000000;
+
+    private void updateRip(int sample) {
+        mean_rip = (mean_rip*mean_rip_count+sample)/(mean_rip_count+1);
+        mean_rip_count++;
+        if (mean_rip_count>MAX_VAL) mean_rip_count = RESTART_VAL;
+    }
+
+    private void updateRef(int sample) {
+        ref = sample;
+        mean_ref = (mean_ref*mean_ref_count+sample)/(mean_ref_count+1);
+        mean_ref_count++;
+        if (mean_ref_count>MAX_VAL) mean_ref_count = RESTART_VAL;
+
     }
 
     public String getDataSourceType(byte[] ANTRxMessage) {
@@ -137,8 +228,8 @@ public class DataExtractorChest {
                 return DataSourceType.ACCELEROMETER_Y;
             case ACCELZ_CHANNEL:
                 return DataSourceType.ACCELEROMETER_Z;
-            case GSR_CHANNEL:
-                return DataSourceType.GALVANIC_SKIN_RESPONSE;
+            case RIP_BASELINE_CHANNEL:
+                return DataSourceType.RESPIRATION_BASELINE;
             case RIP_CHANNEL:
                 return DataSourceType.RESPIRATION;
             case MISC_CHANNEL:
