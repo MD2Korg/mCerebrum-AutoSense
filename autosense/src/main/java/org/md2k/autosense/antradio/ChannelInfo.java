@@ -1,8 +1,9 @@
 package org.md2k.autosense.antradio;
 
+import android.util.Log;
+
 import org.md2k.autosense.devices.AutoSensePlatform;
 import org.md2k.datakitapi.source.platform.PlatformType;
-import org.md2k.utilities.Report.Log;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center

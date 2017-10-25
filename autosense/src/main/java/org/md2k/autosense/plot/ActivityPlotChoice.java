@@ -6,9 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.md2k.autosense.R;
 import org.md2k.mcerebrum.commons.permission.Permission;
 import org.md2k.mcerebrum.commons.permission.PermissionCallback;
-import org.md2k.autosense.R;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center

@@ -4,7 +4,6 @@ import android.content.Context;
 
 import org.md2k.autosense.data_quality.DataQualityACL;
 import org.md2k.datakitapi.source.datasource.DataSourceType;
-import org.md2k.utilities.Report.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +53,6 @@ public class AutoSensePlatformWrist extends AutoSensePlatform{
             this.name = "AutoSense (Right Wrist)";
         dataQualities = new ArrayList<>();
         dataQualities.add(new DataQualityACL(context));
-        Log.d(TAG, "dataQualities=" + this +" platformId="+platformId+" platformType="+platformType+" deviceId="+deviceId);
 
         autoSenseDataSources=new ArrayList<>();
         for (DATASOURCE datasource : DATASOURCES) {

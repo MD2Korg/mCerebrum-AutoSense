@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.md2k.datakitapi.DataKitAPI;
 import org.md2k.datakitapi.datatype.DataTypeInt;
+import org.md2k.datakitapi.datatype.DataTypeIntArray;
 import org.md2k.datakitapi.exception.DataKitException;
 import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
 import org.md2k.datakitapi.source.datasource.DataSourceClient;
@@ -64,7 +65,11 @@ public abstract class DataQuality {
     public void insertToDataKit(int sample) throws DataKitException {
         DataTypeInt dataTypeInt = new DataTypeInt(DateTime.getDateTime(), sample);
         DataKitAPI.getInstance(context).insert(dataSourceClient, dataTypeInt);
-
+        int[] intArray=new int[7];
+        for(int i=0;i<7;i++) intArray[i]=0;
+        int value=dataTypeInt.getSample();
+        intArray[value]=3000;
+        DataKitAPI.getInstance(context).setSummary(dataSourceClient, new DataTypeIntArray(dataTypeInt.getDateTime(), intArray));
     }
 
     public boolean register(Platform platform) throws DataKitException {

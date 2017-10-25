@@ -1,0 +1,8 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Configured Devices"
+        android:key="autosense_configured" />
+    <PreferenceCategory
+        android:key="key_device_available"
+        android:title="Available Devices" />
+</PreferenceScreen>

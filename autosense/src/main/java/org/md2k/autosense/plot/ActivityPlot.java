@@ -8,22 +8,26 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
-import org.md2k.datakitapi.datatype.DataType;
-import org.md2k.datakitapi.datatype.DataTypeDouble;
-import org.md2k.datakitapi.datatype.DataTypeDoubleArray;
-import org.md2k.datakitapi.datatype.DataTypeFloat;
-import org.md2k.datakitapi.datatype.DataTypeFloatArray;
-import org.md2k.datakitapi.source.datasource.DataSource;
-import org.md2k.datakitapi.source.datasource.DataSourceType;
 import org.md2k.mcerebrum.commons.plot.RealtimeLineChartActivity;
-import org.md2k.autosense.ActivityMain;
 
 public class ActivityPlot extends RealtimeLineChartActivity {
-    DataSource dataSource;
+    String dataSourceType;
+    String platformId;
+    String deviceId;
+    String dataSourceId;
+    String platformType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        platformId = intent.getStringExtra("platformid");
+        platformType = intent.getStringExtra("platformtype");
+        deviceId = intent.getStringExtra("deviceId");
+        dataSourceType = getIntent().getStringExtra("datasourcetype");
+        dataSourceId = intent.getStringExtra("datasourceid");
+
+        if (dataSourceType == null) finish();
         try {
             dataSource = getIntent().getExtras().getParcelable(DataSource.class.getSimpleName());
         }catch (Exception e){
@@ -56,6 +60,16 @@ public class ActivityPlot extends RealtimeLineChartActivity {
     void updatePlot(Intent intent) {
         float[] sample = new float[1];
         String[] legends;
+        String ds = intent.getStringExtra("datasourcetype");
+        double d = intent.getDoubleExtra("data", 0);
+        if (!ds.equals(dataSourceType)) return;
+        getmChart().getDescription().setText(dataSourceType);
+        getmChart().getDescription().setPosition(1f, 1f);
+        getmChart().getDescription().setEnabled(true);
+        getmChart().getDescription().setTextColor(Color.WHITE);
+        legends = new String[]{ds};
+        sample = new float[]{(float) d};
+        addEntry(sample, legends,300);
         String ds = intent.getStringExtra("key");
         String pi = intent.getStringExtra("platformid");
         if (!ds.equals(dataSource.getType()) || !pi.equals(dataSource.getPlatform().getId())) return;

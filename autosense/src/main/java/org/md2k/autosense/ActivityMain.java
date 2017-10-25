@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,15 +27,14 @@ import org.md2k.autosense.devices.AutoSensePlatforms;
 import org.md2k.autosense.plot.ActivityPlotChoice;
 import org.md2k.datakitapi.datatype.DataType;
 import org.md2k.datakitapi.datatype.DataTypeByteArray;
-import org.md2k.datakitapi.messagehandler.ResultCallback;
 import org.md2k.datakitapi.time.DateTime;
-import org.md2k.utilities.Apps;
-import org.md2k.utilities.UI.ActivityAbout;
-import org.md2k.utilities.UI.ActivityCopyright;
-import org.md2k.utilities.permission.PermissionInfo;
+import org.md2k.mcerebrum.commons.permission.Permission;
+import org.md2k.mcerebrum.commons.permission.PermissionCallback;
+import org.md2k.mcerebrum.core.access.appinfo.AppInfo;
 
 import java.util.HashMap;
 
+import es.dmoral.toasty.Toasty;
 import io.fabric.sdk.android.Fabric;
 
 /*
@@ -76,7 +74,7 @@ public class ActivityMain extends AppCompatActivity {
         @Override
         public void run() {
             {
-                long time = Apps.serviceRunningTime(ActivityMain.this, Constants.SERVICE_NAME);
+                long time = AppInfo.serviceRunningTime(ActivityMain.this, Constants.SERVICE_NAME);
                 if (time < 0) {
                     ((TextView) findViewById(R.id.button_app_status)).setText("START");
                     findViewById(R.id.button_app_status).setBackground(ContextCompat.getDrawable(ActivityMain.this, R.drawable.button_status_off));
@@ -109,17 +107,24 @@ public class ActivityMain extends AppCompatActivity {
         // Initialize Fabric with the debug-disabled crashlytics.
         Fabric.with(this, crashlyticsKit, new Crashlytics());
         mHandler = new Handler();
-
         setContentView(R.layout.activity_main);
-        PermissionInfo permissionInfo = new PermissionInfo();
-        permissionInfo.getPermissions(this, new ResultCallback<Boolean>() {
+
+        Permission.requestPermission(this, new PermissionCallback() {
             @Override
-            public void onResult(Boolean result) {
-                if (!result) {
-                    Toast.makeText(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
+            public void OnResponse(boolean isGranted) {
+                if (!isGranted) {
+                    Toasty.error(getApplicationContext(), "!PERMISSION DENIED !!! Could not continue...", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    load();
+                    if(getIntent().hasExtra("RUN") && getIntent().getBooleanExtra("RUN", false)) {
+                        Intent intent = new Intent(ActivityMain.this, ServiceAutoSenses.class);
+                        startService(intent);
+                        finish();
+                    }else if(getIntent().hasExtra("PERMISSION") && getIntent().getBooleanExtra("PERMISSION", false)) {
+                        finish();
+                    } else {
+                        load();
+                    }
                 }
             }
         });
@@ -132,7 +137,7 @@ public class ActivityMain extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), ServiceAutoSenses.class);
-                if (Apps.isServiceRunning(getBaseContext(), Constants.SERVICE_NAME)) {
+                if (AppInfo.isServiceRunning(getBaseContext(), Constants.SERVICE_NAME)) {
                     stopService(intent);
                 } else {
                     startService(intent);
@@ -177,7 +182,7 @@ public class ActivityMain extends AppCompatActivity {
                 finish();
                 break;
             case R.id.action_settings:
-                intent = new Intent(this, ActivityAutoSenseSettings.class);
+                intent = new Intent(this, ActivitySettings.class);
                 startActivity(intent);
                 break;
 
@@ -186,19 +191,6 @@ public class ActivityMain extends AppCompatActivity {
                 startActivity(intent);
                 break;
 
-            case R.id.action_about:
-                intent = new Intent(this, ActivityAbout.class);
-                try {
-                    intent.putExtra(org.md2k.utilities.Constants.VERSION_CODE, String.valueOf(this.getPackageManager().getPackageInfo(getPackageName(), 0).versionCode));
-                    intent.putExtra(org.md2k.utilities.Constants.VERSION_NAME, this.getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
-                } catch (PackageManager.NameNotFoundException ignored) {
-                }
-                startActivity(intent);
-                break;
-            case R.id.action_copyright:
-                intent = new Intent(this, ActivityCopyright.class);
-                startActivity(intent);
-                break;
         }
         return super.onOptionsItemSelected(item);
     }

@@ -1,11 +1,5 @@
 package org.md2k.autosense;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-
-import org.md2k.utilities.Report.Log;
-
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Syed Monowar Hossain <monowar.hossain@gmail.com>
@@ -37,21 +31,4 @@ public class Constants {
     public static final boolean LOG_TEXT =false;
     public static final String INTENT_STOP = "stop";
     public static final String INTENT_RECEIVED_DATA = "received_data";
-    public static SharedPreferences sharedPreferences = null;
-
-    public static void createSharedPreference(Context context){
-        Log.d("Constants", "SharedPreference:" + context.getPackageName());
-        sharedPreferences= PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply();
-    }
-    public static String getSharedPreferenceString(String key){
-        return sharedPreferences.getString(key, "");
-    }
-    public static void setSharedPreferencesString(String key, String text) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(key, text);
-        editor.apply();
-    }
 }

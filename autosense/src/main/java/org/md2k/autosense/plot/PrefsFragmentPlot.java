@@ -10,10 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import org.md2k.autosense.Configuration;
+import org.md2k.autosense.R;
+import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSource;
-import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
-import org.md2k.datakitapi.source.platform.Platform;
-import org.md2k.datakitapi.source.platform.PlatformBuilder;
+
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -73,6 +76,26 @@ public class PrefsFragmentPlot extends PreferenceFragment {
     }
 
 
+    private Preference createPreference(final String dataSourceType, final String dataSourceId, final String platformType, final String platformId, final String deviceId) {
+
+        Preference preference = new Preference(getActivity());
+        String key = dataSourceType;
+        if (dataSourceId != null) key += "_" + dataSourceId;
+        preference.setKey(key);
+        String title = key;
+        title = title.replace("_", " ");
+        title = title.substring(0, 1).toUpperCase() + title.substring(1).toLowerCase();
+        preference.setTitle(title);
+        preference.setSummary(deviceId);
+        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent(getActivity(), ActivityPlot.class);
+                intent.putExtra("datasourcetype", dataSourceType);
+                intent.putExtra("datasourceid", dataSourceId);
+                intent.putExtra("deviceid", deviceId);
+                intent.putExtra("platformtype", platformType);
+                intent.putExtra("platformid", platformId);
     private Preference createPreference(String dataSourceType,String platformId) {
 
         Preference preference = new Preference(getActivity());
@@ -99,6 +122,23 @@ public class PrefsFragmentPlot extends PreferenceFragment {
     }
 
     protected void addPreferenceScreenSensors() {
+        ArrayList<DataSource> dataSources = null;
+        try {
+            dataSources = Configuration.getDataSources();
+        } catch (FileNotFoundException e) {
+            return;
+        }
+        String dataSourceType, platformId, dataSourceId, platformType, deviceId;
+        PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("dataSourceType");
+        preferenceCategory.removeAll();
+        for (int i = 0; i < dataSources.size(); i++) {
+            platformId = dataSources.get(i).getPlatform().getId();
+            dataSourceType = dataSources.get(i).getType();
+            dataSourceId = dataSources.get(i).getId();
+            platformType = dataSources.get(i).getPlatform().getType();
+            deviceId = dataSources.get(i).getPlatform().getMetadata().get(METADATA.DEVICE_ID);
+            Preference preference = createPreference(dataSourceType, dataSourceId, platformType, platformId, deviceId);
+            preferenceCategory.addPreference(preference);
         String dataSourceType, platformId;
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference("dataSourceType");
         preferenceCategory.removeAll();

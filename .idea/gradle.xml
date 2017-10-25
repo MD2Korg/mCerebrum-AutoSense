@@ -5,12 +5,13 @@
       <GradleProjectSettings>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="1.8" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/autosense" />
             <option value="$PROJECT_DIR$/../mCerebrum-DataKitAPI/datakitapi" />
+            <option value="$PROJECT_DIR$/../mCerebrum-Library/commons" />
+            <option value="$PROJECT_DIR$/../mCerebrum-Library/core" />
             <option value="$PROJECT_DIR$/../mCerebrum-Utilities/utilities" />
           </set>
         </option>
