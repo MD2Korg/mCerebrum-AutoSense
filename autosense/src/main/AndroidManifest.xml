@@ -7,6 +7,7 @@
 
     <application
         android:allowBackup="true"
+        android:name=".MyApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/app_theme_teal_light">
@@ -49,10 +50,6 @@
                 <action android:name="org.md2k.autosense.antradio.connection.ServiceConnectDevices"></action>
             </intent-filter>
         </service>
-        <service
-            android:name=".ServiceMCerebrum"
-            android:enabled="true"
-            android:exported="true"></service>
         <service
             android:name=".antradio.connection.ServiceAutoSense"
             android:enabled="true"
