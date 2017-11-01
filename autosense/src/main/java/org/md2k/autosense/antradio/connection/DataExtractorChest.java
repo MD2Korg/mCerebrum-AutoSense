@@ -141,7 +141,7 @@ public class DataExtractorChest {
             timestamps[i]=timestamp-(4-i)*diff;
         return timestamps;
     }
-    void broadcast(Context context, String dataSourceType, double value){
+    private void broadcast(Context context, String dataSourceType, double value){
         Intent intent = new Intent("DATA");
         intent.putExtra("datasourcetype", dataSourceType);
         intent.putExtra("data",value);
@@ -185,6 +185,7 @@ public class DataExtractorChest {
                     } else {
                         dataKitAPI.insertHighFrequency(newInfo.autoSensePlatform.getAutoSenseDataSource(dataSourceType).getDataSourceClient(), new DataTypeDoubleArray(timestamps[i], samples[i]));
                     }
+                    broadcast(context, dataSourceType, samples[i]);
                     switch (dataSourceType) {
                         case DataSourceType.RESPIRATION:
                             newInfo.autoSensePlatform.dataQualities.get(0).add(modifiedSamples[i]);

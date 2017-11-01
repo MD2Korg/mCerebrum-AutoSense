@@ -47,9 +47,9 @@ public class AutoSensePlatformChest extends AutoSensePlatform{
             new DATASOURCE(DataSourceType.ACCELEROMETER_Z,"Accelerometer Z",64.0/6),
             new DATASOURCE(DataSourceType.RESPIRATION_BASELINE,"Respiration baseline",64.0/6),
             new DATASOURCE(DataSourceType.RESPIRATION_RAW,"Respiration raw",64.0/3),
-            new DATASOURCE(DataSourceType.BATTERY,"Battery",6.4/5)
-//            new DATASOURCE(DataSourceType.SKIN_TEMPERATURE,"Skin Temperature",6.4/5),
-//            new DATASOURCE(DataSourceType.AMBIENT_TEMPERATURE,"Ambient Temperature",6.4/5)
+            new DATASOURCE(DataSourceType.BATTERY,"Battery",6.4/5),
+            new DATASOURCE(DataSourceType.SKIN_TEMPERATURE,"Skin Temperature",6.4/5),
+            new DATASOURCE(DataSourceType.AMBIENT_TEMPERATURE,"Ambient Temperature",6.4/5)
     ));
     public AutoSensePlatformChest(Context context, String platformType, String platformId, String deviceId) {
         super(context,platformType,platformId,deviceId, "AutoSense (Chest)");

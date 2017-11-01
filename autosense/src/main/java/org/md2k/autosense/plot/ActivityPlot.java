@@ -8,26 +8,37 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 
+import org.md2k.datakitapi.source.datasource.DataSource;
 import org.md2k.mcerebrum.commons.plot.RealtimeLineChartActivity;
 
 public class ActivityPlot extends RealtimeLineChartActivity {
     String dataSourceType;
+
+    /*
     String platformId;
     String deviceId;
     String dataSourceId;
     String platformType;
+*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
+        DataSource dataSource=intent.getParcelableExtra(DataSource.class.getSimpleName());
+        if(dataSource==null) {
+            finish();
+            return;
+        }
+        dataSourceType = dataSource.getType();
+
+/*
         platformId = intent.getStringExtra("platformid");
         platformType = intent.getStringExtra("platformtype");
         deviceId = intent.getStringExtra("deviceId");
-        dataSourceType = getIntent().getStringExtra("datasourcetype");
         dataSourceId = intent.getStringExtra("datasourceid");
-
-        if (dataSourceType == null) finish();
+*/
+//        if (dataSourceType == null) finish();
 
     }
 

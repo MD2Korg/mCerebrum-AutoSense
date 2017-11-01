@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import org.md2k.autosense.antradio.connection.ServiceAutoSenses;
+import org.md2k.autosense.plot.ActivityPlot;
 import org.md2k.mcerebrum.commons.permission.ActivityPermission;
 import org.md2k.mcerebrum.commons.permission.Permission;
 import org.md2k.mcerebrum.core.access.MCerebrum;
@@ -43,6 +44,7 @@ public class MyMCerebrumInit extends MCerebrumInfo {
         MCerebrum.setPermissionActivity(context, ActivityPermission.class);
         MCerebrum.setConfigured(context, Configuration.isConfigured());
         MCerebrum.setConfigureExact(context, Configuration.isEqualDefault());
+        MCerebrum.setReportActivity(context, ActivityPlot.class);
         if(!MCerebrum.getPermission(context)){
             if(Permission.hasPermission(context))
                 MCerebrum.setPermission(context, true);

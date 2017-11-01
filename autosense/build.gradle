@@ -1,4 +1,4 @@
-version = '2.0.2'
+version = '2.0.4'
 apply from: 'versioning.gradle'
 
 
@@ -18,43 +18,6 @@ repositories {
     maven { url 'https://maven.fabric.io/public' }
 }
 
-def store_file = "keystore_missing"
-if ( hasProperty('MD2K_RELEASE_STORE_FILE') ) {
-    store_file = MD2K_RELEASE_STORE_FILE
-} else if ( System.getenv('MD2K_RELEASE_STORE_FILE') ){
-    store_file = System.getenv('MD2K_RELEASE_STORE_FILE')
-} else {
-    println "ERROR: " + store_file
-}
-
-def store_password = "keystore_password_missing"
-if ( hasProperty('MD2K_RELEASE_STORE_PASSWORD') ) {
-    store_password = MD2K_RELEASE_STORE_PASSWORD
-} else if ( System.getenv('MD2K_RELEASE_STORE_PASSWORD') ){
-    store_password = System.getenv('MD2K_RELEASE_STORE_PASSWORD')
-} else {
-    println "ERROR: " + store_password
-}
-
-
-def key_alias = "release_key_alias_missing"
-if ( hasProperty('MD2K_RELEASE_KEY_ALIAS') ) {
-    key_alias = MD2K_RELEASE_KEY_ALIAS
-} else if ( System.getenv('MD2K_RELEASE_KEY_ALIAS') ){
-    key_alias = System.getenv('MD2K_RELEASE_KEY_ALIAS')
-} else {
-    println "ERROR: " + key_alias
-}
-
-def key_password = "release_key_password_missing"
-if ( hasProperty('MD2K_RELEASE_KEY_PASSWORD') ) {
-    key_password = MD2K_RELEASE_KEY_PASSWORD
-} else if ( System.getenv('MD2K_RELEASE_KEY_PASSWORD') ){
-    key_password = System.getenv('MD2K_RELEASE_KEY_PASSWORD')
-} else {
-    println "ERROR: " + key_password
-}
-
 
 android {
     compileSdkVersion 25
@@ -64,15 +27,11 @@ android {
         targetSdkVersion 21
         versionCode buildVersionCode()
         versionName version
+        multiDexEnabled true
     }
 
     signingConfigs {
         release {
-
-            storeFile file(store_file)
-            storePassword store_password
-            keyAlias key_alias
-            keyPassword key_password
         }
     }
 

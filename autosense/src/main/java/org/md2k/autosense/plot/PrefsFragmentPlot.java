@@ -14,6 +14,9 @@ import org.md2k.autosense.Configuration;
 import org.md2k.autosense.R;
 import org.md2k.datakitapi.source.METADATA;
 import org.md2k.datakitapi.source.datasource.DataSource;
+import org.md2k.datakitapi.source.datasource.DataSourceBuilder;
+import org.md2k.datakitapi.source.platform.Platform;
+import org.md2k.datakitapi.source.platform.PlatformBuilder;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -88,12 +91,10 @@ public class PrefsFragmentPlot extends PreferenceFragment {
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
+                Platform p=new PlatformBuilder().setType(platformType).setId(platformId).build();
+                DataSource ds=new DataSourceBuilder().setType(dataSourceType).setId(dataSourceId).setPlatform(p).build();
                 Intent intent = new Intent(getActivity(), ActivityPlot.class);
-                intent.putExtra("datasourcetype", dataSourceType);
-                intent.putExtra("datasourceid", dataSourceId);
-                intent.putExtra("deviceid", deviceId);
-                intent.putExtra("platformtype", platformType);
-                intent.putExtra("platformid", platformId);
+                intent.putExtra(DataSource.class.getSimpleName(), ds);
                 startActivity(intent);
                 return false;
             }
