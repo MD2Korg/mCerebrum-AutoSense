@@ -43,7 +43,7 @@ import java.util.HashMap;
 public class DataQualityRIPVariance extends DataQuality {
     private static final String TAG = DataQualityRIPVariance.class.getSimpleName();
 
-    private static final double RIP_VARIANCE_THRESHOLD = 1000;
+    private static final double RIP_VARIANCE_THRESHOLD = 30000;//earlier it was 1000
 
     public DataQualityRIPVariance(Context context) {
         super(context);
