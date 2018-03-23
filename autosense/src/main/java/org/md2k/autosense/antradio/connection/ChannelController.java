@@ -150,28 +150,26 @@ public class ChannelController {
 
     public void close() {
         // TODO kill all our resources
-        if (null != mAntChannel) {
-            mIsOpen = false;
-            // Releasing the channel to make it available for others.
-            // After releasing, the AntChannel instance cannot be reused.
-            try {
-                mAntChannel.clearChannelEventHandler();
-            } catch (RemoteException ignored) {
-                Log.d(TAG,"error");
+            if (null != mAntChannel) {
+                mIsOpen = false;
+                // Releasing the channel to make it available for others.
+                // After releasing, the AntChannel instance cannot be reused.
+                try {
+                    mAntChannel.clearChannelEventHandler();
+                } catch (RemoteException ignored) {
+                    Log.d(TAG, "error");
+                }
+                try {
+                    mAntChannel.release();
+                }catch (Exception e){}
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+//                e.printStackTrace();
+                }
+                mAntChannel = null;
             }
-
-
-            mAntChannel.release();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            mAntChannel = null;
-        }
-
-
-        displayChannelError("Channel Closed");
+            displayChannelError("Channel Closed");
     }
 
     static public abstract class ChannelBroadcastListener {
